@@ -1,0 +1,75 @@
+/**
+ * Viator Token Library — Core collection (names aligned with Figma variables).
+ *
+ * - MCP-verified on Cover frame: scheme/surface, Radius/None (node 1:22).
+ * - Space, radius, typography scales: structural names match Figma; numeric values follow
+ *   a 4px spacing grid (rem) until you run `npm run tokens:sync` to replace with API values.
+ * - Color primitives (Color/*): generated into viator-figma-tokens.colors.css by the sync script.
+ */
+
+@theme {
+  /* —— Verified from Figma MCP get_variable_defs (Cover 1:22) —— */
+  --viator-scheme-surface: #ffffff;
+  --viator-radius-none: 0px;
+
+  /* —— Radius (Figma: Radius/XS | S | M | L | XL | XXL | Pill) —— */
+  --viator-radius-xs: 0.125rem;
+  --viator-radius-s: 0.25rem;
+  --viator-radius-m: 0.5rem;
+  --viator-radius-l: 0.75rem;
+  --viator-radius-xl: 1rem;
+  --viator-radius-xxl: 1.5rem;
+  --viator-radius-pill: 9999px;
+
+  /* —— Space (Figma: Space/0 | 025 | 050 | 100 … 1000) —— */
+  --viator-space-0: 0px;
+  --viator-space-025: 0.125rem;
+  --viator-space-050: 0.25rem;
+  --viator-space-100: 0.5rem;
+  --viator-space-150: 0.75rem;
+  --viator-space-200: 1rem;
+  --viator-space-250: 1.25rem;
+  --viator-space-300: 1.5rem;
+  --viator-space-400: 2rem;
+  --viator-space-500: 2.5rem;
+  --viator-space-600: 3rem;
+  --viator-space-700: 3.5rem;
+  --viator-space-800: 4rem;
+  --viator-space-1000: 5rem;
+
+  /* —— Typeface / font families (STRING in Figma) —— */
+  --viator-typeface-font-brand: "Aeonik", system-ui, sans-serif;
+  --viator-typeface-font-system: "Aeonik", system-ui, sans-serif;
+
+  /* —— Font size (FLOAT in Figma) —— */
+  --viator-typeface-font-size-50: 0.625rem;
+  --viator-typeface-font-size-75: 0.6875rem;
+  --viator-typeface-font-size-100: 0.75rem;
+  --viator-typeface-font-size-200: 0.875rem;
+  --viator-typeface-font-size-300: 1rem;
+  --viator-typeface-font-size-400: 1.125rem;
+  --viator-typeface-font-size-500: 1.25rem;
+  --viator-typeface-font-size-600: 1.5rem;
+  --viator-typeface-font-size-700: 1.875rem;
+  --viator-typeface-font-size-800: 2.25rem;
+  --viator-typeface-font-size-900: 3rem;
+  --viator-typeface-font-size-1100: 3.75rem;
+
+  /* —— Line height (FLOAT in Figma) —— */
+  --viator-typeface-line-height-50: 1;
+  --viator-typeface-line-height-75: 1.1;
+  --viator-typeface-line-height-100: 1.25;
+  --viator-typeface-line-height-200: 1.375;
+  --viator-typeface-line-height-300: 1.5;
+  --viator-typeface-line-height-400: 1.5;
+  --viator-typeface-line-height-500: 1.55;
+  --viator-typeface-line-height-600: 1.6;
+  --viator-typeface-line-height-700: 1.6;
+  --viator-typeface-line-height-800: 1.65;
+  --viator-typeface-line-height-900: 1.7;
+  --viator-typeface-line-height-1000: 1.75;
+
+  /* —— Letter spacing —— */
+  --viator-typeface-letter-spacing-none: 0em;
+  --viator-typeface-letter-spacing-s: 0.01em;
+}
