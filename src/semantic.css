@@ -1,0 +1,53 @@
+/**
+ * Semantic tokens — component intent layer (Button, Input, Card, Modal).
+ * References app theme colors from `variables.css` (load this file after `variables.css`).
+ * Crosswalk to FUJI / Atlas semantic names where applicable (see KILIMANJARO-DS-SPEC.md).
+ */
+@theme {
+  /* Button — FUJI: buttons/buttonPrimary-*, buttonSecondary-*, text/button* */
+  --semantic-button-primary-bg: var(--color-primary);
+  --semantic-button-primary-bg-hover: var(--color-primary-hover);
+  --semantic-button-primary-fg: #ffffff;
+  --semantic-button-primary-bg-disabled: var(--color-border);
+
+  --semantic-button-secondary-bg: transparent;
+  --semantic-button-secondary-border: var(--color-border);
+  --semantic-button-secondary-fg: var(--color-ink);
+  --semantic-button-secondary-bg-hover: var(--color-mint-bg);
+
+  --semantic-button-tertiary-bg: transparent;
+  --semantic-button-tertiary-fg: var(--color-primary);
+  --semantic-button-tertiary-fg-hover: var(--color-primary-hover);
+
+  --semantic-button-focus-ring: var(--color-primary);
+  --semantic-button-border-width: 1.5px;
+
+  /* Input — FUJI: Input Fields/Inputfield-stroke-* */
+  --semantic-input-bg: var(--color-page);
+  --semantic-input-fg: var(--color-ink);
+  --semantic-input-placeholder: var(--color-muted);
+  --semantic-input-border: var(--color-border);
+  --semantic-input-border-hover: var(--color-muted);
+  --semantic-input-border-focus: var(--color-primary);
+  --semantic-input-border-disabled: var(--color-border);
+
+  /* Card */
+  --semantic-card-bg: var(--color-page);
+  --semantic-card-border: var(--color-border);
+  --semantic-card-radius: var(--primitive-radius-surface);
+  --semantic-card-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
+
+  /* Modal — FUJI: Support/modalOverlay-fill */
+  --semantic-modal-backdrop: rgb(12 10 9 / 0.45);
+  --semantic-modal-surface: var(--color-page);
+  --semantic-modal-radius: var(--primitive-radius-modal);
+  --semantic-modal-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+  /* Accordion — KILIMANJARO Accordion / Title + Chevron (see Figma node 11565:24151) */
+  --semantic-accordion-border: var(--color-border);
+  --semantic-accordion-title-fg: var(--color-ink);
+  --semantic-accordion-trigger-bg-hover: var(--color-mint-bg);
+  --semantic-accordion-trigger-bg-pressed: rgb(209 250 229);
+  --semantic-accordion-chevron-fg: var(--color-ink);
+  --semantic-accordion-panel-fg: var(--color-muted);
+}

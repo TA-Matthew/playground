@@ -1,0 +1,30 @@
+/**
+ * Primitives — base scales for KILIMANJARO / Viator B2C Web DS.
+ * Sources: `viator-figma-tokens.css` (Core: Space, Radius, Typeface) + generated colors.
+ * Figma file: https://www.figma.com/design/kfEgE1oVxKplDJxEBW9nIT/KILIMANJARO---Viator-B2C-Web-DS
+ */
+@import "./viator-figma-tokens.css";
+@import "./viator-figma-tokens.colors.css";
+
+@theme {
+  /* Spacing aliases (maps to Figma Space/*) */
+  --primitive-space-2xs: var(--viator-space-025);
+  --primitive-space-xs: var(--viator-space-050);
+  --primitive-space-sm: var(--viator-space-100);
+  --primitive-space-md: var(--viator-space-200);
+  --primitive-space-lg: var(--viator-space-300);
+  --primitive-space-xl: var(--viator-space-400);
+
+  /* Radius aliases (maps to Figma Radius/* + Legacy “full rounded” for controls) */
+  --primitive-radius-xs: var(--viator-radius-xs);
+  --primitive-radius-control: var(--viator-radius-pill);
+  --primitive-radius-field: var(--viator-radius-m);
+  --primitive-radius-surface: var(--viator-radius-xl);
+  --primitive-radius-modal: var(--viator-radius-xxl);
+
+  /* Typography aliases (maps to Typeface/Font size/*) */
+  --primitive-text-xs: var(--viator-typeface-font-size-100);
+  --primitive-text-sm: var(--viator-typeface-font-size-200);
+  --primitive-text-md: var(--viator-typeface-font-size-300);
+  --primitive-text-lg: var(--viator-typeface-font-size-400);
+}

@@ -1,0 +1,54 @@
+@import "./aeonik-fonts.css";
+@import "./variables.css";
+@import "./semantic.css";
+
+@layer base {
+  html {
+    @apply antialiased text-[15px] leading-relaxed text-stone-800;
+    font-family: var(--font-sans);
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+  body {
+    @apply m-0 min-h-screen bg-white text-stone-800;
+  }
+  ::selection {
+    @apply bg-emerald-200/60 text-stone-900;
+  }
+}
+
+/* Logistics map markers — selection affordances (HTML markers outside React tree) */
+@keyframes logistics-map-pin-teardrop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.55) translateY(12px);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.06) translateY(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Opacity only — never animate `transform` on the marker root: MapLibre positions via inline
+   `transform` on the same element; a scale animation overrides it and pins jump (e.g. pass-by dots). */
+@keyframes logistics-map-pin-disc-in {
+  from {
+    opacity: 0.65;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@layer utilities {
+  .animate-logistics-map-pin-teardrop-in {
+    animation: logistics-map-pin-teardrop-in 0.42s cubic-bezier(0.34, 1.45, 0.64, 1) both;
+    transform-origin: 50% 100%;
+  }
+  .animate-logistics-map-pin-disc-in {
+    animation: logistics-map-pin-disc-in 0.32s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+  }
+}

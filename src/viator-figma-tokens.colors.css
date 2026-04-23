@@ -1,0 +1,7 @@
+/**
+ * Color + any variables returned by Figma REST `variables/local`.
+ * Populate with: FIGMA_TOKEN=… npm run tokens:sync
+ *
+ * Requires a Figma personal access token with `file_variables:read`.
+ * If this file is empty, non-color Viator tokens still apply from viator-figma-tokens.css.
+ */

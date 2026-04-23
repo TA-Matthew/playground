@@ -1,0 +1,39 @@
+@import "tailwindcss";
+@import "./primitives.css";
+
+/**
+ * Design tokens — cross-referenced with Figma: Viator Token Library (Cover).
+ * Semantic aliases below consolidate brand values; components reference only these
+ * or Tailwind theme utilities (e.g. bg-page, text-ink).
+ */
+@theme {
+  --font-sans: "Aeonik", system-ui, sans-serif;
+  --font-display: "Aeonik", system-ui, sans-serif;
+
+  --color-page: var(--viator-scheme-surface);
+  --color-ink: #0c0a09;
+  --color-muted: #57534e;
+  --color-border: #e7e5e4;
+  --color-primary: #059669;
+  --color-primary-hover: #047857;
+  --color-mint-bg: #ecfdf5;
+  --color-deal-red: #b91c1c;
+  --color-deal-badge-bg: #fef2f2;
+
+  /* Cover / Token Library (Figma semantic — single source for pill + hero accents) */
+  --color-token-pill-border: #002b11;
+  --color-token-pill-fg: #008768;
+
+  /* Typography scale — Cover */
+  --font-size-token-library-subtitle: 2.5rem;
+  --font-size-token-library-display: clamp(3.5rem, 14vw, 18.125rem);
+  --line-height-token-library-subtitle: 0.8;
+  --line-height-token-library-display: 0.82;
+  --letter-spacing-token-library-subtitle: -0.05rem;
+  --letter-spacing-token-library-display: -0.02em;
+
+  /* Spacing — Cover insets (Figma ~103px → closest step 96px / 6rem) */
+  --spacing-cover-inset: 6rem;
+  /* Space below header row before “Token” (Figma ~81px → closest 80px / 5rem) */
+  --spacing-token-library-after-header: 5rem;
+}
