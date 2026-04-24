@@ -1,15 +1,17 @@
 import { useCallback } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { BookingSidebar } from '../components/booking/BookingSidebar'
 import {
   type AiSummaryLayoutVariant,
   ReviewsFigmaReplica,
 } from '../components/ai-review/ReviewsFigmaReplica'
+import { variants, type VariantId } from '../data/variants'
 import { parseVariant } from '../uxr/urlState'
 
 export function AiReviewPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   /** Same `variant` query as logistics (`a` = default, omit; `b` = explicit). */
-  const summaryLayout = parseVariant(searchParams) as AiSummaryLayoutVariant
+  const summaryLayout: VariantId = parseVariant(searchParams)
   const setSummaryLayout = useCallback(
     (v: AiSummaryLayoutVariant) => {
       setSearchParams(
@@ -36,7 +38,7 @@ export function AiReviewPage() {
       >
         Skip to content
       </a>
-      <div className="px-4 pb-2 pt-6 sm:px-6 md:pt-8">
+      <div className="mx-auto w-full max-w-[1308px] px-4 pb-14 pt-8 sm:px-6 md:pb-20 md:pt-10 lg:px-8 xl:px-10">
         <div className="mb-6">
           <Link
             to="/"
@@ -82,11 +84,16 @@ export function AiReviewPage() {
             </div>
           </div>
         </div>
-      </div>
 
-      <main id="main" className="w-full" tabIndex={-1}>
-        <ReviewsFigmaReplica key={summaryLayout} summaryLayout={summaryLayout} />
-      </main>
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-10 xl:gap-12">
+          <main id="main" className="min-w-0 lg:order-1" tabIndex={-1}>
+            <ReviewsFigmaReplica key={summaryLayout} summaryLayout={summaryLayout} />
+          </main>
+          <aside className="hidden min-w-0 lg:order-2 lg:block lg:sticky lg:top-8 lg:z-10 lg:self-start">
+            <BookingSidebar booking={variants[summaryLayout].booking} variantId={summaryLayout} />
+          </aside>
+        </div>
+      </div>
     </div>
   )
 }
