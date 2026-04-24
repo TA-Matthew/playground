@@ -24,3 +24,13 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+/wrangler.toml
+/.wrangler/
+**/.DS_Store
+
+/.wrangler/
+**/.DS_Store
+
+/.wrangler/
+**/.DS_Store
