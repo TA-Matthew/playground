@@ -4,7 +4,8 @@
 
 @layer base {
   html {
-    @apply antialiased text-[15px] leading-relaxed text-stone-800;
+    @apply antialiased leading-relaxed text-stone-800;
+    font-size: 16px;
     font-family: var(--font-sans);
     font-feature-settings: "kern" 1, "liga" 1;
   }

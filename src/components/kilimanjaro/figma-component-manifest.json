@@ -1,0 +1,5383 @@
+{
+  "fileKey": "kfEgE1oVxKplDJxEBW9nIT",
+  "fileName": "KILIMANJARO - Viator B2C Web DS",
+  "lastModified": "2026-02-20T19:38:47Z",
+  "componentCount": 1075,
+  "components": [
+    {
+      "id": "22541:35974",
+      "type": "COMPONENT_SET",
+      "name": "DS status UI ONLY"
+    },
+    {
+      "id": "22541:35970",
+      "type": "COMPONENT",
+      "name": "Status=stable"
+    },
+    {
+      "id": "22541:35971",
+      "type": "COMPONENT",
+      "name": "Status=ready"
+    },
+    {
+      "id": "22541:35972",
+      "type": "COMPONENT",
+      "name": "Status=unstable"
+    },
+    {
+      "id": "22541:35973",
+      "type": "COMPONENT",
+      "name": "Status=deprecated"
+    },
+    {
+      "id": "177:2458",
+      "type": "COMPONENT",
+      "name": "Viator logo"
+    },
+    {
+      "id": "3838:30514",
+      "type": "COMPONENT",
+      "name": ".Guides / 16"
+    },
+    {
+      "id": "3838:30522",
+      "type": "COMPONENT",
+      "name": ".Guides / 20"
+    },
+    {
+      "id": "3838:30530",
+      "type": "COMPONENT",
+      "name": ".Guides / 24"
+    },
+    {
+      "id": "3838:30538",
+      "type": "COMPONENT",
+      "name": ".Guides / 32"
+    },
+    {
+      "id": "3838:30545",
+      "type": "COMPONENT",
+      "name": ".Guides / 48"
+    },
+    {
+      "id": "11572:24626",
+      "type": "COMPONENT_SET",
+      "name": "Collapsible Content"
+    },
+    {
+      "id": "11572:24627",
+      "type": "COMPONENT",
+      "name": "Status=Read more, Display=Medium"
+    },
+    {
+      "id": "16979:24314",
+      "type": "COMPONENT",
+      "name": "Status=Read more, Display=Small"
+    },
+    {
+      "id": "11572:24630",
+      "type": "COMPONENT",
+      "name": "Status=Read less, Display=Medium"
+    },
+    {
+      "id": "16979:24317",
+      "type": "COMPONENT",
+      "name": "Status=Read less, Display=Small"
+    },
+    {
+      "id": "19841:30512",
+      "type": "COMPONENT",
+      "name": "Accordion Menu"
+    },
+    {
+      "id": "11565:24151",
+      "type": "COMPONENT_SET",
+      "name": "Accordion"
+    },
+    {
+      "id": "11565:24135",
+      "type": "COMPONENT",
+      "name": "Compact=No, State=Closed, Divider=Yes, Display=Desktop"
+    },
+    {
+      "id": "11565:24137",
+      "type": "COMPONENT",
+      "name": "Compact=Yes, State=Closed, Divider=Yes, Display=Desktop"
+    },
+    {
+      "id": "11565:24143",
+      "type": "COMPONENT",
+      "name": "Compact=No, State=Closed, Divider=Yes, Display=Mobile"
+    },
+    {
+      "id": "11565:24145",
+      "type": "COMPONENT",
+      "name": "Compact=Yes, State=Closed, Divider=Yes, Display=Mobile"
+    },
+    {
+      "id": "11565:24147",
+      "type": "COMPONENT",
+      "name": "Compact=No, State=Closed, Divider=No, Display=Mobile"
+    },
+    {
+      "id": "11565:24149",
+      "type": "COMPONENT",
+      "name": "Compact=Yes, State=Closed, Divider=No, Display=Mobile"
+    },
+    {
+      "id": "11565:24144",
+      "type": "COMPONENT",
+      "name": "Compact=No, State=Open, Divider=Yes, Display=Mobile"
+    },
+    {
+      "id": "11565:24146",
+      "type": "COMPONENT",
+      "name": "Compact=Yes, State=Open, Divider=Yes, Display=Mobile"
+    },
+    {
+      "id": "11565:24148",
+      "type": "COMPONENT",
+      "name": "Compact=No, State=Open, Divider=No, Display=Mobile"
+    },
+    {
+      "id": "11565:24150",
+      "type": "COMPONENT",
+      "name": "Compact=Yes, State=Open, Divider=No, Display=Mobile"
+    },
+    {
+      "id": "11565:24136",
+      "type": "COMPONENT",
+      "name": "Compact=No, State=Open, Divider=Yes, Display=Desktop"
+    },
+    {
+      "id": "11565:24138",
+      "type": "COMPONENT",
+      "name": "Compact=Yes, State=Open, Divider=Yes, Display=Desktop"
+    },
+    {
+      "id": "11565:24141",
+      "type": "COMPONENT",
+      "name": "Compact=Yes, State=Closed, Divider=No, Display=Desktop"
+    },
+    {
+      "id": "11565:24140",
+      "type": "COMPONENT",
+      "name": "Compact=No, State=Open, Divider=No, Display=Desktop"
+    },
+    {
+      "id": "11565:24142",
+      "type": "COMPONENT",
+      "name": "Compact=Yes, State=Open, Divider=No, Display=Desktop"
+    },
+    {
+      "id": "2157:23388",
+      "type": "COMPONENT_SET",
+      "name": "Inline Alert"
+    },
+    {
+      "id": "2245:5792",
+      "type": "COMPONENT",
+      "name": "Type=Info"
+    },
+    {
+      "id": "2245:5805",
+      "type": "COMPONENT",
+      "name": "Type=Warning"
+    },
+    {
+      "id": "2245:5817",
+      "type": "COMPONENT",
+      "name": "Type=Attention/Error"
+    },
+    {
+      "id": "26765:172",
+      "type": "COMPONENT",
+      "name": "Type=Neutral"
+    },
+    {
+      "id": "8702:18906",
+      "type": "COMPONENT_SET",
+      "name": "Parner Discount Banner"
+    },
+    {
+      "id": "8702:18903",
+      "type": "COMPONENT",
+      "name": "Display=Desktop + Tablet"
+    },
+    {
+      "id": "8702:18905",
+      "type": "COMPONENT",
+      "name": "Display=Mobile"
+    },
+    {
+      "id": "8751:18949",
+      "type": "COMPONENT_SET",
+      "name": "Partner Travel Directive"
+    },
+    {
+      "id": "8751:18946",
+      "type": "COMPONENT",
+      "name": "Display=Desktop + Tablet"
+    },
+    {
+      "id": "8751:18948",
+      "type": "COMPONENT",
+      "name": "Display=Mobile"
+    },
+    {
+      "id": "13029:27356",
+      "type": "COMPONENT_SET",
+      "name": "Toast"
+    },
+    {
+      "id": "13029:27348",
+      "type": "COMPONENT",
+      "name": "Image=yes, Action=yes"
+    },
+    {
+      "id": "45666:1638",
+      "type": "COMPONENT",
+      "name": "Image=yes, Action=yes"
+    },
+    {
+      "id": "13029:27350",
+      "type": "COMPONENT",
+      "name": "Image=yes, Action=no"
+    },
+    {
+      "id": "13029:27351",
+      "type": "COMPONENT",
+      "name": "Image=no, Action=no"
+    },
+    {
+      "id": "13029:27349",
+      "type": "COMPONENT",
+      "name": "Image=no, Action=yes"
+    },
+    {
+      "id": "29533:2757",
+      "type": "COMPONENT_SET",
+      "name": "Global Header Alert"
+    },
+    {
+      "id": "3342:35",
+      "type": "COMPONENT",
+      "name": "Display=Desktop + Tablet"
+    },
+    {
+      "id": "29533:2756",
+      "type": "COMPONENT",
+      "name": "Display=Mobile"
+    },
+    {
+      "id": "2200:18",
+      "type": "COMPONENT_SET",
+      "name": "Avatar"
+    },
+    {
+      "id": "16867:24539",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Style=Color 1"
+    },
+    {
+      "id": "16867:24551",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Style=Color 5"
+    },
+    {
+      "id": "16867:24545",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Style=Color 3"
+    },
+    {
+      "id": "16867:24557",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Style=Color 7"
+    },
+    {
+      "id": "16867:24542",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Style=Color 2"
+    },
+    {
+      "id": "16867:24554",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Style=Color 6"
+    },
+    {
+      "id": "16867:24548",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Style=Color 4"
+    },
+    {
+      "id": "16867:24560",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Style=Color 8"
+    },
+    {
+      "id": "16867:24563",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Style=No color"
+    },
+    {
+      "id": "16867:24538",
+      "type": "COMPONENT",
+      "name": "Size=Small, Style=Color 1"
+    },
+    {
+      "id": "16867:24550",
+      "type": "COMPONENT",
+      "name": "Size=Small, Style=Color 5"
+    },
+    {
+      "id": "16867:24544",
+      "type": "COMPONENT",
+      "name": "Size=Small, Style=Color 3"
+    },
+    {
+      "id": "16867:24556",
+      "type": "COMPONENT",
+      "name": "Size=Small, Style=Color 7"
+    },
+    {
+      "id": "16867:24541",
+      "type": "COMPONENT",
+      "name": "Size=Small, Style=Color 2"
+    },
+    {
+      "id": "16867:24553",
+      "type": "COMPONENT",
+      "name": "Size=Small, Style=Color 6"
+    },
+    {
+      "id": "16867:24547",
+      "type": "COMPONENT",
+      "name": "Size=Small, Style=Color 4"
+    },
+    {
+      "id": "16867:24559",
+      "type": "COMPONENT",
+      "name": "Size=Small, Style=Color 8"
+    },
+    {
+      "id": "16867:24562",
+      "type": "COMPONENT",
+      "name": "Size=Small, Style=No color"
+    },
+    {
+      "id": "16867:24540",
+      "type": "COMPONENT",
+      "name": "Size=Large, Style=Color 1"
+    },
+    {
+      "id": "16867:24552",
+      "type": "COMPONENT",
+      "name": "Size=Large, Style=Color 5"
+    },
+    {
+      "id": "16867:24546",
+      "type": "COMPONENT",
+      "name": "Size=Large, Style=Color 3"
+    },
+    {
+      "id": "16867:24558",
+      "type": "COMPONENT",
+      "name": "Size=Large, Style=Color 7"
+    },
+    {
+      "id": "16867:24543",
+      "type": "COMPONENT",
+      "name": "Size=Large, Style=Color 2"
+    },
+    {
+      "id": "16867:24555",
+      "type": "COMPONENT",
+      "name": "Size=Large, Style=Color 6"
+    },
+    {
+      "id": "16867:24549",
+      "type": "COMPONENT",
+      "name": "Size=Large, Style=Color 4"
+    },
+    {
+      "id": "16867:24561",
+      "type": "COMPONENT",
+      "name": "Size=Large, Style=Color 8"
+    },
+    {
+      "id": "16867:24564",
+      "type": "COMPONENT",
+      "name": "Size=Large, Style=No color"
+    },
+    {
+      "id": "16574:26499",
+      "type": "COMPONENT_SET",
+      "name": "User Initials Avatar"
+    },
+    {
+      "id": "16556:26502",
+      "type": "COMPONENT",
+      "name": "Display=Large"
+    },
+    {
+      "id": "16556:26499",
+      "type": "COMPONENT",
+      "name": "Display=Medium"
+    },
+    {
+      "id": "16556:26501",
+      "type": "COMPONENT",
+      "name": "Display=Small"
+    },
+    {
+      "id": "576:11",
+      "type": "COMPONENT",
+      "name": "primitive / badge / Viator+"
+    },
+    {
+      "id": "677:183",
+      "type": "COMPONENT",
+      "name": "primitive / badge / top 9"
+    },
+    {
+      "id": "986:22415",
+      "type": "COMPONENT",
+      "name": "primitive / badge / top 10+"
+    },
+    {
+      "id": "677:184",
+      "type": "COMPONENT",
+      "name": "primitive / badge / connectivity"
+    },
+    {
+      "id": "16062:26620",
+      "type": "COMPONENT_SET",
+      "name": "Badge"
+    },
+    {
+      "id": "9835:20658",
+      "type": "COMPONENT",
+      "name": "Size=Text, Colour=Black"
+    },
+    {
+      "id": "31758:3361",
+      "type": "COMPONENT",
+      "name": "Size=Text, Colour=Attention"
+    },
+    {
+      "id": "31758:4555",
+      "type": "COMPONENT",
+      "name": "Size=Text, Colour=Secondary"
+    },
+    {
+      "id": "16062:26619",
+      "type": "COMPONENT",
+      "name": "Size=Dot, Colour=Black"
+    },
+    {
+      "id": "31758:3365",
+      "type": "COMPONENT",
+      "name": "Size=Dot, Colour=Attention"
+    },
+    {
+      "id": "31758:4559",
+      "type": "COMPONENT",
+      "name": "Size=Dot, Colour=Secondary"
+    },
+    {
+      "id": "15738:26586",
+      "type": "COMPONENT_SET",
+      "name": "Hero Banner"
+    },
+    {
+      "id": "15086:26509",
+      "type": "COMPONENT",
+      "name": "Display=Desktop"
+    },
+    {
+      "id": "15738:26587",
+      "type": "COMPONENT",
+      "name": "Display=MW"
+    },
+    {
+      "id": "17820:25172",
+      "type": "COMPONENT_SET",
+      "name": "Callout Banner"
+    },
+    {
+      "id": "17820:25171",
+      "type": "COMPONENT",
+      "name": "Display=Landscape"
+    },
+    {
+      "id": "17820:25170",
+      "type": "COMPONENT",
+      "name": "Display=Portrait"
+    },
+    {
+      "id": "28382:4332",
+      "type": "COMPONENT",
+      "name": "Sign up banner"
+    },
+    {
+      "id": "37646:105",
+      "type": "COMPONENT_SET",
+      "name": "Inline Callout Banner"
+    },
+    {
+      "id": "37646:106",
+      "type": "COMPONENT",
+      "name": "Type=🚨 Error, Icon alignment=Top, Border radius=Rounded"
+    },
+    {
+      "id": "37646:113",
+      "type": "COMPONENT",
+      "name": "Type=⚠️ Warning, Icon alignment=Top, Border radius=Rounded"
+    },
+    {
+      "id": "37646:120",
+      "type": "COMPONENT",
+      "name": "Type=✅ Success, Icon alignment=Top, Border radius=Rounded"
+    },
+    {
+      "id": "37646:127",
+      "type": "COMPONENT",
+      "name": "Type=🎁 Secondary (+Rewards), Icon alignment=Top, Border radius=Rounded"
+    },
+    {
+      "id": "37646:134",
+      "type": "COMPONENT",
+      "name": "Type=ℹ️ Info, Icon alignment=Top, Border radius=Rounded"
+    },
+    {
+      "id": "37907:234",
+      "type": "COMPONENT",
+      "name": "Type=Default, Icon alignment=Top, Border radius=Rounded"
+    },
+    {
+      "id": "38431:713",
+      "type": "COMPONENT",
+      "name": "Type=🚨 Error, Icon alignment=Center, Border radius=Rounded"
+    },
+    {
+      "id": "38458:416",
+      "type": "COMPONENT",
+      "name": "Type=⚠️ Warning, Icon alignment=Center, Border radius=Rounded"
+    },
+    {
+      "id": "38458:449",
+      "type": "COMPONENT",
+      "name": "Type=✅ Success, Icon alignment=Center, Border radius=Rounded"
+    },
+    {
+      "id": "38458:482",
+      "type": "COMPONENT",
+      "name": "Type=🎁 Secondary (+Rewards), Icon alignment=Center, Border radius=Rounded"
+    },
+    {
+      "id": "38458:515",
+      "type": "COMPONENT",
+      "name": "Type=ℹ️ Info, Icon alignment=Center, Border radius=Rounded"
+    },
+    {
+      "id": "38458:548",
+      "type": "COMPONENT",
+      "name": "Type=Default, Icon alignment=Center, Border radius=Rounded"
+    },
+    {
+      "id": "38464:981",
+      "type": "COMPONENT",
+      "name": "Type=🚨 Error, Icon alignment=Top, Border radius=Squared (0px)"
+    },
+    {
+      "id": "38464:979",
+      "type": "COMPONENT",
+      "name": "Type=⚠️ Warning, Icon alignment=Top, Border radius=Squared (0px)"
+    },
+    {
+      "id": "38464:980",
+      "type": "COMPONENT",
+      "name": "Type=✅ Success, Icon alignment=Top, Border radius=Squared (0px)"
+    },
+    {
+      "id": "38464:978",
+      "type": "COMPONENT",
+      "name": "Type=🎁 Secondary (+Rewards), Icon alignment=Top, Border radius=Squared (0px)"
+    },
+    {
+      "id": "38464:977",
+      "type": "COMPONENT",
+      "name": "Type=ℹ️ Info, Icon alignment=Top, Border radius=Squared (0px)"
+    },
+    {
+      "id": "38464:976",
+      "type": "COMPONENT",
+      "name": "Type=Default, Icon alignment=Top, Border radius=Squared (0px)"
+    },
+    {
+      "id": "38464:975",
+      "type": "COMPONENT",
+      "name": "Type=🚨 Error, Icon alignment=Center, Border radius=Squared (0px)"
+    },
+    {
+      "id": "38464:974",
+      "type": "COMPONENT",
+      "name": "Type=⚠️ Warning, Icon alignment=Center, Border radius=Squared (0px)"
+    },
+    {
+      "id": "38464:973",
+      "type": "COMPONENT",
+      "name": "Type=✅ Success, Icon alignment=Center, Border radius=Squared (0px)"
+    },
+    {
+      "id": "38464:972",
+      "type": "COMPONENT",
+      "name": "Type=🎁 Secondary (+Rewards), Icon alignment=Center, Border radius=Squared (0px)"
+    },
+    {
+      "id": "38464:971",
+      "type": "COMPONENT",
+      "name": "Type=ℹ️ Info, Icon alignment=Center, Border radius=Squared (0px)"
+    },
+    {
+      "id": "38464:970",
+      "type": "COMPONENT",
+      "name": "Type=Default, Icon alignment=Center, Border radius=Squared (0px)"
+    },
+    {
+      "id": "6300:485",
+      "type": "COMPONENT_SET",
+      "name": ".Page link"
+    },
+    {
+      "id": "6300:300",
+      "type": "COMPONENT",
+      "name": "Status=Standard, Color=Dark"
+    },
+    {
+      "id": "9357:19377",
+      "type": "COMPONENT",
+      "name": "Status=Standard, Color=Light"
+    },
+    {
+      "id": "6300:484",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Color=Dark"
+    },
+    {
+      "id": "9357:19381",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Color=Light"
+    },
+    {
+      "id": "6428:80",
+      "type": "COMPONENT_SET",
+      "name": "Breadcrumbs"
+    },
+    {
+      "id": "6300:342",
+      "type": "COMPONENT",
+      "name": "Colour=Dark"
+    },
+    {
+      "id": "9357:19427",
+      "type": "COMPONENT",
+      "name": "Colour=Light"
+    },
+    {
+      "id": "9357:19391",
+      "type": "COMPONENT_SET",
+      "name": ".Separator"
+    },
+    {
+      "id": "6300:301",
+      "type": "COMPONENT",
+      "name": "Color=Dark"
+    },
+    {
+      "id": "9357:19390",
+      "type": "COMPONENT",
+      "name": "Color=Light"
+    },
+    {
+      "id": "1613:27",
+      "type": "COMPONENT_SET",
+      "name": "Button"
+    },
+    {
+      "id": "199:268",
+      "type": "COMPONENT",
+      "name": "Color=Commerce, Variant=FIll, Size=Large, Status=Hover"
+    },
+    {
+      "id": "199:274",
+      "type": "COMPONENT",
+      "name": "Color=Commerce, Variant=FIll, Size=Large, Status=Active"
+    },
+    {
+      "id": "199:262",
+      "type": "COMPONENT",
+      "name": "Color=Commerce, Variant=FIll, Size=Large, Status=Disabled"
+    },
+    {
+      "id": "199:270",
+      "type": "COMPONENT",
+      "name": "Color=Commerce, Variant=FIll, Size=Medium, Status=Hover"
+    },
+    {
+      "id": "199:276",
+      "type": "COMPONENT",
+      "name": "Color=Commerce, Variant=FIll, Size=Medium, Status=Active"
+    },
+    {
+      "id": "199:264",
+      "type": "COMPONENT",
+      "name": "Color=Commerce, Variant=FIll, Size=Medium, Status=Disabled"
+    },
+    {
+      "id": "199:185",
+      "type": "COMPONENT",
+      "name": "Color=Commerce, Variant=FIll, Size=Small, Status=Default"
+    },
+    {
+      "id": "199:272",
+      "type": "COMPONENT",
+      "name": "Color=Commerce, Variant=FIll, Size=Small, Status=Hover"
+    },
+    {
+      "id": "199:278",
+      "type": "COMPONENT",
+      "name": "Color=Commerce, Variant=FIll, Size=Small, Status=Active"
+    },
+    {
+      "id": "199:266",
+      "type": "COMPONENT",
+      "name": "Color=Commerce, Variant=FIll, Size=Small, Status=Disabled"
+    },
+    {
+      "id": "199:249",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Outline, Size=Small, Status=Default"
+    },
+    {
+      "id": "199:231",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Outline, Size=Large, Status=Default"
+    },
+    {
+      "id": "199:280",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Outline, Size=Large, Status=Hover"
+    },
+    {
+      "id": "199:286",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Outline, Size=Large, Status=Active"
+    },
+    {
+      "id": "199:292",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Outline, Size=Large, Status=Disabled"
+    },
+    {
+      "id": "199:247",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Outline, Size=Medium, Status=Default"
+    },
+    {
+      "id": "199:282",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Outline, Size=Medium, Status=Hover"
+    },
+    {
+      "id": "199:288",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Outline, Size=Medium, Status=Active"
+    },
+    {
+      "id": "199:294",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Outline, Size=Medium, Status=Disabled"
+    },
+    {
+      "id": "199:284",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Outline, Size=Small, Status=Hover"
+    },
+    {
+      "id": "199:290",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Outline, Size=Small, Status=Active"
+    },
+    {
+      "id": "199:296",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Outline, Size=Small, Status=Disabled"
+    },
+    {
+      "id": "199:239",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Borderless, Size=Large, Status=Default"
+    },
+    {
+      "id": "199:298",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Borderless, Size=Large, Status=Hover"
+    },
+    {
+      "id": "199:304",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Borderless, Size=Large, Status=Active"
+    },
+    {
+      "id": "199:310",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Borderless, Size=Large, Status=Disabled"
+    },
+    {
+      "id": "199:251",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Borderless, Size=Medium, Status=Default"
+    },
+    {
+      "id": "199:300",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Borderless, Size=Medium, Status=Hover"
+    },
+    {
+      "id": "199:306",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Borderless, Size=Medium, Status=Active"
+    },
+    {
+      "id": "199:312",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Borderless, Size=Medium, Status=Disabled"
+    },
+    {
+      "id": "199:253",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Borderless, Size=Small, Status=Default"
+    },
+    {
+      "id": "199:302",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Borderless, Size=Small, Status=Hover"
+    },
+    {
+      "id": "199:308",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Borderless, Size=Small, Status=Active"
+    },
+    {
+      "id": "199:315",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=Borderless, Size=Small, Status=Disabled"
+    },
+    {
+      "id": "199:141",
+      "type": "COMPONENT",
+      "name": "Color=Commerce, Variant=FIll, Size=Large, Status=Default"
+    },
+    {
+      "id": "199:164",
+      "type": "COMPONENT",
+      "name": "Color=Commerce, Variant=FIll, Size=Medium, Status=Default"
+    },
+    {
+      "id": "36044:702",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=FIll, Size=Large, Status=Hover"
+    },
+    {
+      "id": "36044:701",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=FIll, Size=Large, Status=Active"
+    },
+    {
+      "id": "36044:698",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=FIll, Size=Large, Status=Disabled"
+    },
+    {
+      "id": "36044:696",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=FIll, Size=Medium, Status=Hover"
+    },
+    {
+      "id": "36044:695",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=FIll, Size=Medium, Status=Active"
+    },
+    {
+      "id": "36044:700",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=FIll, Size=Medium, Status=Disabled"
+    },
+    {
+      "id": "36044:699",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=FIll, Size=Small, Status=Default"
+    },
+    {
+      "id": "36044:697",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=FIll, Size=Small, Status=Hover"
+    },
+    {
+      "id": "36044:694",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=FIll, Size=Small, Status=Active"
+    },
+    {
+      "id": "36044:693",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=FIll, Size=Small, Status=Disabled"
+    },
+    {
+      "id": "36044:692",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=FIll, Size=Large, Status=Default"
+    },
+    {
+      "id": "36044:691",
+      "type": "COMPONENT",
+      "name": "Color=Neutral, Variant=FIll, Size=Medium, Status=Default"
+    },
+    {
+      "id": "36044:1987",
+      "type": "COMPONENT",
+      "name": "Color=Destructive, Variant=FIll, Size=Large, Status=Hover"
+    },
+    {
+      "id": "36044:1982",
+      "type": "COMPONENT",
+      "name": "Color=Destructive, Variant=FIll, Size=Large, Status=Active"
+    },
+    {
+      "id": "36044:1986",
+      "type": "COMPONENT",
+      "name": "Color=Destructive, Variant=FIll, Size=Large, Status=Disabled"
+    },
+    {
+      "id": "36044:1984",
+      "type": "COMPONENT",
+      "name": "Color=Destructive, Variant=FIll, Size=Medium, Status=Hover"
+    },
+    {
+      "id": "36044:1990",
+      "type": "COMPONENT",
+      "name": "Color=Destructive, Variant=FIll, Size=Medium, Status=Active"
+    },
+    {
+      "id": "36044:1983",
+      "type": "COMPONENT",
+      "name": "Color=Destructive, Variant=FIll, Size=Medium, Status=Disabled"
+    },
+    {
+      "id": "36044:1985",
+      "type": "COMPONENT",
+      "name": "Color=Destructive, Variant=FIll, Size=Small, Status=Default"
+    },
+    {
+      "id": "36044:1981",
+      "type": "COMPONENT",
+      "name": "Color=Destructive, Variant=FIll, Size=Small, Status=Hover"
+    },
+    {
+      "id": "36044:1988",
+      "type": "COMPONENT",
+      "name": "Color=Destructive, Variant=FIll, Size=Small, Status=Active"
+    },
+    {
+      "id": "36044:1980",
+      "type": "COMPONENT",
+      "name": "Color=Destructive, Variant=FIll, Size=Small, Status=Disabled"
+    },
+    {
+      "id": "36044:1979",
+      "type": "COMPONENT",
+      "name": "Color=Destructive, Variant=FIll, Size=Large, Status=Default"
+    },
+    {
+      "id": "36044:1989",
+      "type": "COMPONENT",
+      "name": "Color=Destructive, Variant=FIll, Size=Medium, Status=Default"
+    },
+    {
+      "id": "7903:19002",
+      "type": "COMPONENT_SET",
+      "name": "Wallet Pass Button"
+    },
+    {
+      "id": "7903:19001",
+      "type": "COMPONENT",
+      "name": "Style=Apple Two lines, Type=——"
+    },
+    {
+      "id": "7903:18994",
+      "type": "COMPONENT",
+      "name": "Style=Google Wallet, Type=Primary"
+    },
+    {
+      "id": "37725:682",
+      "type": "COMPONENT",
+      "name": "Style=Google Wallet, Type=Condensed"
+    },
+    {
+      "id": "7903:19003",
+      "type": "COMPONENT_SET",
+      "name": "Download app button"
+    },
+    {
+      "id": "7903:19000",
+      "type": "COMPONENT",
+      "name": "Style=Apple Dark"
+    },
+    {
+      "id": "7903:18999",
+      "type": "COMPONENT",
+      "name": "Style=Apple Light"
+    },
+    {
+      "id": "7903:18998",
+      "type": "COMPONENT",
+      "name": "Style=Google"
+    },
+    {
+      "id": "17093:24378",
+      "type": "COMPONENT_SET",
+      "name": "Back to Top button"
+    },
+    {
+      "id": "17093:24377",
+      "type": "COMPONENT",
+      "name": "Label=No, Hover=No"
+    },
+    {
+      "id": "17095:24409",
+      "type": "COMPONENT",
+      "name": "Label=No, Hover=Yes"
+    },
+    {
+      "id": "17093:24376",
+      "type": "COMPONENT",
+      "name": "Label=Yes, Hover=No"
+    },
+    {
+      "id": "17095:24411",
+      "type": "COMPONENT",
+      "name": "Label=Yes, Hover=Yes"
+    },
+    {
+      "id": "2015:641",
+      "type": "COMPONENT_SET",
+      "name": "Text Input"
+    },
+    {
+      "id": "2015:606",
+      "type": "COMPONENT",
+      "name": "Status=🔴 Error"
+    },
+    {
+      "id": "36508:2039",
+      "type": "COMPONENT",
+      "name": "Status=✍️ Focus"
+    },
+    {
+      "id": "36508:2089",
+      "type": "COMPONENT",
+      "name": "Status=Default"
+    },
+    {
+      "id": "36508:2113",
+      "type": "COMPONENT",
+      "name": "Status=🟢 Filled"
+    },
+    {
+      "id": "36508:2130",
+      "type": "COMPONENT",
+      "name": "Status=🙅 Disabled"
+    },
+    {
+      "id": "36508:2183",
+      "type": "COMPONENT",
+      "name": "Status=✅ Validated"
+    },
+    {
+      "id": "2015:826",
+      "type": "COMPONENT_SET",
+      "name": "Text Area"
+    },
+    {
+      "id": "36580:945",
+      "type": "COMPONENT",
+      "name": "Status=🟢 Filled, Size=M"
+    },
+    {
+      "id": "36580:998",
+      "type": "COMPONENT",
+      "name": "Status=✍️ Focus, Size=M"
+    },
+    {
+      "id": "36580:1101",
+      "type": "COMPONENT",
+      "name": "Status=🙅 Disabled, Size=M"
+    },
+    {
+      "id": "36580:1031",
+      "type": "COMPONENT",
+      "name": "Status=🔴 Error, Size=M"
+    },
+    {
+      "id": "36580:1064",
+      "type": "COMPONENT",
+      "name": "Status=✅ Validated, Size=M"
+    },
+    {
+      "id": "36580:963",
+      "type": "COMPONENT",
+      "name": "Status=Default, Size=M"
+    },
+    {
+      "id": "36580:946",
+      "type": "COMPONENT",
+      "name": "Status=🟢 Filled, Size=L"
+    },
+    {
+      "id": "36580:1005",
+      "type": "COMPONENT",
+      "name": "Status=✍️ Focus, Size=L"
+    },
+    {
+      "id": "36580:1108",
+      "type": "COMPONENT",
+      "name": "Status=🙅 Disabled, Size=L"
+    },
+    {
+      "id": "36580:1038",
+      "type": "COMPONENT",
+      "name": "Status=🔴 Error, Size=L"
+    },
+    {
+      "id": "36580:1071",
+      "type": "COMPONENT",
+      "name": "Status=✅ Validated, Size=L"
+    },
+    {
+      "id": "36580:970",
+      "type": "COMPONENT",
+      "name": "Status=Default, Size=L"
+    },
+    {
+      "id": "2303:36",
+      "type": "COMPONENT_SET",
+      "name": "Search input"
+    },
+    {
+      "id": "18264:26940",
+      "type": "COMPONENT",
+      "name": "Status=Standard, Dates=Ghost, Read Only=No"
+    },
+    {
+      "id": "18462:32454",
+      "type": "COMPONENT",
+      "name": "Status=Standard, Dates=Ghost, Read Only=Yes"
+    },
+    {
+      "id": "18264:26936",
+      "type": "COMPONENT",
+      "name": "Status=Standard, Dates=Filled, Read Only=No"
+    },
+    {
+      "id": "18462:32463",
+      "type": "COMPONENT",
+      "name": "Status=Standard, Dates=Filled, Read Only=Yes"
+    },
+    {
+      "id": "2303:35",
+      "type": "COMPONENT",
+      "name": "Status=Ghost, Dates=No, Read Only=No"
+    },
+    {
+      "id": "18462:32630",
+      "type": "COMPONENT",
+      "name": "Status=Ghost, Dates=No, Read Only=Yes"
+    },
+    {
+      "id": "18462:32638",
+      "type": "COMPONENT",
+      "name": "Status=Ghost, Dates=Ghost, Read Only=No"
+    },
+    {
+      "id": "18462:32646",
+      "type": "COMPONENT",
+      "name": "Status=Ghost, Dates=Ghost, Read Only=Yes"
+    },
+    {
+      "id": "18462:32650",
+      "type": "COMPONENT",
+      "name": "Status=Ghost, Dates=Filled, Read Only=No"
+    },
+    {
+      "id": "18462:32658",
+      "type": "COMPONENT",
+      "name": "Status=Ghost, Dates=Filled, Read Only=Yes"
+    },
+    {
+      "id": "2303:34",
+      "type": "COMPONENT",
+      "name": "Status=Standard, Dates=No, Read Only=No"
+    },
+    {
+      "id": "18462:32436",
+      "type": "COMPONENT",
+      "name": "Status=Standard, Dates=No, Read Only=Yes"
+    },
+    {
+      "id": "16667:24310",
+      "type": "COMPONENT",
+      "name": "Status=Ghost Hover, Dates=No, Read Only=No"
+    },
+    {
+      "id": "18462:32666",
+      "type": "COMPONENT",
+      "name": "Status=Ghost Hover, Dates=No, Read Only=Yes"
+    },
+    {
+      "id": "18462:32674",
+      "type": "COMPONENT",
+      "name": "Status=Ghost Hover, Dates=Ghost, Read Only=No"
+    },
+    {
+      "id": "18462:32682",
+      "type": "COMPONENT",
+      "name": "Status=Ghost Hover, Dates=Ghost, Read Only=Yes"
+    },
+    {
+      "id": "18462:32690",
+      "type": "COMPONENT",
+      "name": "Status=Ghost Hover, Dates=Filled, Read Only=No"
+    },
+    {
+      "id": "18462:32698",
+      "type": "COMPONENT",
+      "name": "Status=Ghost Hover, Dates=Filled, Read Only=Yes"
+    },
+    {
+      "id": "2303:92",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Dates=No, Read Only=No"
+    },
+    {
+      "id": "18462:32572",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Dates=No, Read Only=Yes"
+    },
+    {
+      "id": "18462:32584",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Dates=Ghost, Read Only=No"
+    },
+    {
+      "id": "18462:32596",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Dates=Ghost, Read Only=Yes"
+    },
+    {
+      "id": "18462:32608",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Dates=Filled, Read Only=No"
+    },
+    {
+      "id": "18462:32620",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Dates=Filled, Read Only=Yes"
+    },
+    {
+      "id": "18197:26923",
+      "type": "COMPONENT",
+      "name": "Status=Filled Hover, Dates=No, Read Only=No"
+    },
+    {
+      "id": "18462:32471",
+      "type": "COMPONENT",
+      "name": "Status=Filled Hover, Dates=No, Read Only=Yes"
+    },
+    {
+      "id": "18462:32544",
+      "type": "COMPONENT",
+      "name": "Status=Filled Hover, Dates=Ghost, Read Only=No"
+    },
+    {
+      "id": "18462:32549",
+      "type": "COMPONENT",
+      "name": "Status=Filled Hover, Dates=Ghost, Read Only=Yes"
+    },
+    {
+      "id": "18462:32553",
+      "type": "COMPONENT",
+      "name": "Status=Filled Hover, Dates=Filled, Read Only=No"
+    },
+    {
+      "id": "18462:32562",
+      "type": "COMPONENT",
+      "name": "Status=Filled Hover, Dates=Filled, Read Only=Yes"
+    },
+    {
+      "id": "19074:28315",
+      "type": "COMPONENT",
+      "name": "Status=Error, Dates=No, Read Only=Yes"
+    },
+    {
+      "id": "19074:28710",
+      "type": "COMPONENT",
+      "name": "Status=Error, Dates=No, Read Only=No"
+    },
+    {
+      "id": "19074:28709",
+      "type": "COMPONENT",
+      "name": "Status=Error, Dates=Ghost, Read Only=No"
+    },
+    {
+      "id": "19074:28708",
+      "type": "COMPONENT",
+      "name": "Status=Error, Dates=Ghost, Read Only=Yes"
+    },
+    {
+      "id": "19074:28707",
+      "type": "COMPONENT",
+      "name": "Status=Error, Dates=Filled, Read Only=No"
+    },
+    {
+      "id": "19074:28706",
+      "type": "COMPONENT",
+      "name": "Status=Error, Dates=Filled, Read Only=Yes"
+    },
+    {
+      "id": "4482:808",
+      "type": "COMPONENT_SET",
+      "name": "Password Input"
+    },
+    {
+      "id": "36580:1504",
+      "type": "COMPONENT",
+      "name": "State=Default, Type=👻 Empty"
+    },
+    {
+      "id": "36580:1549",
+      "type": "COMPONENT",
+      "name": "State=🔴 Error, Type=👻 Empty"
+    },
+    {
+      "id": "36580:1565",
+      "type": "COMPONENT",
+      "name": "State=🔴 Error, Type=🙈 Hidden"
+    },
+    {
+      "id": "36580:1581",
+      "type": "COMPONENT",
+      "name": "State=🔴 Error, Type=👀 Visible"
+    },
+    {
+      "id": "36580:1505",
+      "type": "COMPONENT",
+      "name": "State=Default, Type=🙈 Hidden"
+    },
+    {
+      "id": "36580:1506",
+      "type": "COMPONENT",
+      "name": "State=Default, Type=👀 Visible"
+    },
+    {
+      "id": "36580:1507",
+      "type": "COMPONENT",
+      "name": "State=✍️ Focus, Type=👀 Visible"
+    },
+    {
+      "id": "36580:1600",
+      "type": "COMPONENT",
+      "name": "State=✍️ Focus, Type=👻 Empty"
+    },
+    {
+      "id": "36580:1516",
+      "type": "COMPONENT",
+      "name": "State=✍️ Focus, Type=🙈 Hidden"
+    },
+    {
+      "id": "9111:25460",
+      "type": "COMPONENT_SET",
+      "name": "Phone input"
+    },
+    {
+      "id": "36580:2443",
+      "type": "COMPONENT",
+      "name": "Status=Enabled"
+    },
+    {
+      "id": "36580:2504",
+      "type": "COMPONENT",
+      "name": "Status=Status6"
+    },
+    {
+      "id": "36580:2581",
+      "type": "COMPONENT",
+      "name": "Status=Status6"
+    },
+    {
+      "id": "36580:2459",
+      "type": "COMPONENT",
+      "name": "Status=Focus"
+    },
+    {
+      "id": "36580:2641",
+      "type": "COMPONENT",
+      "name": "Status=Frame 39842"
+    },
+    {
+      "id": "36580:2190",
+      "type": "COMPONENT",
+      "name": ".dropdown"
+    },
+    {
+      "id": "36580:2196",
+      "type": "COMPONENT_SET",
+      "name": "Select"
+    },
+    {
+      "id": "36580:2197",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Size=Medium"
+    },
+    {
+      "id": "36580:2368",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Size=Large"
+    },
+    {
+      "id": "36580:2203",
+      "type": "COMPONENT",
+      "name": "Status=Default, Size=Medium"
+    },
+    {
+      "id": "36580:2200",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Size=Small"
+    },
+    {
+      "id": "36580:2209",
+      "type": "COMPONENT",
+      "name": "Status=Disabled, Size=Medium"
+    },
+    {
+      "id": "36580:2371",
+      "type": "COMPONENT",
+      "name": "Status=Default, Size=Large"
+    },
+    {
+      "id": "36580:2206",
+      "type": "COMPONENT",
+      "name": "Status=Default, Size=Small"
+    },
+    {
+      "id": "36580:2374",
+      "type": "COMPONENT",
+      "name": "Status=Disabled, Size=Large"
+    },
+    {
+      "id": "36580:2212",
+      "type": "COMPONENT",
+      "name": "Status=Disabled, Size=Small"
+    },
+    {
+      "id": "2230:4",
+      "type": "COMPONENT_SET",
+      "name": "Label"
+    },
+    {
+      "id": "39281:6246",
+      "type": "COMPONENT",
+      "name": "Type=Promoted, Shadow?=Yes"
+    },
+    {
+      "id": "39281:6242",
+      "type": "COMPONENT",
+      "name": "Type=Light Neutral, Shadow?=Yes"
+    },
+    {
+      "id": "39281:6234",
+      "type": "COMPONENT",
+      "name": "Type=Mid Neutral, Shadow?=Yes"
+    },
+    {
+      "id": "39281:6241",
+      "type": "COMPONENT",
+      "name": "Type=Promoted, Shadow?=No"
+    },
+    {
+      "id": "39281:6238",
+      "type": "COMPONENT",
+      "name": "Type=Light Neutral, Shadow?=No"
+    },
+    {
+      "id": "39281:6237",
+      "type": "COMPONENT",
+      "name": "Type=Mid Neutral, Shadow?=No"
+    },
+    {
+      "id": "39281:6235",
+      "type": "COMPONENT",
+      "name": "Type=Attention, Shadow?=Yes"
+    },
+    {
+      "id": "39281:6232",
+      "type": "COMPONENT",
+      "name": "Type=Highlight, Shadow?=Yes"
+    },
+    {
+      "id": "39281:6231",
+      "type": "COMPONENT",
+      "name": "Type=Rewards, Shadow?=Yes"
+    },
+    {
+      "id": "39281:6240",
+      "type": "COMPONENT",
+      "name": "Type=Tertiary, Shadow?=Yes"
+    },
+    {
+      "id": "39281:6243",
+      "type": "COMPONENT",
+      "name": "Type=Dark Neutral, Shadow?=Yes"
+    },
+    {
+      "id": "39281:6245",
+      "type": "COMPONENT",
+      "name": "Type=Blur Light, Shadow?=Yes"
+    },
+    {
+      "id": "39281:6230",
+      "type": "COMPONENT",
+      "name": "Type=Blur Dark, Shadow?=Yes"
+    },
+    {
+      "id": "39281:6229",
+      "type": "COMPONENT",
+      "name": "Type=Attention, Shadow?=No"
+    },
+    {
+      "id": "39281:6236",
+      "type": "COMPONENT",
+      "name": "Type=Rewards, Shadow?=No"
+    },
+    {
+      "id": "39281:6228",
+      "type": "COMPONENT",
+      "name": "Type=Highlight, Shadow?=No"
+    },
+    {
+      "id": "39281:6233",
+      "type": "COMPONENT",
+      "name": "Type=Tertiary, Shadow?=No"
+    },
+    {
+      "id": "39281:6244",
+      "type": "COMPONENT",
+      "name": "Type=Dark Neutral, Shadow?=No"
+    },
+    {
+      "id": "39281:6227",
+      "type": "COMPONENT",
+      "name": "Type=Blur Light, Shadow?=No"
+    },
+    {
+      "id": "39281:6239",
+      "type": "COMPONENT",
+      "name": "Type=Blur Dark, Shadow?=No"
+    },
+    {
+      "id": "2230:1",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Light Neutral/Yes/Large/No"
+    },
+    {
+      "id": "22653:31464",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Light Neutral/Yes/Large/Yes"
+    },
+    {
+      "id": "13488:26330",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Light Neutral/Yes/Small/No"
+    },
+    {
+      "id": "22653:31466",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Light Neutral/Yes/Small/Yes"
+    },
+    {
+      "id": "7744:18046",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Light Neutral/No/Large/No"
+    },
+    {
+      "id": "22653:31468",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Light Neutral/No/Large/Yes"
+    },
+    {
+      "id": "13488:26332",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Light Neutral/No/Small/No"
+    },
+    {
+      "id": "22653:31470",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Light Neutral/No/Small/Yes"
+    },
+    {
+      "id": "2230:3",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Attention/Yes/Large/No"
+    },
+    {
+      "id": "22653:31472",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Attention/Yes/Large/Yes"
+    },
+    {
+      "id": "13488:26334",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Attention/Yes/Small/No"
+    },
+    {
+      "id": "22653:31474",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Attention/Yes/Small/Yes"
+    },
+    {
+      "id": "7744:18042",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Attention/No/Large/No"
+    },
+    {
+      "id": "22653:31476",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Attention/No/Large/Yes"
+    },
+    {
+      "id": "13488:26336",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Attention/No/Small/No"
+    },
+    {
+      "id": "22653:31478",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Attention/No/Small/Yes"
+    },
+    {
+      "id": "5346:17010",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Primary/Yes/Large/No"
+    },
+    {
+      "id": "31501:7890",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Promoted/Yes/Large/No"
+    },
+    {
+      "id": "22653:31480",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Primary/Yes/Large/Yes"
+    },
+    {
+      "id": "31501:13705",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Promoted/Yes/Large/Yes"
+    },
+    {
+      "id": "13488:26338",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Primary/Yes/Small/No"
+    },
+    {
+      "id": "31501:13697",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Promoted/Yes/Small/No"
+    },
+    {
+      "id": "22653:31482",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Primary/Yes/Small/Yes"
+    },
+    {
+      "id": "31501:13713",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Promoted/Yes/Small/Yes"
+    },
+    {
+      "id": "7744:18040",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Primary/No/Large/No"
+    },
+    {
+      "id": "31501:7894",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Promoted/No/Large/No"
+    },
+    {
+      "id": "22653:31484",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Primary/No/Large/Yes"
+    },
+    {
+      "id": "31501:13709",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Promoted/No/Large/Yes"
+    },
+    {
+      "id": "13488:26340",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Primary/No/Small/No"
+    },
+    {
+      "id": "31501:13701",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Promoted/No/Small/No"
+    },
+    {
+      "id": "22653:31486",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Primary/No/Small/Yes"
+    },
+    {
+      "id": "31501:13717",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Promoted/No/Small/Yes"
+    },
+    {
+      "id": "5346:17009",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Secondary/Yes/Large/No"
+    },
+    {
+      "id": "22653:31488",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Secondary/Yes/Large/Yes"
+    },
+    {
+      "id": "13488:26342",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Secondary/Yes/Small/No"
+    },
+    {
+      "id": "22653:31490",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Secondary/Yes/Small/Yes"
+    },
+    {
+      "id": "7744:18044",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Secondary/No/Large/No"
+    },
+    {
+      "id": "22653:31492",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Secondary/No/Large/Yes"
+    },
+    {
+      "id": "13488:26344",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Secondary/No/Small/No"
+    },
+    {
+      "id": "22653:31494",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Secondary/No/Small/Yes"
+    },
+    {
+      "id": "5346:17008",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Mid Neutral/Yes/Large/No"
+    },
+    {
+      "id": "22653:31496",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Mid Neutral/Yes/Large/Yes"
+    },
+    {
+      "id": "13488:26346",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Mid Neutral/Yes/Small/No"
+    },
+    {
+      "id": "22653:31498",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Mid Neutral/Yes/Small/Yes"
+    },
+    {
+      "id": "7853:18041",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Highlight/Yes/Large/No"
+    },
+    {
+      "id": "22653:31500",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Highlight/Yes/Large/Yes"
+    },
+    {
+      "id": "13488:26348",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Highlight/Yes/Small/No"
+    },
+    {
+      "id": "22653:31502",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Highlight/Yes/Small/Yes"
+    },
+    {
+      "id": "7853:18049",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Dark Neutral/Yes/Large/No"
+    },
+    {
+      "id": "38316:8567",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Blur/Yes/Large/No"
+    },
+    {
+      "id": "38316:11565",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Blur/Yes/Large/Yes"
+    },
+    {
+      "id": "38316:11553",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Blur/No/Large/No"
+    },
+    {
+      "id": "38316:11573",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Blur/No/Large/Yes"
+    },
+    {
+      "id": "22653:31504",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Dark Neutral/Yes/Large/Yes"
+    },
+    {
+      "id": "13488:26350",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Dark Neutral/Yes/Small/No"
+    },
+    {
+      "id": "38316:11557",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Blur/Yes/Small/No"
+    },
+    {
+      "id": "38316:11577",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Blur/Yes/Small/Yes"
+    },
+    {
+      "id": "38316:11561",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Blur/No/Small/No"
+    },
+    {
+      "id": "38316:11581",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Blur/No/Small/Yes"
+    },
+    {
+      "id": "22653:31506",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Dark Neutral/Yes/Small/Yes"
+    },
+    {
+      "id": "7744:18038",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Mid Neutral/No/Large/No"
+    },
+    {
+      "id": "22653:31508",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Mid Neutral/No/Large/Yes"
+    },
+    {
+      "id": "13488:26352",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Mid Neutral/No/Small/No"
+    },
+    {
+      "id": "22653:31510",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Mid Neutral/No/Small/Yes"
+    },
+    {
+      "id": "7853:18039",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Highlight/No/Large/No"
+    },
+    {
+      "id": "22653:31512",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Highlight/No/Large/Yes"
+    },
+    {
+      "id": "13488:26354",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Highlight/No/Small/No"
+    },
+    {
+      "id": "22653:31514",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Highlight/No/Small/Yes"
+    },
+    {
+      "id": "7853:18047",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Dark Neutral/No/Large/No"
+    },
+    {
+      "id": "22653:31516",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Dark Neutral/No/Large/Yes"
+    },
+    {
+      "id": "13488:26356",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Dark Neutral/No/Small/No"
+    },
+    {
+      "id": "22653:31518",
+      "type": "COMPONENT",
+      "name": "[Deprecated] Label/Dark Neutral/No/Small/Yes"
+    },
+    {
+      "id": "18116:27892",
+      "type": "COMPONENT_SET",
+      "name": "Omnibus"
+    },
+    {
+      "id": "18116:27891",
+      "type": "COMPONENT",
+      "name": "Size=Medium"
+    },
+    {
+      "id": "18116:27890",
+      "type": "COMPONENT",
+      "name": "Size=Large"
+    },
+    {
+      "id": "18116:27889",
+      "type": "COMPONENT",
+      "name": "Size=Small"
+    },
+    {
+      "id": "31982:1020",
+      "type": "COMPONENT_SET",
+      "name": "Translation attribution"
+    },
+    {
+      "id": "21098:30674",
+      "type": "COMPONENT",
+      "name": "Type=TranslatedByGoogle"
+    },
+    {
+      "id": "31982:1005",
+      "type": "COMPONENT",
+      "name": "Type=Other"
+    },
+    {
+      "id": "9376:19406",
+      "type": "COMPONENT_SET",
+      "name": "map pin"
+    },
+    {
+      "id": "9376:19407",
+      "type": "COMPONENT",
+      "name": "size=large, state=default"
+    },
+    {
+      "id": "9376:19410",
+      "type": "COMPONENT",
+      "name": "size=large, state=hover"
+    },
+    {
+      "id": "9376:19413",
+      "type": "COMPONENT",
+      "name": "size=small, state=default"
+    },
+    {
+      "id": "9376:19416",
+      "type": "COMPONENT",
+      "name": "size=small, state=hover"
+    },
+    {
+      "id": "10034:20371",
+      "type": "COMPONENT_SET",
+      "name": "Map"
+    },
+    {
+      "id": "10034:20370",
+      "type": "COMPONENT",
+      "name": "Size=Mobile"
+    },
+    {
+      "id": "10034:20368",
+      "type": "COMPONENT",
+      "name": "Size=Desktop"
+    },
+    {
+      "id": "4598:60",
+      "type": "COMPONENT_SET",
+      "name": ".Page indicator"
+    },
+    {
+      "id": "4598:55",
+      "type": "COMPONENT",
+      "name": "Status=Enabled"
+    },
+    {
+      "id": "4598:59",
+      "type": "COMPONENT",
+      "name": "Status=Hover / Focus"
+    },
+    {
+      "id": "4598:58",
+      "type": "COMPONENT",
+      "name": "Status=Selected"
+    },
+    {
+      "id": "4598:65",
+      "type": "COMPONENT_SET",
+      "name": ".Page navigation"
+    },
+    {
+      "id": "4598:64",
+      "type": "COMPONENT",
+      "name": "Status=Enabled"
+    },
+    {
+      "id": "4598:63",
+      "type": "COMPONENT",
+      "name": "Status=Hover / Focus"
+    },
+    {
+      "id": "4598:61",
+      "type": "COMPONENT",
+      "name": "Status=Disabled"
+    },
+    {
+      "id": "4676:139",
+      "type": "COMPONENT_SET",
+      "name": "Pagination"
+    },
+    {
+      "id": "4599:16467",
+      "type": "COMPONENT",
+      "name": "Size=Desktop + Tablet"
+    },
+    {
+      "id": "4599:16468",
+      "type": "COMPONENT",
+      "name": "Size=Mobile"
+    },
+    {
+      "id": "2027:23211",
+      "type": "COMPONENT_SET",
+      "name": "Date picker"
+    },
+    {
+      "id": "2024:652",
+      "type": "COMPONENT",
+      "name": "Status=Entry, Display=Default"
+    },
+    {
+      "id": "2024:651",
+      "type": "COMPONENT",
+      "name": "Status=Default, Display=Default"
+    },
+    {
+      "id": "15676:26561",
+      "type": "COMPONENT",
+      "name": "Status=Default, Display=Rounded"
+    },
+    {
+      "id": "15676:26562",
+      "type": "COMPONENT",
+      "name": "Status=Entry, Display=Rounded"
+    },
+    {
+      "id": "2024:1113",
+      "type": "COMPONENT",
+      "name": "Date picker input"
+    },
+    {
+      "id": "2024:1950",
+      "type": "COMPONENT",
+      "name": "Date picker double prompt"
+    },
+    {
+      "id": "45132:18961",
+      "type": "COMPONENT",
+      "name": "Range date picker double prompt"
+    },
+    {
+      "id": "2092:458",
+      "type": "COMPONENT_SET",
+      "name": "Date range picker input"
+    },
+    {
+      "id": "2092:456",
+      "type": "COMPONENT",
+      "name": "Status=Range start"
+    },
+    {
+      "id": "2092:457",
+      "type": "COMPONENT",
+      "name": "Status=Range end"
+    },
+    {
+      "id": "2092:1440",
+      "type": "COMPONENT_SET",
+      "name": "PAX input"
+    },
+    {
+      "id": "2092:1439",
+      "type": "COMPONENT",
+      "name": "Status=Stadard"
+    },
+    {
+      "id": "2092:1438",
+      "type": "COMPONENT",
+      "name": "Status=Entry"
+    },
+    {
+      "id": "7505:19445",
+      "type": "COMPONENT_SET",
+      "name": "PAX picker"
+    },
+    {
+      "id": "7505:19446",
+      "type": "COMPONENT",
+      "name": "Status=Default, + / -=Yes, Device=Mobile"
+    },
+    {
+      "id": "7505:19448",
+      "type": "COMPONENT",
+      "name": "Status=Pressed, + / -=Yes, Device=Mobile"
+    },
+    {
+      "id": "7505:19450",
+      "type": "COMPONENT",
+      "name": "Status=Disabled, + / -=Yes, Device=Mobile"
+    },
+    {
+      "id": "7505:19452",
+      "type": "COMPONENT",
+      "name": "Status=Default, + / -=No, Device=Mobile"
+    },
+    {
+      "id": "7505:19454",
+      "type": "COMPONENT",
+      "name": "Status=Pressed, + / -=No, Device=Mobile"
+    },
+    {
+      "id": "7505:19456",
+      "type": "COMPONENT",
+      "name": "Status=Disabled, + / -=No, Device=Mobile"
+    },
+    {
+      "id": "7505:19704",
+      "type": "COMPONENT",
+      "name": "Status=Default, + / -=No, Device=Desktop"
+    },
+    {
+      "id": "7505:19701",
+      "type": "COMPONENT",
+      "name": "Status=Pressed, + / -=No, Device=Desktop"
+    },
+    {
+      "id": "7505:19703",
+      "type": "COMPONENT",
+      "name": "Status=Disabled, + / -=No, Device=Desktop"
+    },
+    {
+      "id": "7505:19700",
+      "type": "COMPONENT",
+      "name": "Status=Default, + / -=Yes, Device=Desktop"
+    },
+    {
+      "id": "7505:19702",
+      "type": "COMPONENT",
+      "name": "Status=Pressed, + / -=Yes, Device=Desktop"
+    },
+    {
+      "id": "7505:19699",
+      "type": "COMPONENT",
+      "name": "Status=Disabled, + / -=Yes, Device=Desktop"
+    },
+    {
+      "id": "7505:19948",
+      "type": "COMPONENT_SET",
+      "name": "PAX Picker Input"
+    },
+    {
+      "id": "2092:1630",
+      "type": "COMPONENT",
+      "name": "Device=Desktop"
+    },
+    {
+      "id": "7505:19947",
+      "type": "COMPONENT",
+      "name": "Device=Mobile"
+    },
+    {
+      "id": "45132:6604",
+      "type": "COMPONENT",
+      "name": "Date price picker input"
+    },
+    {
+      "id": "45132:825",
+      "type": "COMPONENT_SET",
+      "name": ".Calendar date"
+    },
+    {
+      "id": "45132:826",
+      "type": "COMPONENT",
+      "name": "Date type=🟢 Available, Status=Default"
+    },
+    {
+      "id": "45132:830",
+      "type": "COMPONENT",
+      "name": "Date type=🔴 Not available, Status=Default"
+    },
+    {
+      "id": "45132:834",
+      "type": "COMPONENT",
+      "name": "Date type=🔥 Most popular, Status=Default"
+    },
+    {
+      "id": "45132:838",
+      "type": "COMPONENT",
+      "name": "Date type=🗓️ Special event, Status=Default"
+    },
+    {
+      "id": "45132:842",
+      "type": "COMPONENT",
+      "name": "Date type=🏷️ On sale, Status=Default"
+    },
+    {
+      "id": "45132:848",
+      "type": "COMPONENT",
+      "name": "Date type=🟢 Available, Status=Hover"
+    },
+    {
+      "id": "45132:852",
+      "type": "COMPONENT",
+      "name": "Date type=🔴 Not available, Status=Hover"
+    },
+    {
+      "id": "45132:856",
+      "type": "COMPONENT",
+      "name": "Date type=🔥 Most popular, Status=Hover"
+    },
+    {
+      "id": "45132:860",
+      "type": "COMPONENT",
+      "name": "Date type=🗓️ Special event, Status=Hover"
+    },
+    {
+      "id": "45132:864",
+      "type": "COMPONENT",
+      "name": "Date type=🏷️ On sale, Status=Hover"
+    },
+    {
+      "id": "45132:870",
+      "type": "COMPONENT",
+      "name": "Date type=🧘‍♀️ Off-Peak, Status=Hover"
+    },
+    {
+      "id": "45132:874",
+      "type": "COMPONENT",
+      "name": "Date type=🧘‍♀️ Off-Peak, Status=Default"
+    },
+    {
+      "id": "45132:878",
+      "type": "COMPONENT",
+      "name": "Date type=🟢 Available, Status=Selected"
+    },
+    {
+      "id": "45132:882",
+      "type": "COMPONENT",
+      "name": "Date type=🔴 Not available, Status=Selected"
+    },
+    {
+      "id": "45132:886",
+      "type": "COMPONENT",
+      "name": "Date type=🔥 Most popular, Status=Selected"
+    },
+    {
+      "id": "45132:890",
+      "type": "COMPONENT",
+      "name": "Date type=🗓️ Special event, Status=Selected"
+    },
+    {
+      "id": "45132:894",
+      "type": "COMPONENT",
+      "name": "Date type=🏷️ On sale, Status=Selected"
+    },
+    {
+      "id": "45132:900",
+      "type": "COMPONENT",
+      "name": "Date type=🧘‍♀️ Off-Peak, Status=Selected"
+    },
+    {
+      "id": "45132:904",
+      "type": "COMPONENT",
+      "name": "Date type=🟢 Available, Status=Range"
+    },
+    {
+      "id": "45132:908",
+      "type": "COMPONENT",
+      "name": "Date type=🔴 Not available, Status=Range"
+    },
+    {
+      "id": "45132:912",
+      "type": "COMPONENT",
+      "name": "Date type=🔥 Most popular, Status=Range"
+    },
+    {
+      "id": "45132:916",
+      "type": "COMPONENT",
+      "name": "Date type=🗓️ Special event, Status=Range"
+    },
+    {
+      "id": "45132:920",
+      "type": "COMPONENT",
+      "name": "Date type=🏷️ On sale, Status=Range"
+    },
+    {
+      "id": "45132:926",
+      "type": "COMPONENT",
+      "name": "Date type=🧘‍♀️ Off-Peak, Status=Range"
+    },
+    {
+      "id": "6140:0",
+      "type": "COMPONENT_SET",
+      "name": "Progress bar"
+    },
+    {
+      "id": "6138:1",
+      "type": "COMPONENT",
+      "name": "Variant=Continuous"
+    },
+    {
+      "id": "32024:186",
+      "type": "COMPONENT",
+      "name": "Variant=Stepped"
+    },
+    {
+      "id": "200:0",
+      "type": "COMPONENT",
+      "name": "star solid"
+    },
+    {
+      "id": "200:1",
+      "type": "COMPONENT",
+      "name": "star half"
+    },
+    {
+      "id": "589:8153",
+      "type": "COMPONENT",
+      "name": "star outline"
+    },
+    {
+      "id": "2219:3546",
+      "type": "COMPONENT_SET",
+      "name": "Star rating"
+    },
+    {
+      "id": "2219:3275",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=5, Review count=No"
+    },
+    {
+      "id": "2219:3274",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=4.5, Review count=No"
+    },
+    {
+      "id": "2219:3272",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=4, Review count=No"
+    },
+    {
+      "id": "2219:3269",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=3.5, Review count=No"
+    },
+    {
+      "id": "2219:3267",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=3, Review count=No"
+    },
+    {
+      "id": "2219:3266",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=2.5, Review count=No"
+    },
+    {
+      "id": "2219:3268",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=2, Review count=No"
+    },
+    {
+      "id": "2219:3271",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=1.5, Review count=No"
+    },
+    {
+      "id": "2219:3265",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=1, Review count=No"
+    },
+    {
+      "id": "2219:3270",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=0.5, Review count=No"
+    },
+    {
+      "id": "2219:3273",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=0, Review count=No"
+    },
+    {
+      "id": "2219:2716",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=5, Review count=No"
+    },
+    {
+      "id": "2219:2713",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=4.5, Review count=No"
+    },
+    {
+      "id": "2219:2715",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=4, Review count=No"
+    },
+    {
+      "id": "2219:2711",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=3.5, Review count=No"
+    },
+    {
+      "id": "2219:2709",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=3, Review count=No"
+    },
+    {
+      "id": "2219:2714",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=2.5, Review count=No"
+    },
+    {
+      "id": "2219:2707",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=2, Review count=No"
+    },
+    {
+      "id": "2219:2708",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=1.5, Review count=No"
+    },
+    {
+      "id": "2219:2712",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=1, Review count=No"
+    },
+    {
+      "id": "2219:2710",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=0.5, Review count=No"
+    },
+    {
+      "id": "2219:2706",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=0, Review count=No"
+    },
+    {
+      "id": "2219:2994",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=5, Review count=No"
+    },
+    {
+      "id": "2219:2988",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=4.5, Review count=No"
+    },
+    {
+      "id": "2219:2991",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=4, Review count=No"
+    },
+    {
+      "id": "2219:2990",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=3.5, Review count=No"
+    },
+    {
+      "id": "2219:2989",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=3, Review count=No"
+    },
+    {
+      "id": "2219:2993",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=2.5, Review count=No"
+    },
+    {
+      "id": "2219:2986",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=2, Review count=No"
+    },
+    {
+      "id": "2219:2992",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=1.5, Review count=No"
+    },
+    {
+      "id": "2219:2985",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=1, Review count=No"
+    },
+    {
+      "id": "2219:2984",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=0.5, Review count=No"
+    },
+    {
+      "id": "2219:2987",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=0, Review count=No"
+    },
+    {
+      "id": "2219:20561",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=5, Review count=Yes"
+    },
+    {
+      "id": "25725:35048",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=5, Review count=Label"
+    },
+    {
+      "id": "2219:20559",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=5, Review count=Yes"
+    },
+    {
+      "id": "25725:35051",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=5, Review count=Label"
+    },
+    {
+      "id": "2219:20566",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=5, Review count=Yes"
+    },
+    {
+      "id": "25725:35054",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=5, Review count=Label"
+    },
+    {
+      "id": "2219:20545",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=4.5, Review count=Yes"
+    },
+    {
+      "id": "25725:35057",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=4.5, Review count=Label"
+    },
+    {
+      "id": "2219:20553",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=4, Review count=Yes"
+    },
+    {
+      "id": "25725:35060",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=4, Review count=Label"
+    },
+    {
+      "id": "2219:20567",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=3.5, Review count=Yes"
+    },
+    {
+      "id": "25725:35063",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=3.5, Review count=Label"
+    },
+    {
+      "id": "2219:20562",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=3, Review count=Yes"
+    },
+    {
+      "id": "25725:35066",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=3, Review count=Label"
+    },
+    {
+      "id": "2219:20560",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=2.5, Review count=Yes"
+    },
+    {
+      "id": "25725:35069",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=2.5, Review count=Label"
+    },
+    {
+      "id": "2219:20558",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=2, Review count=Yes"
+    },
+    {
+      "id": "25725:35072",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=2, Review count=Label"
+    },
+    {
+      "id": "2219:20557",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=1.5, Review count=Yes"
+    },
+    {
+      "id": "25725:35075",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=1.5, Review count=Label"
+    },
+    {
+      "id": "2219:20554",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=1, Review count=Yes"
+    },
+    {
+      "id": "25725:35078",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=1, Review count=Label"
+    },
+    {
+      "id": "2219:20551",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=0.5, Review count=Yes"
+    },
+    {
+      "id": "25725:35081",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=0.5, Review count=Label"
+    },
+    {
+      "id": "2219:20550",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=0, Review count=Yes"
+    },
+    {
+      "id": "25725:35084",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stars=0, Review count=Label"
+    },
+    {
+      "id": "2219:20564",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=4.5, Review count=Yes"
+    },
+    {
+      "id": "25725:35087",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=4.5, Review count=Label"
+    },
+    {
+      "id": "2219:20556",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=4, Review count=Yes"
+    },
+    {
+      "id": "25725:35090",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=4, Review count=Label"
+    },
+    {
+      "id": "2219:20548",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=3.5, Review count=Yes"
+    },
+    {
+      "id": "25725:35093",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=3.5, Review count=Label"
+    },
+    {
+      "id": "2219:20547",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=3, Review count=Yes"
+    },
+    {
+      "id": "25725:35096",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=3, Review count=Label"
+    },
+    {
+      "id": "2219:20546",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=2.5, Review count=Yes"
+    },
+    {
+      "id": "25725:35099",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=2.5, Review count=Label"
+    },
+    {
+      "id": "2219:20549",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=2, Review count=Yes"
+    },
+    {
+      "id": "25725:35102",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=2, Review count=Label"
+    },
+    {
+      "id": "2219:20563",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=1.5, Review count=Yes"
+    },
+    {
+      "id": "25725:35105",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=1.5, Review count=Label"
+    },
+    {
+      "id": "2219:20543",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=1, Review count=Yes"
+    },
+    {
+      "id": "25725:35108",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=1, Review count=Label"
+    },
+    {
+      "id": "2219:20552",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=0.5, Review count=Yes"
+    },
+    {
+      "id": "25725:35111",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=0.5, Review count=Label"
+    },
+    {
+      "id": "2219:20544",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=0, Review count=Yes"
+    },
+    {
+      "id": "25725:35114",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stars=0, Review count=Label"
+    },
+    {
+      "id": "2219:20542",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=4.5, Review count=Yes"
+    },
+    {
+      "id": "25725:35117",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=4.5, Review count=Label"
+    },
+    {
+      "id": "2219:20541",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=4, Review count=Yes"
+    },
+    {
+      "id": "25725:35120",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=4, Review count=Label"
+    },
+    {
+      "id": "2219:20540",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=3.5, Review count=Yes"
+    },
+    {
+      "id": "25725:35123",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=3.5, Review count=Label"
+    },
+    {
+      "id": "2219:20539",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=3, Review count=Yes"
+    },
+    {
+      "id": "25725:35126",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=3, Review count=Label"
+    },
+    {
+      "id": "2219:20537",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=2.5, Review count=Yes"
+    },
+    {
+      "id": "25725:35129",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=2.5, Review count=Label"
+    },
+    {
+      "id": "2219:20555",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=2, Review count=Yes"
+    },
+    {
+      "id": "25725:35132",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=2, Review count=Label"
+    },
+    {
+      "id": "2219:20538",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=1.5, Review count=Yes"
+    },
+    {
+      "id": "25725:35135",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=1.5, Review count=Label"
+    },
+    {
+      "id": "2219:20536",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=1, Review count=Yes"
+    },
+    {
+      "id": "25725:35138",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=1, Review count=Label"
+    },
+    {
+      "id": "2219:20535",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=0.5, Review count=Yes"
+    },
+    {
+      "id": "25725:35141",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=0.5, Review count=Label"
+    },
+    {
+      "id": "2219:20565",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=0, Review count=Yes"
+    },
+    {
+      "id": "25725:35144",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stars=0, Review count=Label"
+    },
+    {
+      "id": "34928:20438",
+      "type": "COMPONENT_SET",
+      "name": "Simpliflied Star Rating"
+    },
+    {
+      "id": "34928:20439",
+      "type": "COMPONENT",
+      "name": "Size=Large, Review count=No"
+    },
+    {
+      "id": "34928:20670",
+      "type": "COMPONENT",
+      "name": "Size=Small, Review count=No"
+    },
+    {
+      "id": "34928:20791",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Review count=No"
+    },
+    {
+      "id": "34928:21012",
+      "type": "COMPONENT",
+      "name": "Size=Small, Review count=Yes"
+    },
+    {
+      "id": "34928:21018",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Review count=Yes"
+    },
+    {
+      "id": "34928:21024",
+      "type": "COMPONENT",
+      "name": "Size=Large, Review count=Yes"
+    },
+    {
+      "id": "1992:1087",
+      "type": "COMPONENT_SET",
+      "name": "Checkbox"
+    },
+    {
+      "id": "209:491",
+      "type": "COMPONENT",
+      "name": "State=Enabled, Checked=False, Label=False, Subtext=False"
+    },
+    {
+      "id": "1992:858",
+      "type": "COMPONENT",
+      "name": "State=Hover, Checked=False, Label=False, Subtext=False"
+    },
+    {
+      "id": "4468:243",
+      "type": "COMPONENT",
+      "name": "State=Focused, Checked=False, Label=False, Subtext=False"
+    },
+    {
+      "id": "209:492",
+      "type": "COMPONENT",
+      "name": "State=Disabled, Checked=False, Label=False, Subtext=False"
+    },
+    {
+      "id": "209:490",
+      "type": "COMPONENT",
+      "name": "State=Enabled, Checked=True, Label=False, Subtext=False"
+    },
+    {
+      "id": "1992:892",
+      "type": "COMPONENT",
+      "name": "State=Hover, Checked=True, Label=False, Subtext=False"
+    },
+    {
+      "id": "4468:240",
+      "type": "COMPONENT",
+      "name": "State=Focused, Checked=True, Label=False, Subtext=False"
+    },
+    {
+      "id": "1992:893",
+      "type": "COMPONENT",
+      "name": "State=Disabled, Checked=True, Label=False, Subtext=False"
+    },
+    {
+      "id": "1992:1059",
+      "type": "COMPONENT",
+      "name": "State=Enabled, Checked=False, Label=True, Subtext=False"
+    },
+    {
+      "id": "29695:2579",
+      "type": "COMPONENT",
+      "name": "State=Focused, Checked=False, Label=True, Subtext=False"
+    },
+    {
+      "id": "1992:1058",
+      "type": "COMPONENT",
+      "name": "State=Hover, Checked=False, Label=True, Subtext=False"
+    },
+    {
+      "id": "1992:1086",
+      "type": "COMPONENT",
+      "name": "State=Enabled, Checked=False, Label=True, Subtext=True"
+    },
+    {
+      "id": "29695:2606",
+      "type": "COMPONENT",
+      "name": "State=Focused, Checked=False, Label=True, Subtext=True"
+    },
+    {
+      "id": "1992:1085",
+      "type": "COMPONENT",
+      "name": "State=Hover, Checked=False, Label=True, Subtext=True"
+    },
+    {
+      "id": "1992:1084",
+      "type": "COMPONENT",
+      "name": "State=Disabled, Checked=False, Label=True, Subtext=True"
+    },
+    {
+      "id": "1992:1083",
+      "type": "COMPONENT",
+      "name": "State=Enabled, Checked=True, Label=True, Subtext=True"
+    },
+    {
+      "id": "29695:2611",
+      "type": "COMPONENT",
+      "name": "State=Focused, Checked=True, Label=True, Subtext=True"
+    },
+    {
+      "id": "1992:1081",
+      "type": "COMPONENT",
+      "name": "State=Hover, Checked=True, Label=True, Subtext=True"
+    },
+    {
+      "id": "1992:1082",
+      "type": "COMPONENT",
+      "name": "State=Disabled, Checked=True, Label=True, Subtext=True"
+    },
+    {
+      "id": "1992:1057",
+      "type": "COMPONENT",
+      "name": "State=Enabled, Checked=True, Label=True, Subtext=False"
+    },
+    {
+      "id": "29695:2582",
+      "type": "COMPONENT",
+      "name": "State=Focused, Checked=True, Label=True, Subtext=False"
+    },
+    {
+      "id": "1992:1056",
+      "type": "COMPONENT",
+      "name": "State=Hover, Checked=True, Label=True, Subtext=False"
+    },
+    {
+      "id": "1992:1054",
+      "type": "COMPONENT",
+      "name": "State=Disabled, Checked=False, Label=True, Subtext=False"
+    },
+    {
+      "id": "1992:1055",
+      "type": "COMPONENT",
+      "name": "State=Disabled, Checked=True, Label=True, Subtext=False"
+    },
+    {
+      "id": "1992:1404",
+      "type": "COMPONENT_SET",
+      "name": "Radio button"
+    },
+    {
+      "id": "209:494",
+      "type": "COMPONENT",
+      "name": "Status=Enabled, Label=False, Subtext=False"
+    },
+    {
+      "id": "1992:1303",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Label=False, Subtext=False"
+    },
+    {
+      "id": "209:493",
+      "type": "COMPONENT",
+      "name": "Status=Selected, Label=False, Subtext=False"
+    },
+    {
+      "id": "29693:2146",
+      "type": "COMPONENT",
+      "name": "Status=Focused, Label=False, Subtext=False"
+    },
+    {
+      "id": "209:495",
+      "type": "COMPONENT",
+      "name": "Status=Disabled, Label=False, Subtext=False"
+    },
+    {
+      "id": "1992:1400",
+      "type": "COMPONENT",
+      "name": "Status=Enabled, Label=True, Subtext=True"
+    },
+    {
+      "id": "1992:1403",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Label=True, Subtext=True"
+    },
+    {
+      "id": "1992:1401",
+      "type": "COMPONENT",
+      "name": "Status=Selected, Label=True, Subtext=True"
+    },
+    {
+      "id": "29693:2170",
+      "type": "COMPONENT",
+      "name": "Status=Focused, Label=True, Subtext=True"
+    },
+    {
+      "id": "1992:1402",
+      "type": "COMPONENT",
+      "name": "Status=Disabled, Label=True, Subtext=True"
+    },
+    {
+      "id": "1992:1396",
+      "type": "COMPONENT",
+      "name": "Status=Enabled, Label=True, Subtext=False"
+    },
+    {
+      "id": "1992:1397",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Label=True, Subtext=False"
+    },
+    {
+      "id": "1992:1398",
+      "type": "COMPONENT",
+      "name": "Status=Selected, Label=True, Subtext=False"
+    },
+    {
+      "id": "29693:2155",
+      "type": "COMPONENT",
+      "name": "Status=Focused, Label=True, Subtext=False"
+    },
+    {
+      "id": "1992:1399",
+      "type": "COMPONENT",
+      "name": "Status=Disabled, Label=True, Subtext=False"
+    },
+    {
+      "id": "5207:17",
+      "type": "COMPONENT_SET",
+      "name": "Chip"
+    },
+    {
+      "id": "5207:16",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Primary, Status=Unselected, Icon=False"
+    },
+    {
+      "id": "5207:15",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Primary, Status=Hover, Icon=False"
+    },
+    {
+      "id": "5207:14",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Primary, Status=Pressed, Icon=False"
+    },
+    {
+      "id": "5207:13",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Primary, Status=Selected, Icon=False"
+    },
+    {
+      "id": "10519:23169",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Primary, Status=Unselected, Icon=True"
+    },
+    {
+      "id": "10519:23167",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Primary, Status=Hover, Icon=True"
+    },
+    {
+      "id": "10519:23168",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Primary, Status=Pressed, Icon=True"
+    },
+    {
+      "id": "10519:23166",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Primary, Status=Selected, Icon=True"
+    },
+    {
+      "id": "1992:1975",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Neutral, Status=Unselected, Icon=False"
+    },
+    {
+      "id": "1992:1974",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Neutral, Status=Hover, Icon=False"
+    },
+    {
+      "id": "1992:1973",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Neutral, Status=Pressed, Icon=False"
+    },
+    {
+      "id": "10519:23180",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Neutral, Status=Selected, Icon=False"
+    },
+    {
+      "id": "1992:1972",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Neutral, Status=Inactive, Icon=False"
+    },
+    {
+      "id": "1992:1937",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Neutral, Status=Unselected, Icon=True"
+    },
+    {
+      "id": "1992:1936",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Neutral, Status=Hover, Icon=True"
+    },
+    {
+      "id": "1992:1935",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Neutral, Status=Pressed, Icon=True"
+    },
+    {
+      "id": "10519:23186",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Neutral, Status=Selected, Icon=True"
+    },
+    {
+      "id": "1992:1934",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Neutral, Status=Inactive, Icon=True"
+    },
+    {
+      "id": "25393:34087",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Primary, Status=Inactive, Icon=False"
+    },
+    {
+      "id": "25393:34086",
+      "type": "COMPONENT",
+      "name": "DisplayVariant=Primary, Status=Inactive, Icon=True"
+    },
+    {
+      "id": "19697:30110",
+      "type": "COMPONENT",
+      "name": "Range slider"
+    },
+    {
+      "id": "33690:2966",
+      "type": "COMPONENT_SET",
+      "name": "Switch Toggle"
+    },
+    {
+      "id": "33690:2965",
+      "type": "COMPONENT",
+      "name": "Status=Disabled"
+    },
+    {
+      "id": "33690:2964",
+      "type": "COMPONENT",
+      "name": "Status=Off"
+    },
+    {
+      "id": "33690:2963",
+      "type": "COMPONENT",
+      "name": "Status=On"
+    },
+    {
+      "id": "6096:293",
+      "type": "COMPONENT_SET",
+      "name": "Tab"
+    },
+    {
+      "id": "6096:292",
+      "type": "COMPONENT",
+      "name": "Status=Selected, Dark mode=No"
+    },
+    {
+      "id": "6096:291",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Dark mode=No"
+    },
+    {
+      "id": "6096:290",
+      "type": "COMPONENT",
+      "name": "Status=Enabled, Dark mode=No"
+    },
+    {
+      "id": "6096:289",
+      "type": "COMPONENT",
+      "name": "Status=Disabled, Dark mode=No"
+    },
+    {
+      "id": "6114:72",
+      "type": "COMPONENT",
+      "name": "Status=Selected, Dark mode=Yes"
+    },
+    {
+      "id": "6114:70",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Dark mode=Yes"
+    },
+    {
+      "id": "6114:69",
+      "type": "COMPONENT",
+      "name": "Status=Enabled, Dark mode=Yes"
+    },
+    {
+      "id": "6114:71",
+      "type": "COMPONENT",
+      "name": "Status=Disabled, Dark mode=Yes"
+    },
+    {
+      "id": "38750:1025",
+      "type": "COMPONENT_SET",
+      "name": "Tag"
+    },
+    {
+      "id": "38750:1024",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=🤑 Pricing, Font=Emphasis, Wraps?=No"
+    },
+    {
+      "id": "38750:1023",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=⏰ Availability, Font=Emphasis, Wraps?=No"
+    },
+    {
+      "id": "38750:1021",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=🏆 Awards, Font=Emphasis, Wraps?=No"
+    },
+    {
+      "id": "38750:1022",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=👬 Cohorts, Font=Emphasis, Wraps?=No"
+    },
+    {
+      "id": "38750:1020",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=🧩 Taxonomy, Font=Emphasis, Wraps?=No"
+    },
+    {
+      "id": "38750:1018",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=🤑 Pricing, Font=Default, Wraps?=No"
+    },
+    {
+      "id": "38750:1019",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=⏰ Availability, Font=Default, Wraps?=No"
+    },
+    {
+      "id": "38750:1017",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=🏆 Awards, Font=Default, Wraps?=No"
+    },
+    {
+      "id": "38750:1016",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=👬 Cohorts, Font=Default, Wraps?=No"
+    },
+    {
+      "id": "38750:1015",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=🧩 Taxonomy, Font=Default, Wraps?=No"
+    },
+    {
+      "id": "38809:4766",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=🏷️ Value prop, Font=Emphasis, Wraps?=No"
+    },
+    {
+      "id": "38809:4764",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=🏷️ Value prop, Font=Default, Wraps?=No"
+    },
+    {
+      "id": "38781:457",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=🤑 Pricing, Font=Emphasis, Wraps?=No"
+    },
+    {
+      "id": "38781:456",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=⏰ Availability, Font=Emphasis, Wraps?=No"
+    },
+    {
+      "id": "38781:455",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=🏆 Awards, Font=Emphasis, Wraps?=No"
+    },
+    {
+      "id": "38781:454",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=👬 Cohorts, Font=Emphasis, Wraps?=No"
+    },
+    {
+      "id": "38781:452",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=🧩 Taxonomy, Font=Emphasis, Wraps?=No"
+    },
+    {
+      "id": "38809:4765",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=🏷️ Value prop, Font=Emphasis, Wraps?=No"
+    },
+    {
+      "id": "38781:453",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=🤑 Pricing, Font=Default, Wraps?=No"
+    },
+    {
+      "id": "38781:451",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=⏰ Availability, Font=Default, Wraps?=No"
+    },
+    {
+      "id": "38781:450",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=🏆 Awards, Font=Default, Wraps?=No"
+    },
+    {
+      "id": "38781:449",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=👬 Cohorts, Font=Default, Wraps?=No"
+    },
+    {
+      "id": "38781:448",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=🧩 Taxonomy, Font=Default, Wraps?=No"
+    },
+    {
+      "id": "38809:4763",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=🏷️ Value prop, Font=Default, Wraps?=No"
+    },
+    {
+      "id": "43781:668",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=🤑 Pricing, Font=Emphasis, Wraps?=Yes"
+    },
+    {
+      "id": "43781:671",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=⏰ Availability, Font=Emphasis, Wraps?=Yes"
+    },
+    {
+      "id": "43781:674",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=🏆 Awards, Font=Emphasis, Wraps?=Yes"
+    },
+    {
+      "id": "43781:677",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=👬 Cohorts, Font=Emphasis, Wraps?=Yes"
+    },
+    {
+      "id": "43781:680",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=🧩 Taxonomy, Font=Emphasis, Wraps?=Yes"
+    },
+    {
+      "id": "43781:683",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=🤑 Pricing, Font=Default, Wraps?=Yes"
+    },
+    {
+      "id": "43781:686",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=⏰ Availability, Font=Default, Wraps?=Yes"
+    },
+    {
+      "id": "43781:689",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=🏆 Awards, Font=Default, Wraps?=Yes"
+    },
+    {
+      "id": "43781:692",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=👬 Cohorts, Font=Default, Wraps?=Yes"
+    },
+    {
+      "id": "43781:695",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=🧩 Taxonomy, Font=Default, Wraps?=Yes"
+    },
+    {
+      "id": "43781:698",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=🏷️ Value prop, Font=Emphasis, Wraps?=Yes"
+    },
+    {
+      "id": "43781:701",
+      "type": "COMPONENT",
+      "name": "State=🙅‍♀️ Default, Type=🏷️ Value prop, Font=Default, Wraps?=Yes"
+    },
+    {
+      "id": "43781:704",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=🤑 Pricing, Font=Emphasis, Wraps?=Yes"
+    },
+    {
+      "id": "43781:707",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=⏰ Availability, Font=Emphasis, Wraps?=Yes"
+    },
+    {
+      "id": "43781:710",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=🏆 Awards, Font=Emphasis, Wraps?=Yes"
+    },
+    {
+      "id": "43781:713",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=👬 Cohorts, Font=Emphasis, Wraps?=Yes"
+    },
+    {
+      "id": "43781:716",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=🧩 Taxonomy, Font=Emphasis, Wraps?=Yes"
+    },
+    {
+      "id": "43781:719",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=🏷️ Value prop, Font=Emphasis, Wraps?=Yes"
+    },
+    {
+      "id": "43781:722",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=🤑 Pricing, Font=Default, Wraps?=Yes"
+    },
+    {
+      "id": "43781:725",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=⏰ Availability, Font=Default, Wraps?=Yes"
+    },
+    {
+      "id": "43781:728",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=🏆 Awards, Font=Default, Wraps?=Yes"
+    },
+    {
+      "id": "43781:731",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=👬 Cohorts, Font=Default, Wraps?=Yes"
+    },
+    {
+      "id": "43781:734",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=🧩 Taxonomy, Font=Default, Wraps?=Yes"
+    },
+    {
+      "id": "43781:737",
+      "type": "COMPONENT",
+      "name": "State=🖱️ Hover, Type=🏷️ Value prop, Font=Default, Wraps?=Yes"
+    },
+    {
+      "id": "2444:1066",
+      "type": "COMPONENT_SET",
+      "name": ".beak"
+    },
+    {
+      "id": "2444:1067",
+      "type": "COMPONENT",
+      "name": "Property 1=bottom"
+    },
+    {
+      "id": "2444:1070",
+      "type": "COMPONENT",
+      "name": "Property 1=top"
+    },
+    {
+      "id": "2444:1073",
+      "type": "COMPONENT",
+      "name": "Property 1=right"
+    },
+    {
+      "id": "2444:1076",
+      "type": "COMPONENT",
+      "name": "Property 1=left"
+    },
+    {
+      "id": "2444:1079",
+      "type": "COMPONENT_SET",
+      "name": "Tooltip"
+    },
+    {
+      "id": "2444:1080",
+      "type": "COMPONENT",
+      "name": "Arrow location=Left, Colour=Info, Close icon=No"
+    },
+    {
+      "id": "2444:1157",
+      "type": "COMPONENT",
+      "name": "Arrow location=Left, Colour=Feature, Close icon=No"
+    },
+    {
+      "id": "2444:1085",
+      "type": "COMPONENT",
+      "name": "Arrow location=Right, Colour=Info, Close icon=No"
+    },
+    {
+      "id": "2444:1152",
+      "type": "COMPONENT",
+      "name": "Arrow location=Right, Colour=Feature, Close icon=No"
+    },
+    {
+      "id": "2444:1090",
+      "type": "COMPONENT",
+      "name": "Arrow location=Top, Colour=Info, Close icon=No"
+    },
+    {
+      "id": "2444:1147",
+      "type": "COMPONENT",
+      "name": "Arrow location=Top, Colour=Feature, Close icon=No"
+    },
+    {
+      "id": "2444:1095",
+      "type": "COMPONENT",
+      "name": "Arrow location=Bottom, Colour=Info, Close icon=No"
+    },
+    {
+      "id": "2444:1142",
+      "type": "COMPONENT",
+      "name": "Arrow location=Bottom, Colour=Feature, Close icon=No"
+    },
+    {
+      "id": "2445:25067",
+      "type": "COMPONENT",
+      "name": "Arrow location=Left, Colour=Info, Close icon=Yes"
+    },
+    {
+      "id": "2445:25094",
+      "type": "COMPONENT",
+      "name": "Arrow location=Right, Colour=Info, Close icon=Yes"
+    },
+    {
+      "id": "2445:25131",
+      "type": "COMPONENT",
+      "name": "Arrow location=Top, Colour=Info, Close icon=Yes"
+    },
+    {
+      "id": "2445:25151",
+      "type": "COMPONENT",
+      "name": "Arrow location=Bottom, Colour=Info, Close icon=Yes"
+    },
+    {
+      "id": "2445:25231",
+      "type": "COMPONENT",
+      "name": "Arrow location=Bottom, Colour=Feature, Close icon=Yes"
+    },
+    {
+      "id": "2445:25230",
+      "type": "COMPONENT",
+      "name": "Arrow location=Top, Colour=Feature, Close icon=Yes"
+    },
+    {
+      "id": "2445:25228",
+      "type": "COMPONENT",
+      "name": "Arrow location=Right, Colour=Feature, Close icon=Yes"
+    },
+    {
+      "id": "2445:25229",
+      "type": "COMPONENT",
+      "name": "Arrow location=Left, Colour=Feature, Close icon=Yes"
+    },
+    {
+      "id": "7508:19474",
+      "type": "COMPONENT_SET",
+      "name": "Icon card"
+    },
+    {
+      "id": "7508:19473",
+      "type": "COMPONENT",
+      "name": "Size=Small, Color variant=Promotion"
+    },
+    {
+      "id": "7508:19472",
+      "type": "COMPONENT",
+      "name": "Size=Large, Color variant=Promotion"
+    },
+    {
+      "id": "8912:19316",
+      "type": "COMPONENT",
+      "name": "Size=Large, Color variant=Credits"
+    },
+    {
+      "id": "8912:19317",
+      "type": "COMPONENT",
+      "name": "Size=Small, Color variant=Credits"
+    },
+    {
+      "id": "2660:0",
+      "type": "COMPONENT_SET",
+      "name": "Product Card"
+    },
+    {
+      "id": "27970:19386",
+      "type": "COMPONENT",
+      "name": "Display=Inspiration Card, Highlighted=no"
+    },
+    {
+      "id": "35026:39088",
+      "type": "COMPONENT",
+      "name": "Display=Inspiration Card, Highlighted=Yes"
+    },
+    {
+      "id": "27970:19415",
+      "type": "COMPONENT",
+      "name": "Display=Research Card, Highlighted=no"
+    },
+    {
+      "id": "35026:39186",
+      "type": "COMPONENT",
+      "name": "Display=Research Card, Highlighted=Yes"
+    },
+    {
+      "id": "22780:32119",
+      "type": "COMPONENT_SET",
+      "name": "See all card"
+    },
+    {
+      "id": "22780:32118",
+      "type": "COMPONENT",
+      "name": "Property 1=Default"
+    },
+    {
+      "id": "10245:22168",
+      "type": "COMPONENT_SET",
+      "name": "Author content list card"
+    },
+    {
+      "id": "10244:22467",
+      "type": "COMPONENT",
+      "name": "Device=Desktop/Tablet"
+    },
+    {
+      "id": "10269:22297",
+      "type": "COMPONENT",
+      "name": "Device=Mobile"
+    },
+    {
+      "id": "9929:23387",
+      "type": "COMPONENT",
+      "name": "Review Card"
+    },
+    {
+      "id": "2999:6",
+      "type": "COMPONENT_SET",
+      "name": "Attraction Cards"
+    },
+    {
+      "id": "9671:23163",
+      "type": "COMPONENT",
+      "name": "Size=Mobile, View=Grid"
+    },
+    {
+      "id": "9671:23162",
+      "type": "COMPONENT",
+      "name": "Size=Desktop, View=Grid"
+    },
+    {
+      "id": "35970:2982",
+      "type": "COMPONENT",
+      "name": "Size=Desktop, View=List"
+    },
+    {
+      "id": "35970:3024",
+      "type": "COMPONENT",
+      "name": "Size=Mobile, View=List"
+    },
+    {
+      "id": "3000:34600",
+      "type": "COMPONENT",
+      "name": "SpotlightCard"
+    },
+    {
+      "id": "3002:3",
+      "type": "COMPONENT_SET",
+      "name": "Spotlight List Card"
+    },
+    {
+      "id": "28081:5255",
+      "type": "COMPONENT",
+      "name": "Variant=Squared"
+    },
+    {
+      "id": "28081:5642",
+      "type": "COMPONENT",
+      "name": "Variant=Rounded"
+    },
+    {
+      "id": "10258:22169",
+      "type": "COMPONENT",
+      "name": "Image background card"
+    },
+    {
+      "id": "2999:0",
+      "type": "COMPONENT_SET",
+      "name": "Product List Card"
+    },
+    {
+      "id": "2222:8253",
+      "type": "COMPONENT",
+      "name": "Size=Desktop, Highlighted=No, Optional Features=No"
+    },
+    {
+      "id": "31504:14184",
+      "type": "COMPONENT",
+      "name": "Size=Desktop, Highlighted=Yes, Optional Features=No"
+    },
+    {
+      "id": "23390:35261",
+      "type": "COMPONENT",
+      "name": "Size=Desktop, Highlighted=No, Optional Features=Yes"
+    },
+    {
+      "id": "31501:7706",
+      "type": "COMPONENT",
+      "name": "Size=Desktop, Highlighted=Yes, Optional Features=Yes"
+    },
+    {
+      "id": "2222:8533",
+      "type": "COMPONENT",
+      "name": "Size=Tablet, Highlighted=No, Optional Features=No"
+    },
+    {
+      "id": "31504:14347",
+      "type": "COMPONENT",
+      "name": "Size=Tablet, Highlighted=Yes, Optional Features=No"
+    },
+    {
+      "id": "23390:35166",
+      "type": "COMPONENT",
+      "name": "Size=Tablet, Highlighted=No, Optional Features=Yes"
+    },
+    {
+      "id": "31501:13807",
+      "type": "COMPONENT",
+      "name": "Size=Tablet, Highlighted=Yes, Optional Features=Yes"
+    },
+    {
+      "id": "2222:8892",
+      "type": "COMPONENT",
+      "name": "Size=Mobile, Highlighted=No, Optional Features=No"
+    },
+    {
+      "id": "23384:34998",
+      "type": "COMPONENT",
+      "name": "Size=Mobile, Highlighted=No, Optional Features=Yes"
+    },
+    {
+      "id": "31474:6878",
+      "type": "COMPONENT",
+      "name": "Size=Mobile, Highlighted=Yes, Optional Features=Yes"
+    },
+    {
+      "id": "31469:2966",
+      "type": "COMPONENT",
+      "name": "Size=Mobile, Highlighted=Yes, Optional Features=No"
+    },
+    {
+      "id": "26477:2818",
+      "type": "COMPONENT",
+      "name": "Profile content card"
+    },
+    {
+      "id": "26929:2879",
+      "type": "COMPONENT",
+      "name": "Editorial content card"
+    },
+    {
+      "id": "28382:4087",
+      "type": "COMPONENT",
+      "name": "Sign up card"
+    },
+    {
+      "id": "30864:2659",
+      "type": "COMPONENT_SET",
+      "name": "Collection Card"
+    },
+    {
+      "id": "30864:2658",
+      "type": "COMPONENT",
+      "name": "Variation=List, Image Quantity=One"
+    },
+    {
+      "id": "30864:2667",
+      "type": "COMPONENT",
+      "name": "Variation=Solo, Image Quantity=One"
+    },
+    {
+      "id": "30865:2754",
+      "type": "COMPONENT",
+      "name": "Variation=Gallery, Image Quantity=One"
+    },
+    {
+      "id": "30865:2762",
+      "type": "COMPONENT",
+      "name": "Variation=Gallery, Image Quantity=Two"
+    },
+    {
+      "id": "30865:2784",
+      "type": "COMPONENT",
+      "name": "Variation=Gallery, Image Quantity=Three"
+    },
+    {
+      "id": "30865:2799",
+      "type": "COMPONENT",
+      "name": "Variation=Gallery, Image Quantity=Four"
+    },
+    {
+      "id": "36682:6698",
+      "type": "COMPONENT_SET",
+      "name": ".Price format"
+    },
+    {
+      "id": "36682:6697",
+      "type": "COMPONENT",
+      "name": "Discounted=False"
+    },
+    {
+      "id": "36682:6696",
+      "type": "COMPONENT",
+      "name": "Discounted=True"
+    },
+    {
+      "id": "36743:51779",
+      "type": "COMPONENT_SET",
+      "name": ".Price format"
+    },
+    {
+      "id": "36743:51778",
+      "type": "COMPONENT",
+      "name": "Discounted=True"
+    },
+    {
+      "id": "36743:51777",
+      "type": "COMPONENT",
+      "name": "Discounted=False"
+    },
+    {
+      "id": "36743:51793",
+      "type": "COMPONENT_SET",
+      "name": ".Price format"
+    },
+    {
+      "id": "36743:51374",
+      "type": "COMPONENT",
+      "name": "Discounted=True"
+    },
+    {
+      "id": "36743:51786",
+      "type": "COMPONENT",
+      "name": "Discounted=False"
+    },
+    {
+      "id": "38001:5958",
+      "type": "COMPONENT",
+      "name": "Highlight  Card"
+    },
+    {
+      "id": "17871:34260",
+      "type": "COMPONENT_SET",
+      "name": "Customer Support"
+    },
+    {
+      "id": "17871:34259",
+      "type": "COMPONENT",
+      "name": "Display=Stacked"
+    },
+    {
+      "id": "17871:34258",
+      "type": "COMPONENT",
+      "name": "Display=Responsive"
+    },
+    {
+      "id": "17105:26181",
+      "type": "COMPONENT_SET",
+      "name": "Filter chip"
+    },
+    {
+      "id": "35324:2742",
+      "type": "COMPONENT",
+      "name": "Status=Default, Selected=Yes, Icon=No, Chevron=False"
+    },
+    {
+      "id": "35324:2745",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Selected=Yes, Icon=No, Chevron=False"
+    },
+    {
+      "id": "45181:5661",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Selected=Yes, Icon=No, Chevron=False"
+    },
+    {
+      "id": "17105:26178",
+      "type": "COMPONENT",
+      "name": "Status=Default, Selected=No, Icon=No, Chevron=False"
+    },
+    {
+      "id": "17105:26201",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Selected=No, Icon=No, Chevron=False"
+    },
+    {
+      "id": "45181:5663",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Selected=No, Icon=No, Chevron=False"
+    },
+    {
+      "id": "35324:2763",
+      "type": "COMPONENT",
+      "name": "Status=Default, Selected=Yes, Icon=Yes, Chevron=False"
+    },
+    {
+      "id": "45183:5940",
+      "type": "COMPONENT",
+      "name": "Status=Default, Selected=Yes, Icon=Yes, Chevron=True"
+    },
+    {
+      "id": "45183:5871",
+      "type": "COMPONENT",
+      "name": "Status=Default, Selected=Yes, Icon=No, Chevron=True"
+    },
+    {
+      "id": "35324:2767",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Selected=Yes, Icon=Yes, Chevron=False"
+    },
+    {
+      "id": "45183:5943",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Selected=Yes, Icon=Yes, Chevron=True"
+    },
+    {
+      "id": "45183:5874",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Selected=Yes, Icon=No, Chevron=True"
+    },
+    {
+      "id": "45181:5665",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Selected=Yes, Icon=Yes, Chevron=False"
+    },
+    {
+      "id": "45183:5946",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Selected=Yes, Icon=Yes, Chevron=True"
+    },
+    {
+      "id": "45183:5877",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Selected=Yes, Icon=No, Chevron=True"
+    },
+    {
+      "id": "17105:26179",
+      "type": "COMPONENT",
+      "name": "Status=Default, Selected=No, Icon=Yes, Chevron=False"
+    },
+    {
+      "id": "45183:5949",
+      "type": "COMPONENT",
+      "name": "Status=Default, Selected=No, Icon=Yes, Chevron=True"
+    },
+    {
+      "id": "45183:5880",
+      "type": "COMPONENT",
+      "name": "Status=Default, Selected=No, Icon=No, Chevron=True"
+    },
+    {
+      "id": "17105:26207",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Selected=No, Icon=Yes, Chevron=False"
+    },
+    {
+      "id": "45183:5952",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Selected=No, Icon=Yes, Chevron=True"
+    },
+    {
+      "id": "45183:5883",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Selected=No, Icon=No, Chevron=True"
+    },
+    {
+      "id": "45181:5668",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Selected=No, Icon=Yes, Chevron=False"
+    },
+    {
+      "id": "45183:5955",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Selected=No, Icon=Yes, Chevron=True"
+    },
+    {
+      "id": "45183:5886",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Selected=No, Icon=No, Chevron=True"
+    },
+    {
+      "id": "17105:26319",
+      "type": "COMPONENT_SET",
+      "name": "Filter button"
+    },
+    {
+      "id": "17105:26318",
+      "type": "COMPONENT",
+      "name": "Status=Default, Selected=Yes, Icon=No, Text=Yes"
+    },
+    {
+      "id": "17105:26316",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Selected=Yes, Icon=No, Text=Yes"
+    },
+    {
+      "id": "45176:5605",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Selected=Yes, Icon=No, Text=Yes"
+    },
+    {
+      "id": "17105:26314",
+      "type": "COMPONENT",
+      "name": "Status=Default, Selected=No, Icon=No, Text=Yes"
+    },
+    {
+      "id": "17105:26315",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Selected=No, Icon=No, Text=Yes"
+    },
+    {
+      "id": "45176:5612",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Selected=No, Icon=No, Text=Yes"
+    },
+    {
+      "id": "17105:26317",
+      "type": "COMPONENT",
+      "name": "Status=Default, Selected=No, Icon=Yes, Text=Yes"
+    },
+    {
+      "id": "17778:24402",
+      "type": "COMPONENT",
+      "name": "Status=Default, Selected=No, Icon=Yes, Text=No"
+    },
+    {
+      "id": "17105:26313",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Selected=No, Icon=Yes, Text=Yes"
+    },
+    {
+      "id": "45176:5616",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Selected=No, Icon=Yes, Text=Yes"
+    },
+    {
+      "id": "17778:24405",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Selected=No, Icon=Yes, Text=No"
+    },
+    {
+      "id": "45176:5619",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Selected=No, Icon=Yes, Text=No"
+    },
+    {
+      "id": "17105:26311",
+      "type": "COMPONENT",
+      "name": "Status=Default, Selected=Yes, Icon=Yes, Text=Yes"
+    },
+    {
+      "id": "17778:24408",
+      "type": "COMPONENT",
+      "name": "Status=Default, Selected=Yes, Icon=Yes, Text=No"
+    },
+    {
+      "id": "17105:26312",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Selected=Yes, Icon=Yes, Text=Yes"
+    },
+    {
+      "id": "45176:5621",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Selected=Yes, Icon=Yes, Text=Yes"
+    },
+    {
+      "id": "17778:24416",
+      "type": "COMPONENT",
+      "name": "Status=Hover, Selected=Yes, Icon=Yes, Text=No"
+    },
+    {
+      "id": "45176:5629",
+      "type": "COMPONENT",
+      "name": "Status=Focus, Selected=Yes, Icon=Yes, Text=No"
+    },
+    {
+      "id": "17105:26456",
+      "type": "COMPONENT",
+      "name": "Dynamic filter"
+    },
+    {
+      "id": "17868:32808",
+      "type": "COMPONENT_SET",
+      "name": "Filter set"
+    },
+    {
+      "id": "17868:32724",
+      "type": "COMPONENT",
+      "name": "Spacing=Large"
+    },
+    {
+      "id": "17863:26084",
+      "type": "COMPONENT",
+      "name": "Spacing=Small"
+    },
+    {
+      "id": "8751:19086",
+      "type": "COMPONENT_SET",
+      "name": "Footer for Whitelabel"
+    },
+    {
+      "id": "8751:19083",
+      "type": "COMPONENT",
+      "name": "Display=Desktop"
+    },
+    {
+      "id": "8751:19084",
+      "type": "COMPONENT",
+      "name": "Display=Tablet"
+    },
+    {
+      "id": "12090:27479",
+      "type": "COMPONENT",
+      "name": "Display=Mobile"
+    },
+    {
+      "id": "9843:20343",
+      "type": "COMPONENT_SET",
+      "name": "Minimal footer"
+    },
+    {
+      "id": "9843:20341",
+      "type": "COMPONENT",
+      "name": "Display=Desktop"
+    },
+    {
+      "id": "9843:20342",
+      "type": "COMPONENT",
+      "name": "Display=Mobile"
+    },
+    {
+      "id": "12469:27267",
+      "type": "COMPONENT_SET",
+      "name": "Footer for Viator"
+    },
+    {
+      "id": "12469:27268",
+      "type": "COMPONENT",
+      "name": "Display=mobile"
+    },
+    {
+      "id": "12469:27335",
+      "type": "COMPONENT",
+      "name": "Display=tablet"
+    },
+    {
+      "id": "12469:27403",
+      "type": "COMPONENT",
+      "name": "Display=desktop"
+    },
+    {
+      "id": "17669:24671",
+      "type": "COMPONENT_SET",
+      "name": "Footer for TAP"
+    },
+    {
+      "id": "17669:24668",
+      "type": "COMPONENT",
+      "name": "Display=Mobile"
+    },
+    {
+      "id": "17669:24669",
+      "type": "COMPONENT",
+      "name": "Display=Tablet"
+    },
+    {
+      "id": "17669:24670",
+      "type": "COMPONENT",
+      "name": "Display=Desktop"
+    },
+    {
+      "id": "12818:27199",
+      "type": "COMPONENT_SET",
+      "name": "Affiliate Site Stripe"
+    },
+    {
+      "id": "12818:27197",
+      "type": "COMPONENT",
+      "name": "Display=Desktop"
+    },
+    {
+      "id": "12818:27198",
+      "type": "COMPONENT",
+      "name": "Display=Mobile"
+    },
+    {
+      "id": "18565:32873",
+      "type": "COMPONENT",
+      "name": "GlobalNav Dropdown sheet"
+    },
+    {
+      "id": "18565:32907",
+      "type": "COMPONENT_SET",
+      "name": "GlobalNav bar"
+    },
+    {
+      "id": "18565:32938",
+      "type": "COMPONENT",
+      "name": "Status=Active 1"
+    },
+    {
+      "id": "37672:5916",
+      "type": "COMPONENT",
+      "name": "Status=Active 2"
+    },
+    {
+      "id": "37672:5935",
+      "type": "COMPONENT",
+      "name": "Status=Active 3"
+    },
+    {
+      "id": "18565:32941",
+      "type": "COMPONENT_SET",
+      "name": ".Viator Blog special"
+    },
+    {
+      "id": "18565:32942",
+      "type": "COMPONENT",
+      "name": "Status=Default"
+    },
+    {
+      "id": "18565:32945",
+      "type": "COMPONENT",
+      "name": "Status=Hover"
+    },
+    {
+      "id": "18565:33434",
+      "type": "COMPONENT_SET",
+      "name": "GlobalNav Drawer"
+    },
+    {
+      "id": "18565:33435",
+      "type": "COMPONENT",
+      "name": "Level=L1s"
+    },
+    {
+      "id": "18565:33480",
+      "type": "COMPONENT",
+      "name": "Level=L2s + L3s"
+    },
+    {
+      "id": "16458:27095",
+      "type": "COMPONENT_SET",
+      "name": "Header minimal"
+    },
+    {
+      "id": "16442:26990",
+      "type": "COMPONENT",
+      "name": "Display=Desktop"
+    },
+    {
+      "id": "16442:27006",
+      "type": "COMPONENT",
+      "name": "Display=Tablet"
+    },
+    {
+      "id": "16442:27015",
+      "type": "COMPONENT",
+      "name": "Display=Mobile"
+    },
+    {
+      "id": "34779:33972",
+      "type": "COMPONENT_SET",
+      "name": "Account Overlay"
+    },
+    {
+      "id": "34779:33971",
+      "type": "COMPONENT",
+      "name": "Property 1=Logged In"
+    },
+    {
+      "id": "34779:33970",
+      "type": "COMPONENT",
+      "name": "Property 1=Logged Out"
+    },
+    {
+      "id": "3014:10195",
+      "type": "COMPONENT_SET",
+      "name": "Header"
+    },
+    {
+      "id": "22284:32978",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, Logged in=No, With search=No"
+    },
+    {
+      "id": "22284:33004",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, Logged in=No, With search=No"
+    },
+    {
+      "id": "22284:33030",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, Logged in=No, With search=No"
+    },
+    {
+      "id": "22284:33131",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, Logged in=No, With search=Yes"
+    },
+    {
+      "id": "22284:33148",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, Logged in=No, With search=Yes"
+    },
+    {
+      "id": "22284:33159",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, Logged in=No, With search=Yes"
+    },
+    {
+      "id": "22284:33236",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, Logged in=Yes, With search=Yes"
+    },
+    {
+      "id": "22284:33253",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, Logged in=Yes, With search=No"
+    },
+    {
+      "id": "22284:33269",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, Logged in=Yes, With search=Yes"
+    },
+    {
+      "id": "22284:33279",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, Logged in=Yes, With search=No"
+    },
+    {
+      "id": "22284:33288",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, Logged in=Yes, With search=No"
+    },
+    {
+      "id": "22284:33298",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, Logged in=Yes, With search=Yes"
+    },
+    {
+      "id": "23275:33223",
+      "type": "COMPONENT_SET",
+      "name": "Header TAP"
+    },
+    {
+      "id": "23275:33224",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, With Search=No, Logged in=No"
+    },
+    {
+      "id": "23275:33242",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, With Search=Yes, Logged in=No"
+    },
+    {
+      "id": "23275:33263",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, With Search=Yes, Logged in=Yes"
+    },
+    {
+      "id": "23275:33284",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, With Search=No, Logged in=Yes"
+    },
+    {
+      "id": "23275:33302",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, With Search=No, Logged in=No"
+    },
+    {
+      "id": "23275:33316",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, With Search=No, Logged in=Yes"
+    },
+    {
+      "id": "23275:33330",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, With Search=Yes, Logged in=No"
+    },
+    {
+      "id": "23275:33344",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, With Search=Yes, Logged in=Yes"
+    },
+    {
+      "id": "23275:33358",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, With Search=No, Logged in=No"
+    },
+    {
+      "id": "23275:33372",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, With Search=No, Logged in=Yes"
+    },
+    {
+      "id": "23275:33387",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, With Search=Yes, Logged in=No"
+    },
+    {
+      "id": "23275:33403",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, With Search=Yes, Logged in=Yes"
+    },
+    {
+      "id": "23781:35871",
+      "type": "COMPONENT_SET",
+      "name": "Header Whitelabel"
+    },
+    {
+      "id": "23781:35870",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, Cart=True, Search=False"
+    },
+    {
+      "id": "23781:35869",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, Cart=False, Search=True"
+    },
+    {
+      "id": "23781:35868",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, Cart=False, Search=False"
+    },
+    {
+      "id": "23781:35866",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, Cart=True, Search=True"
+    },
+    {
+      "id": "23781:35867",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, Cart=True, Search=False"
+    },
+    {
+      "id": "23781:35862",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, Cart=False, Search=True"
+    },
+    {
+      "id": "23781:35865",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, Cart=False, Search=False"
+    },
+    {
+      "id": "23781:35864",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, Cart=True, Search=False"
+    },
+    {
+      "id": "23781:35863",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, Cart=False, Search=True"
+    },
+    {
+      "id": "23781:35861",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, Cart=True, Search=True"
+    },
+    {
+      "id": "23781:35860",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, Cart=False, Search=False"
+    },
+    {
+      "id": "23781:35859",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, Cart=True, Search=True"
+    },
+    {
+      "id": "23781:36616",
+      "type": "COMPONENT_SET",
+      "name": "Header Agent Attribution"
+    },
+    {
+      "id": "23781:36615",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, Search=False, Logged in=False"
+    },
+    {
+      "id": "23781:36613",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, Search=True, Logged in=False"
+    },
+    {
+      "id": "23781:36614",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, Search=True, Logged in=True"
+    },
+    {
+      "id": "23781:36607",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, Search=False, Logged in=True"
+    },
+    {
+      "id": "23781:36606",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, Search=False, Logged in=False"
+    },
+    {
+      "id": "23781:36612",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, Search=False, Logged in=True"
+    },
+    {
+      "id": "23781:36611",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, Search=True, Logged in=False"
+    },
+    {
+      "id": "23781:36610",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, Search=True, Logged in=True"
+    },
+    {
+      "id": "23781:36608",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, Search=True, Logged in=False"
+    },
+    {
+      "id": "23781:36609",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, Search=False, Logged in=False"
+    },
+    {
+      "id": "23781:36605",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, Search=True, Logged in=True"
+    },
+    {
+      "id": "23781:36604",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, Search=False, Logged in=True"
+    },
+    {
+      "id": "23781:36660",
+      "type": "COMPONENT_SET",
+      "name": "Header Affiliate attribution"
+    },
+    {
+      "id": "23781:36659",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, Search=False, Logged in=False"
+    },
+    {
+      "id": "23781:36656",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, Search=True, Logged in=False"
+    },
+    {
+      "id": "23781:36653",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, Search=True, Logged in=True"
+    },
+    {
+      "id": "23781:36658",
+      "type": "COMPONENT",
+      "name": "Display=Desktop, Search=False, Logged in=True"
+    },
+    {
+      "id": "23781:36657",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, Search=False, Logged in=False"
+    },
+    {
+      "id": "23781:36654",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, Search=False, Logged in=True"
+    },
+    {
+      "id": "23781:36655",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, Search=True, Logged in=False"
+    },
+    {
+      "id": "23781:36652",
+      "type": "COMPONENT",
+      "name": "Display=Tablet, Search=True, Logged in=True"
+    },
+    {
+      "id": "23781:36651",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, Search=False, Logged in=False"
+    },
+    {
+      "id": "23781:36649",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, Search=False, Logged in=True"
+    },
+    {
+      "id": "23781:36650",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, Search=True, Logged in=False"
+    },
+    {
+      "id": "23781:36648",
+      "type": "COMPONENT",
+      "name": "Display=Mobile, Search=True, Logged in=True"
+    },
+    {
+      "id": "26360:2319",
+      "type": "COMPONENT_SET",
+      "name": ".Currency locale"
+    },
+    {
+      "id": "26360:2316",
+      "type": "COMPONENT",
+      "name": "Type=Country/Currency, Hover=Yes"
+    },
+    {
+      "id": "26360:2315",
+      "type": "COMPONENT",
+      "name": "Type=Country/Currency, Hover=No"
+    },
+    {
+      "id": "37980:2445",
+      "type": "COMPONENT_SET",
+      "name": ".Discover dropdown"
+    },
+    {
+      "id": "37980:2465",
+      "type": "COMPONENT",
+      "name": "Type=Default"
+    },
+    {
+      "id": "37980:2467",
+      "type": "COMPONENT",
+      "name": "Type=Active"
+    },
+    {
+      "id": "37980:2478",
+      "type": "COMPONENT",
+      "name": "Type=Hover"
+    },
+    {
+      "id": "26365:2462",
+      "type": "COMPONENT_SET",
+      "name": ".Avatar dropdown"
+    },
+    {
+      "id": "26360:2422",
+      "type": "COMPONENT",
+      "name": "Logged in/out=No, Hover=Yes"
+    },
+    {
+      "id": "26360:2410",
+      "type": "COMPONENT",
+      "name": "Logged in/out=Yes, Hover=No"
+    },
+    {
+      "id": "26365:2461",
+      "type": "COMPONENT",
+      "name": "Logged in/out=Yes, Hover=Yes"
+    },
+    {
+      "id": "26360:2409",
+      "type": "COMPONENT",
+      "name": "Logged in/out=No, Hover=No"
+    },
+    {
+      "id": "28844:2699",
+      "type": "COMPONENT_SET",
+      "name": ".Cart dropdown"
+    },
+    {
+      "id": "26360:2318",
+      "type": "COMPONENT",
+      "name": "Hover=Yes"
+    },
+    {
+      "id": "26360:2317",
+      "type": "COMPONENT",
+      "name": "Hover=No"
+    },
+    {
+      "id": "23502:32607",
+      "type": "COMPONENT_SET",
+      "name": "Links list"
+    },
+    {
+      "id": "3286:28999",
+      "type": "COMPONENT",
+      "name": "Display=Desktop"
+    },
+    {
+      "id": "23502:32605",
+      "type": "COMPONENT",
+      "name": "Display=tablet"
+    },
+    {
+      "id": "23502:32606",
+      "type": "COMPONENT",
+      "name": "Display=mobile"
+    },
+    {
+      "id": "5242:2136",
+      "type": "COMPONENT_SET",
+      "name": "menu item"
+    },
+    {
+      "id": "5242:2132",
+      "type": "COMPONENT",
+      "name": "With icon=No, Status=Default"
+    },
+    {
+      "id": "5242:2135",
+      "type": "COMPONENT",
+      "name": "With icon=No, Status=Disabled"
+    },
+    {
+      "id": "5242:2131",
+      "type": "COMPONENT",
+      "name": "With icon=No, Status=Hover"
+    },
+    {
+      "id": "5242:2133",
+      "type": "COMPONENT",
+      "name": "With icon=No, Status=Selected"
+    },
+    {
+      "id": "5242:2130",
+      "type": "COMPONENT",
+      "name": "With icon=No, Status=Pressed"
+    },
+    {
+      "id": "5242:2134",
+      "type": "COMPONENT",
+      "name": "With icon=Yes, Status=Default"
+    },
+    {
+      "id": "5242:2129",
+      "type": "COMPONENT",
+      "name": "With icon=Yes, Status=Disabled"
+    },
+    {
+      "id": "5242:2128",
+      "type": "COMPONENT",
+      "name": "With icon=Yes, Status=Hover"
+    },
+    {
+      "id": "5242:2127",
+      "type": "COMPONENT",
+      "name": "With icon=Yes, Status=Selected"
+    },
+    {
+      "id": "5242:2126",
+      "type": "COMPONENT",
+      "name": "With icon=Yes, Status=Pressed"
+    },
+    {
+      "id": "5242:2712",
+      "type": "COMPONENT_SET",
+      "name": "menu"
+    },
+    {
+      "id": "5242:2711",
+      "type": "COMPONENT",
+      "name": "Caret position=Leading top"
+    },
+    {
+      "id": "5242:2709",
+      "type": "COMPONENT",
+      "name": "Caret position=Leading bottom"
+    },
+    {
+      "id": "5242:2710",
+      "type": "COMPONENT",
+      "name": "Caret position=Trailing top"
+    },
+    {
+      "id": "5242:2708",
+      "type": "COMPONENT",
+      "name": "Caret position=Trailing bottom"
+    },
+    {
+      "id": "33851:9734",
+      "type": "COMPONENT",
+      "name": "Tab menu"
+    },
+    {
+      "id": "33848:418",
+      "type": "COMPONENT_SET",
+      "name": ".Tab menu item"
+    },
+    {
+      "id": "33848:419",
+      "type": "COMPONENT",
+      "name": "Status=Selected + Hover"
+    },
+    {
+      "id": "33848:425",
+      "type": "COMPONENT",
+      "name": "Status=Default"
+    },
+    {
+      "id": "3594:177",
+      "type": "COMPONENT_SET",
+      "name": "Modal"
+    },
+    {
+      "id": "3594:161",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Takeover=No, CTAs=1 CTA left"
+    },
+    {
+      "id": "3594:159",
+      "type": "COMPONENT",
+      "name": "Size=Large, Takeover=No, CTAs=1 CTA left"
+    },
+    {
+      "id": "3594:158",
+      "type": "COMPONENT",
+      "name": "Size=Small, Takeover=No, CTAs=1 CTA left"
+    },
+    {
+      "id": "3594:167",
+      "type": "COMPONENT",
+      "name": "Size=Small, Takeover=Yes, CTAs=1 CTA left"
+    },
+    {
+      "id": "3594:166",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Takeover=Yes, CTAs=1 CTA left"
+    },
+    {
+      "id": "3594:163",
+      "type": "COMPONENT",
+      "name": "Size=Large, Takeover=Yes, CTAs=1 CTA left"
+    },
+    {
+      "id": "3594:165",
+      "type": "COMPONENT",
+      "name": "Size=Small, Takeover=Yes, CTAs=2 CTA right"
+    },
+    {
+      "id": "3594:164",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Takeover=Yes, CTAs=2 CTA right"
+    },
+    {
+      "id": "3594:162",
+      "type": "COMPONENT",
+      "name": "Size=Large, Takeover=Yes, CTAs=2 CTA right"
+    },
+    {
+      "id": "3594:160",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Takeover=No, CTAs=2 CTA right"
+    },
+    {
+      "id": "3594:157",
+      "type": "COMPONENT",
+      "name": "Size=Large, Takeover=No, CTAs=2 CTA right"
+    },
+    {
+      "id": "3594:156",
+      "type": "COMPONENT",
+      "name": "Size=Small, Takeover=No, CTAs=2 CTA right"
+    },
+    {
+      "id": "3962:24",
+      "type": "COMPONENT_SET",
+      "name": "Scrollable Modal"
+    },
+    {
+      "id": "3962:23",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Takeover=No, Stickiness=Footer"
+    },
+    {
+      "id": "3962:22",
+      "type": "COMPONENT",
+      "name": "Size=Large, Takeover=No, Stickiness=Footer"
+    },
+    {
+      "id": "3962:18",
+      "type": "COMPONENT",
+      "name": "Size=Small, Takeover=No, Stickiness=Footer"
+    },
+    {
+      "id": "3962:17",
+      "type": "COMPONENT",
+      "name": "Size=Small, Takeover=Yes, Stickiness=Footer"
+    },
+    {
+      "id": "3962:13",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Takeover=Yes, Stickiness=Footer"
+    },
+    {
+      "id": "3962:3",
+      "type": "COMPONENT",
+      "name": "Size=Large, Takeover=Yes, Stickiness=Footer"
+    },
+    {
+      "id": "3962:14",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Takeover=No, Stickiness=Header & Footer"
+    },
+    {
+      "id": "3962:20",
+      "type": "COMPONENT",
+      "name": "Size=Large, Takeover=No, Stickiness=Header & Footer"
+    },
+    {
+      "id": "3962:8",
+      "type": "COMPONENT",
+      "name": "Size=Small, Takeover=No, Stickiness=Header & Footer"
+    },
+    {
+      "id": "3962:11",
+      "type": "COMPONENT",
+      "name": "Size=Small, Takeover=Yes, Stickiness=Header & Footer"
+    },
+    {
+      "id": "3962:10",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Takeover=Yes, Stickiness=Header & Footer"
+    },
+    {
+      "id": "3962:16",
+      "type": "COMPONENT",
+      "name": "Size=Large, Takeover=Yes, Stickiness=Header & Footer"
+    },
+    {
+      "id": "3962:7",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Takeover=No, Stickiness=Header"
+    },
+    {
+      "id": "3962:19",
+      "type": "COMPONENT",
+      "name": "Size=Large, Takeover=No, Stickiness=Header"
+    },
+    {
+      "id": "3962:12",
+      "type": "COMPONENT",
+      "name": "Size=Small, Takeover=No, Stickiness=Header"
+    },
+    {
+      "id": "3962:9",
+      "type": "COMPONENT",
+      "name": "Size=Small, Takeover=Yes, Stickiness=Header"
+    },
+    {
+      "id": "3962:21",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Takeover=Yes, Stickiness=Header"
+    },
+    {
+      "id": "3962:15",
+      "type": "COMPONENT",
+      "name": "Size=Large, Takeover=Yes, Stickiness=Header"
+    },
+    {
+      "id": "3962:6",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Takeover=No, Stickiness=None"
+    },
+    {
+      "id": "3962:5",
+      "type": "COMPONENT",
+      "name": "Size=Large, Takeover=No, Stickiness=None"
+    },
+    {
+      "id": "3962:4",
+      "type": "COMPONENT",
+      "name": "Size=Small, Takeover=No, Stickiness=None"
+    },
+    {
+      "id": "3962:1",
+      "type": "COMPONENT",
+      "name": "Size=Small, Takeover=Yes, Stickiness=None"
+    },
+    {
+      "id": "3962:2",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Takeover=Yes, Stickiness=None"
+    },
+    {
+      "id": "3962:0",
+      "type": "COMPONENT",
+      "name": "Size=Large, Takeover=Yes, Stickiness=None"
+    },
+    {
+      "id": "6300:2",
+      "type": "COMPONENT_SET",
+      "name": "Footer Modal"
+    },
+    {
+      "id": "6300:3",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stickiness=None, CTAs=None"
+    },
+    {
+      "id": "6300:50",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stickiness=None, CTAs=None"
+    },
+    {
+      "id": "6300:58",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stickiness=None, CTAs=None"
+    },
+    {
+      "id": "17243:24804",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stickiness=Header, CTAs=None"
+    },
+    {
+      "id": "17243:24805",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stickiness=Footer, CTAs=1 CTA"
+    },
+    {
+      "id": "17243:24806",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stickiness=Footer, CTAs=1 CTA and link"
+    },
+    {
+      "id": "17243:24807",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stickiness=Header and footer, CTAs=1 CTA"
+    },
+    {
+      "id": "17243:24808",
+      "type": "COMPONENT",
+      "name": "Size=Small, Stickiness=Header and footer, CTAs=1 CTA and link"
+    },
+    {
+      "id": "17243:24815",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stickiness=Footer, CTAs=1 CTA"
+    },
+    {
+      "id": "17243:24816",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stickiness=Footer, CTAs=1 CTA and link"
+    },
+    {
+      "id": "17243:24814",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stickiness=Header, CTAs=None"
+    },
+    {
+      "id": "17243:24817",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stickiness=Header and footer, CTAs=1 CTA"
+    },
+    {
+      "id": "17243:24818",
+      "type": "COMPONENT",
+      "name": "Size=Large, Stickiness=Header and footer, CTAs=1 CTA and link"
+    },
+    {
+      "id": "17243:24809",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stickiness=Header, CTAs=None"
+    },
+    {
+      "id": "17243:24810",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stickiness=Footer, CTAs=1 CTA"
+    },
+    {
+      "id": "17243:24811",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stickiness=Footer, CTAs=1 CTA and link"
+    },
+    {
+      "id": "17243:24812",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stickiness=Header and footer, CTAs=1 CTA"
+    },
+    {
+      "id": "17243:24813",
+      "type": "COMPONENT",
+      "name": "Size=Medium, Stickiness=Header and footer, CTAs=1 CTA and link"
+    },
+    {
+      "id": "10386:25797",
+      "type": "COMPONENT_SET",
+      "name": "Pivot"
+    },
+    {
+      "id": "10386:22235",
+      "type": "COMPONENT",
+      "name": "Viewport=Desktop"
+    },
+    {
+      "id": "10386:22243",
+      "type": "COMPONENT",
+      "name": "Viewport=Mobile"
+    },
+    {
+      "id": "6140:646",
+      "type": "COMPONENT_SET",
+      "name": "Rating bars"
+    },
+    {
+      "id": "6140:645",
+      "type": "COMPONENT",
+      "name": "Device=Desktop, Status=Unfiltered"
+    },
+    {
+      "id": "6140:644",
+      "type": "COMPONENT",
+      "name": "Device=Mobile/Tablet, Status=Unfiltered"
+    },
+    {
+      "id": "6140:643",
+      "type": "COMPONENT",
+      "name": "Device=Desktop, Status=Filtered"
+    },
+    {
+      "id": "6140:642",
+      "type": "COMPONENT",
+      "name": "Device=Mobile/Tablet, Status=Filtered"
+    },
+    {
+      "id": "17549:24437",
+      "type": "COMPONENT",
+      "name": "Q&A Single"
+    },
+    {
+      "id": "18673:29983",
+      "type": "COMPONENT_SET",
+      "name": "Search Modal"
+    },
+    {
+      "id": "18349:37352",
+      "type": "COMPONENT",
+      "name": "Display=Tablet + MW"
+    },
+    {
+      "id": "19452:30029",
+      "type": "COMPONENT_SET",
+      "name": "Typeahead result"
+    },
+    {
+      "id": "19452:30028",
+      "type": "COMPONENT",
+      "name": "Type=Icon"
+    },
+    {
+      "id": "19452:30025",
+      "type": "COMPONENT",
+      "name": "Type=Single line"
+    },
+    {
+      "id": "19452:30027",
+      "type": "COMPONENT",
+      "name": "Type=Single regular"
+    },
+    {
+      "id": "19452:30026",
+      "type": "COMPONENT",
+      "name": "Type=Image"
+    },
+    {
+      "id": "8498:18759",
+      "type": "COMPONENT_SET",
+      "name": "Shelf arrow"
+    },
+    {
+      "id": "2985:52",
+      "type": "COMPONENT",
+      "name": "Left / Right=Yes, Status=Default"
+    },
+    {
+      "id": "8498:18757",
+      "type": "COMPONENT",
+      "name": "Left / Right=Yes, Status=Hover/Focus"
+    },
+    {
+      "id": "2985:53",
+      "type": "COMPONENT",
+      "name": "Left / Right=No, Status=Default"
+    },
+    {
+      "id": "8498:18755",
+      "type": "COMPONENT",
+      "name": "Left / Right=No, Status=Hover/Focus"
+    },
+    {
+      "id": "10051:24838",
+      "type": "COMPONENT_SET",
+      "name": "ScrollableShelf"
+    },
+    {
+      "id": "26531:37272",
+      "type": "COMPONENT",
+      "name": "Display=Desktop"
+    },
+    {
+      "id": "26536:40845",
+      "type": "COMPONENT",
+      "name": "Display=Tablet"
+    },
+    {
+      "id": "26536:42714",
+      "type": "COMPONENT",
+      "name": "Display=Mobile"
+    },
+    {
+      "id": "11471:27320",
+      "type": "COMPONENT_SET",
+      "name": "PaginatedShelf"
+    },
+    {
+      "id": "26536:45515",
+      "type": "COMPONENT",
+      "name": "Display=Desktop"
+    },
+    {
+      "id": "26538:47873",
+      "type": "COMPONENT",
+      "name": "Display=Tablet"
+    },
+    {
+      "id": "26538:49646",
+      "type": "COMPONENT",
+      "name": "Display=Mobile"
+    },
+    {
+      "id": "38164:7312",
+      "type": "COMPONENT_SET",
+      "name": "HighlightsShelf"
+    },
+    {
+      "id": "38164:7313",
+      "type": "COMPONENT",
+      "name": "Display=Desktop"
+    },
+    {
+      "id": "38164:7328",
+      "type": "COMPONENT",
+      "name": "Display=Tablet"
+    },
+    {
+      "id": "38164:7337",
+      "type": "COMPONENT",
+      "name": "Display=Mobile"
+    },
+    {
+      "id": "17798:25998",
+      "type": "COMPONENT_SET",
+      "name": "Dynamic Scrollable Shelf"
+    },
+    {
+      "id": "17798:25997",
+      "type": "COMPONENT",
+      "name": "Display=Desktop"
+    },
+    {
+      "id": "17798:25993",
+      "type": "COMPONENT",
+      "name": "Display=Mobile/Tablet"
+    }
+  ]
+}

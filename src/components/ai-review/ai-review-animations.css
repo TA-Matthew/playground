@@ -1,0 +1,182 @@
+/* AI review summary – brand palette for all AI gradients / motion */
+:root {
+  --ai-grad-1: #fe6e03;
+  --ai-grad-2: #fe4f57;
+  --ai-grad-3: #c864e0;
+  --ai-grad-4: #6a7ffd;
+}
+
+/* AI review summary – entrance + persistent heading motion */
+@keyframes ai-title-gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Clockwise: positive rotate() matches clock direction. */
+@keyframes ai-border-spin-rotate {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/*
+ * One 90° quadrant: white, with long soft edges into color (conic = angular blend on the border).
+ * 0° = 360°: --ai-grad-4 (seamless loop).
+ * 0–90: grad-4 → #fff → #fff (core) → grad-1 at 90°. 90–360: full AI sweep back to grad-4.
+ */
+@keyframes ai-rotor-fade-exit {
+  from {
+    opacity: 0.97;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Frame: same duration + ease as conic fade (see .ai-border-rotor--exiting) */
+.ai-border-frame {
+  --ai-exit-ms: 0.65s;
+  --ai-exit-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: none;
+  transition: box-shadow var(--ai-exit-ms) var(--ai-exit-ease);
+}
+
+.ai-border-card-glow--active {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset,
+    0 0 28px rgba(106, 127, 253, 0.22),
+    0 0 48px rgba(200, 100, 224, 0.1);
+}
+
+.ai-border-rotor-google {
+  animation: ai-border-spin-rotate 12s linear infinite;
+  /* First quadrant: white; broad blends at 0 and 90 so the ring edge is soft, not a hard line */
+  background: conic-gradient(
+    from 0deg,
+    var(--ai-grad-4) 0deg,
+    #8e9dfd 20deg,
+    #b4bcfe 40deg,
+    #d6dbff 60deg,
+    #ebeefc 80deg,
+    #f3f4ff 95deg,
+    #f9faff 110deg,
+    #fcfcff 125deg,
+    #ffffff 140deg,
+    #ffffff 160deg,
+    #fff5ec 170deg,
+    #ffe0c8 180deg,
+    #ffc090 190deg,
+    #ff9b50 200deg,
+    #fe7f1c 210deg,
+    var(--ai-grad-1) 220deg,
+    #fe5a35 245deg,
+    var(--ai-grad-2) 270deg,
+    #e04fa7 295deg,
+    var(--ai-grad-3) 320deg,
+    #8f6bee 340deg,
+    #787dfc 350deg,
+    var(--ai-grad-4) 360deg
+  );
+  filter: blur(0.35px) saturate(1.12);
+  opacity: 0.97;
+  will-change: transform;
+}
+
+/* After base rule: replaces spin, same --ai-exit-ms / --ai-exit-ease as .ai-border-frame shadow */
+.ai-border-rotor-google.ai-border-rotor--exiting {
+  will-change: opacity, transform;
+  animation: ai-rotor-fade-exit var(--ai-exit-ms) var(--ai-exit-ease) forwards;
+}
+
+/* Shifting linear gradient: title (text) + icon (mask) */
+.ai-summary-title-animated {
+  background-image: linear-gradient(
+    100deg,
+    var(--ai-grad-1) 0%,
+    var(--ai-grad-2) 25%,
+    var(--ai-grad-3) 50%,
+    var(--ai-grad-4) 75%,
+    var(--ai-grad-1) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: ai-title-gradient-shift 3.5s ease-in-out infinite;
+}
+
+/* Icon: mask with asset alpha; fill = same gradient as title */
+.ai-summary-icon-animated {
+  display: block;
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+  background-image: linear-gradient(
+    100deg,
+    var(--ai-grad-1) 0%,
+    var(--ai-grad-2) 25%,
+    var(--ai-grad-3) 50%,
+    var(--ai-grad-4) 75%,
+    var(--ai-grad-1) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  animation: ai-title-gradient-shift 3.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-summary-title-animated,
+  .ai-summary-icon-animated,
+  .ai-border-rotor-google,
+  .ai-border-rotor--exiting,
+  .ai-border-card-glow--active {
+    animation: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+  }
+  .ai-summary-title-animated {
+    -webkit-text-fill-color: #5a3a9e;
+    background-image: none;
+  }
+  .ai-summary-icon-animated {
+    animation: none !important;
+    background: #5a3a9e;
+  }
+  .ai-summary-body-fade-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Theme-selected AI summary: full text + entrance (replaces typewriter) */
+@keyframes ai-summary-body-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Easing + base duration match ReviewsListBlock: ease [0.4, 0, 0.2, 1], tFast 0.2s */
+.ai-summary-body-fade-in {
+  --ai-summary-t: 0.2s;
+  --ai-summary-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  animation: ai-summary-body-fade-in var(--ai-summary-t) var(--ai-summary-ease) both;
+}
