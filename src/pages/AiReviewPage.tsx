@@ -85,7 +85,7 @@ export function AiReviewPage() {
       </div>
 
       <main id="main" className="w-full" tabIndex={-1}>
-        <ReviewsFigmaReplica summaryLayout={summaryLayout} />
+        <ReviewsFigmaReplica key={summaryLayout} summaryLayout={summaryLayout} />
       </main>
     </div>
   )
