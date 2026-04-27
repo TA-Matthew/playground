@@ -381,7 +381,7 @@ function AiReviewSummaryFigmaBlock({
             aria-hidden
           />
           <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-2 sm:flex-nowrap">
-            <p className="ai-summary-title-animated min-w-0 text-base font-bold leading-normal">AI review summary</p>
+            <p className="ai-summary-title-animated min-w-0 text-base font-bold leading-normal">Review summary</p>
             <p className="min-w-0 text-sm font-normal leading-5 text-[#4D4D4D] [letter-spacing:0.05px]">
               Explore by theme
             </p>
@@ -775,7 +775,7 @@ function AiSummaryBorderAnimatedFrame({
     <div
       ref={wrapRef}
       role="region"
-      aria-label="AI-generated review summary"
+      aria-label="Review summary"
       className={[
         /* 1px ring, fixed — never toggle padding (avoids jump) */
         'ai-border-frame relative overflow-hidden rounded-3xl p-px',
@@ -830,7 +830,7 @@ function AiReviewSummaryBlock({
             }}
             aria-hidden
           />
-          <p className="ai-summary-title-animated min-w-0 flex-1 text-base font-bold leading-normal">AI review summary</p>
+          <p className="ai-summary-title-animated min-w-0 flex-1 text-base font-bold leading-normal">Review summary</p>
         </div>
         <div className="absolute top-0 right-0 w-fit shrink-0 rounded-md bg-[#f7eeff] px-1 py-0.5 sm:relative sm:top-auto sm:right-auto">
           <p className="whitespace-nowrap text-right text-xs font-medium leading-4 text-[#351560] sm:text-center">
