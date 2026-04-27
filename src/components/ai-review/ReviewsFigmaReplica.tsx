@@ -20,6 +20,9 @@ const RATING_COUNTS = {
 
 const RATING_TOTAL = Object.values(RATING_COUNTS).reduce((a, b) => a + b, 0)
 
+/** Nearest-1k floor for “NN,000+ reviews” badges (aligned with {@link RATING_TOTAL}). */
+const RATING_TOTAL_K_PLUS = Math.floor(RATING_TOTAL / 1000) * 1000
+
 type StarKind = 'solid' | 'half' | 'outline'
 
 function StarRowMedium({ pattern, size = 16 }: { pattern: StarKind[]; size?: 16 | 24 }) {
@@ -388,7 +391,7 @@ function AiReviewSummaryFigmaBlock({
         </div>
         <div className="absolute top-0 right-0 w-fit rounded-md bg-[#f7eeff] px-1 py-0.5 sm:relative sm:top-auto sm:right-auto">
           <p className="whitespace-nowrap text-center text-xs font-medium leading-4 text-[#351560]">
-            36,500+ reviews
+            {RATING_TOTAL_K_PLUS.toLocaleString()}+ reviews
           </p>
         </div>
       </div>
@@ -833,7 +836,7 @@ function AiReviewSummaryBlock({
         </div>
         <div className="absolute top-0 right-0 w-fit shrink-0 rounded-md bg-[#f7eeff] px-1 py-0.5 sm:relative sm:top-auto sm:right-auto">
           <p className="whitespace-nowrap text-right text-xs font-medium leading-4 text-[#351560] sm:text-center">
-            36,500+ reviews
+            {RATING_TOTAL_K_PLUS.toLocaleString()}+ reviews
           </p>
         </div>
       </div>
@@ -1687,7 +1690,7 @@ export function ReviewsFigmaReplica({ summaryLayout = 'a' }: ReviewsFigmaReplica
                   pattern={['solid', 'solid', 'solid', 'solid', 'half']}
                 />
                 <p className="text-sm font-bold leading-normal text-black">
-                  based on 36,539 reviews
+                  based on {RATING_TOTAL.toLocaleString()} reviews
                 </p>
               </div>
               <div className="space-y-2">
@@ -1769,8 +1772,8 @@ export function ReviewsFigmaReplica({ summaryLayout = 'a' }: ReviewsFigmaReplica
                     className="w-full shrink-0 text-left text-sm leading-5 text-[#333] tabular-nums sm:ml-auto sm:w-auto sm:shrink-0 sm:text-right sm:text-base sm:leading-normal"
                     style={{ fontFeatureSettings: "'lnum' 1" }}
                   >
-                    {filteredReviews.length.toLocaleString()}{' '}
-                    {filteredReviews.length === 1 ? 'review' : 'reviews'}
+                    {RATING_TOTAL.toLocaleString()}{' '}
+                    {RATING_TOTAL === 1 ? 'review' : 'reviews'}
                   </p>
                 )}
               </div>
