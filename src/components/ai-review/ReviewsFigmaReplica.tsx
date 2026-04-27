@@ -335,7 +335,7 @@ function AiReviewSummarySourceFooter() {
         </div>
       )}
       <p className="w-full shrink-0 text-left text-[10px] font-normal leading-[14px] text-[#808080] [letter-spacing:0.05px] sm:max-w-[50%] sm:whitespace-nowrap sm:text-right">
-        From real guest reviews summarised by AI
+        Real traveler reviews summarised by AI
       </p>
     </div>
   )
