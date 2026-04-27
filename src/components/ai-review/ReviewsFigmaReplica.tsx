@@ -111,8 +111,7 @@ const THEME_CHIPS: { id: ThemeId; label: string; endIcon: 'up' | 'down' | 'remov
   { id: 'audio-headsets', label: 'Audio headsets', endIcon: 'down' },
 ]
 
-function defaultSentimentOnThemeSelect(id: ThemeId): ThemeSentimentKind {
-  const chip = THEME_CHIPS.find((c) => c.id === id)
+function defaultSentimentOnThemeSelect(_id: ThemeId): ThemeSentimentKind {
   // Always default to positive sentiment in breakdown, even for “negative” themes like audio headsets.
   return 'positive'
 }
@@ -175,7 +174,7 @@ const AI_REVIEW_MATRIX_BLURB_BY_THEME: Record<ThemeId, string> = {
     'Loud room or not, audio works for most. Pairing or battery annoyances show up, but are not the norm.',
 }
 
-function themeLabelForFigma(id: ThemeId, column: 'pos' | 'neg'): string {
+function themeLabelForFigma(id: ThemeId, _column: 'pos' | 'neg'): string {
   return THEME_CHIPS.find((c) => c.id === id)?.label ?? id
 }
 
@@ -1454,7 +1453,7 @@ function ReviewBlock({ r }: { r: Review }) {
         </div>
         <div className="space-y-4 text-base leading-normal text-black">
           <p className="whitespace-pre-wrap">{r.body}</p>
-          {r.readMore && <ReadMore />}
+          {r.readMore && <ReadMore onClick={() => {}} />}
           {r.photos && r.photos.length > 0 && (
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {r.photos.map((src) => (
