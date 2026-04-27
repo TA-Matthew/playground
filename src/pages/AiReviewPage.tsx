@@ -90,7 +90,7 @@ export function AiReviewPage() {
             <ReviewsFigmaReplica key={summaryLayout} summaryLayout={summaryLayout} />
           </main>
           <aside className="hidden min-w-0 lg:order-2 lg:block lg:sticky lg:top-8 lg:z-10 lg:self-start">
-            <BookingSidebar booking={variants[summaryLayout].booking} variantId={summaryLayout} />
+            <BookingSidebar booking={variants[summaryLayout].booking} />
           </aside>
         </div>
       </div>

@@ -1,3 +1,5 @@
+import { viatorListing } from './viatorListing'
+
 export type VariantId = 'a' | 'b'
 
 export interface Stop {
@@ -21,7 +23,6 @@ export interface BookingContent {
   wasPrice: string
   dateLabel: string
   travellers: number
-  meetingPoint: string
   bookAheadNote: string
 }
 
@@ -207,8 +208,8 @@ export const variants: Record<VariantId, ExperienceVariant> = {
   a: {
     id: 'a',
     label: 'Variant A',
-    tourTitle: 'Vatican Museums, Sistine Chapel & St Peter’s Basilica Guided Tour',
-    ratingLine: '4.5 (12,480) · Badge of Excellence · Rome, Italy',
+    tourTitle: viatorListing.tourTitle,
+    ratingLine: viatorListing.ratingLine,
     meetingAndPickup: MEETING_AND_PICKUP_A,
     whatToExpectIntro: ITINERARY_SECTION_INTRO,
     whatToExpectExtra: ITINERARY_SECTION_EXTRA,
@@ -221,25 +222,23 @@ export const variants: Record<VariantId, ExperienceVariant> = {
       wasPrice: '€124.00',
       dateLabel: 'Mon 18 Jan',
       travellers: 2,
-      meetingPoint: 'Meet at: Via Plauto, 17, 00193 Roma RM, Italy',
       bookAheadNote: 'Book ahead! On average, booked 8 days in advance.',
     },
   },
   b: {
     id: 'b',
     label: 'Variant B',
-    tourTitle: 'Vatican Museums, Sistine Chapel & St Peter’s Basilica Guided Tour',
-    ratingLine: '4.5 (12,480) · Badge of Excellence · Rome, Italy',
+    tourTitle: viatorListing.tourTitle,
+    ratingLine: viatorListing.ratingLine,
     stops: STOPS_B,
     routeLngLat: ROUTE_LNG_LAT_B,
     booking: {
       dealEndsLabel: 'Ends May 24',
-      discountPct: '-8%',
-      priceDisplay: '$98.00 per person',
+      discountPct: '-6%',
+      priceDisplay: '$101.49 per person',
       wasPrice: '€124.00',
       dateLabel: 'Mon 18 Jan',
       travellers: 2,
-      meetingPoint: 'Meet at: Via Plauto, 17, 00193 Roma RM, Italy',
       bookAheadNote: 'Book ahead! On average, booked 8 days in advance.',
     },
   },

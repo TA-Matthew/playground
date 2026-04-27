@@ -14,24 +14,24 @@ export function CollapsibleSection({
   const [open, setOpen] = useState(defaultOpen)
 
   return (
-    <section className="border-b border-stone-200/90 pb-12 last:border-b-0 last:pb-0">
+    <section className="border-b border-[#d9d9d9] pb-10 last:border-b-0 last:pb-0">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="group flex w-full items-center justify-between gap-4 rounded-xl py-4 text-left transition-colors hover:bg-stone-50/90 md:py-5"
+        className="group flex w-full items-center justify-between gap-4 py-4 text-left transition-colors hover:bg-[#f5f5f5]/80 md:py-5"
         aria-expanded={open}
       >
-        <h2 className="text-xl font-medium tracking-tight text-stone-900 md:text-[1.375rem]">
+        <h2 className="text-2xl font-bold leading-[1.2] tracking-[0.2px] text-black">
           {title}
         </h2>
         <span
-          className="inline-flex shrink-0 items-center justify-center text-stone-500 transition group-hover:text-stone-700"
+          className="inline-flex shrink-0 items-center justify-center text-[#4d4d4d] transition group-hover:text-black"
           aria-hidden
         >
           <ChevronIcon up={open} />
         </span>
       </button>
-      {open ? <div className="mt-6 md:mt-7">{children}</div> : null}
+      {open ? <div className="mt-0">{children}</div> : null}
     </section>
   )
 }

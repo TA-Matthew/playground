@@ -1,8 +1,22 @@
 @import "./aeonik-fonts.css";
 @import "./variables.css";
 @import "./semantic.css";
+@import "./pdp-figma.css";
 
 @layer base {
+  /* Hide scrollbars app-wide; scrolling still works (mouse wheel, trackpad, touch, keyboard). */
+  *,
+  *::before,
+  *::after {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
   html {
     @apply antialiased leading-relaxed text-stone-800;
     font-size: 16px;
@@ -44,12 +58,63 @@
   }
 }
 
+/* Loyalty log in CTA — LoyaltyLoginButtonPage */
+@keyframes loyalty-login-shimmer {
+  0% {
+    transform: translateX(-140%) skewX(-14deg);
+  }
+  100% {
+    transform: translateX(140%) skewX(-14deg);
+  }
+}
+
+@keyframes loyalty-login-glow-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgb(16 185 129 / 0.35),
+      0 0 0 0 rgb(245 158 11 / 0.12);
+  }
+  50% {
+    box-shadow:
+      0 0 0 6px rgb(16 185 129 / 0),
+      0 0 22px 2px rgb(245 158 11 / 0.18);
+  }
+}
+
 @layer utilities {
+  /** Horizontal shelves: keep touch/overflow scroll but hide native scrollbar (Chrome, Firefox, Safari). */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
   .animate-logistics-map-pin-teardrop-in {
     animation: logistics-map-pin-teardrop-in 0.42s cubic-bezier(0.34, 1.45, 0.64, 1) both;
     transform-origin: 50% 100%;
   }
   .animate-logistics-map-pin-disc-in {
     animation: logistics-map-pin-disc-in 0.32s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+  }
+
+  .loyalty-login-btn-glow {
+    animation: loyalty-login-glow-pulse 2.8s ease-in-out infinite;
+  }
+
+  .loyalty-login-btn-shimmer {
+    animation: loyalty-login-shimmer 3.2s ease-in-out infinite;
+    animation-delay: 0.4s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .loyalty-login-btn-glow,
+    .loyalty-login-btn-shimmer {
+      animation: none;
+    }
   }
 }

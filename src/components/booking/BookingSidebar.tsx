@@ -1,12 +1,11 @@
 import bookAheadFlame from '../../assets/book-ahead-flame.png'
-import type { BookingContent, VariantId } from '../../data/variants'
+import type { BookingContent } from '../../data/variants'
 
 type Props = {
   booking: BookingContent
-  variantId: VariantId
 }
 
-export function BookingSidebar({ booking, variantId }: Props) {
+export function BookingSidebar({ booking }: Props) {
   return (
     <aside className="space-y-4">
       <div className="rounded-2xl border border-stone-200/90 bg-white p-6 shadow-[0_2px_12px_rgba(15,23,42,0.06)] ring-1 ring-stone-100">
@@ -57,20 +56,6 @@ export function BookingSidebar({ booking, variantId }: Props) {
             </span>
           </button>
         </div>
-
-        {variantId !== 'b' ? (
-          <button
-            type="button"
-            className="mt-5 flex w-full items-start gap-2.5 rounded-lg text-left text-[15px] text-stone-800 transition hover:bg-stone-50"
-          >
-            <span className="mt-0.5 shrink-0 text-stone-700">
-              <MapPinSmall />
-            </span>
-            <span className="font-medium underline decoration-stone-300 underline-offset-4 hover:decoration-stone-500">
-              {booking.meetingPoint}
-            </span>
-          </button>
-        ) : null}
 
         <div className="mt-6 flex flex-col gap-3">
           <button
@@ -150,18 +135,6 @@ function PersonIcon() {
         strokeWidth="1.75"
         strokeLinecap="round"
       />
-    </svg>
-  )
-}
-
-function MapPinSmall() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M12 22s7-4.35 7-11a7 7 0 10-14 0c0 6.65 7 11 7 11z"
-        fill="currentColor"
-      />
-      <circle cx="12" cy="11" r="2" fill="white" />
     </svg>
   )
 }

@@ -1,12 +1,12 @@
 export function AdditionalInfo() {
   return (
-    <div className="mt-1 grid gap-8 md:grid-cols-2 md:gap-12">
-      <ul className="list-disc space-y-3 pl-5 text-[15px] leading-relaxed text-stone-700 marker:text-stone-400">
+    <div className="mt-1 grid gap-8 md:grid-cols-2 md:gap-10">
+      <ul className="list-disc space-y-3 pl-5 text-base leading-[1.5] text-[#333] marker:text-[#b3b3b3]">
         <li>Confirmation will be received at time of booking, unless booked within 1 day of travel.</li>
         <li>Not wheelchair accessible</li>
         <li>Near public transportation</li>
       </ul>
-      <div className="space-y-4 text-[15px] leading-relaxed text-stone-700">
+      <div className="space-y-4 text-base leading-[1.5] text-[#333]">
         <p>
           Please note that there is no hotel pickup/drop off available for this tour. All visitors
           must pass through airport-style security. During high season the wait at security may be

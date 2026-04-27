@@ -4,6 +4,10 @@ import { AdditionalInfo } from '../components/additional/AdditionalInfo'
 import { BookingSidebar } from '../components/booking/BookingSidebar'
 import { CollapsibleSection } from '../components/common/CollapsibleSection'
 import { MeetingAndPickupCard } from '../components/experience/MeetingAndPickupCard'
+import { PdpCancellationQuestionsSection } from '../components/experience/pdp/PdpCancellationQuestionsSection'
+import { PdpTravelerPhotosSection } from '../components/experience/pdp/PdpTravelerPhotosSection'
+import { PdpViatorDeepReviewsBlock } from '../components/experience/pdp/PdpViatorDeepReviewsBlock'
+import { ViatorPdpBlock } from '../components/experience/pdp/ViatorPdpBlock'
 import { LogisticsBlock } from '../components/logistics/LogisticsBlock'
 import { FacilitatorBar } from '../components/uxr/FacilitatorBar'
 import { SecretUnlock } from '../components/uxr/SecretUnlock'
@@ -98,8 +102,9 @@ export function ExperiencePage() {
           />
         ) : null}
 
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-10 xl:gap-12">
-          <main className="min-w-0 lg:order-1">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-6 xl:gap-6">
+          <main className="pdp-figma w-full min-w-0 max-w-[862px] lg:order-1">
+            <ViatorPdpBlock />
             {data.meetingAndPickup ? (
               <CollapsibleSection title="Meeting and Pickup" defaultOpen>
                 <MeetingAndPickupCard content={data.meetingAndPickup} />
@@ -130,10 +135,16 @@ export function ExperiencePage() {
             <CollapsibleSection title="Additional Info" defaultOpen>
               <AdditionalInfo />
             </CollapsibleSection>
+
+            <div className="w-full">
+              <PdpCancellationQuestionsSection />
+              <PdpTravelerPhotosSection />
+            </div>
+            <PdpViatorDeepReviewsBlock />
           </main>
 
           <aside className="hidden min-w-0 lg:order-2 lg:block lg:sticky lg:top-8 lg:z-10 lg:self-start">
-            <BookingSidebar booking={data.booking} variantId={variant} />
+            <BookingSidebar booking={data.booking} />
           </aside>
         </div>
       </div>
@@ -156,14 +167,14 @@ function WhatToExpectIntroBlock({
     <>
       {!readMore ? (
         <div className="relative max-w-none">
-          <p className="line-clamp-3 text-[15px] leading-relaxed text-stone-700">{intro}</p>
+          <p className="line-clamp-3 text-base leading-[1.5] text-[#333]">{intro}</p>
           <div
             className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-white via-white/85 to-transparent"
             aria-hidden
           />
         </div>
       ) : (
-        <div className="max-w-none space-y-3 text-[15px] leading-relaxed text-stone-700">
+        <div className="max-w-none space-y-3 text-base leading-[1.5] text-[#333]">
           {intro.split('\n\n').map((block, i) => (
             <p key={`intro-${i}`}>{block}</p>
           ))}
@@ -176,7 +187,7 @@ function WhatToExpectIntroBlock({
       )}
       <button
         type="button"
-        className="group mt-3 inline-flex items-center gap-1.5 text-[15px] font-medium text-emerald-800 underline decoration-emerald-800/30 underline-offset-4 transition hover:text-emerald-900 hover:decoration-emerald-800/60"
+        className="group mt-3 inline-flex items-center gap-1.5 text-base font-medium text-[#0d0d0d] underline [text-decoration-skip-ink:none] decoration-[#0d0d0d] underline-offset-2 transition hover:text-black hover:decoration-black"
         onClick={() => setReadMore((r) => !r)}
       >
         {readMore ? 'Read less' : 'Read more'}

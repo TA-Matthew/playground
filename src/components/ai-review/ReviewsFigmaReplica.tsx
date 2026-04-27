@@ -264,12 +264,71 @@ const FIGMA_MATRIX_ROWS: { pos: ThemeId; neg?: ThemeId }[] = [
   { pos: 'good-value' },
 ]
 
-/** [Figma — source line](https://www.figma.com/design/5lTovMIkLFFcyrjQUTRGbY/Q2-Decide-Availability-2026?node-id=20589-93625) */
+/** 16px thumb; 44×44 tap target on mobile, 32×32 from sm. */
+const helpfulFeedbackBtn =
+  'flex h-11 w-11 cursor-pointer items-center justify-center rounded-full p-0 [-webkit-tap-highlight-color:transparent] transition-colors sm:h-8 sm:w-8 sm:hover:bg-[#e8e8e8] sm:active:bg-[#dedede] max-sm:active:bg-[#dedede] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-emerald-600'
+
+/** [Figma — “Was this helpful?” + source](https://www.figma.com/design/5lTovMIkLFFcyrjQUTRGbY/Q2-Decide-Availability-2026?node-id=20618-93904) */
 function AiReviewSummarySourceFooter() {
+  const [feedbackThanks, setFeedbackThanks] = useState(false)
   return (
-    <p className="mt-4 text-xs font-normal leading-4 text-[#666] [letter-spacing:0.05px] sm:text-left">
-      From real guest reviews summarized by AI
-    </p>
+    <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {feedbackThanks ? (
+        <p
+          className="ai-summary-body-fade-in text-sm font-normal leading-normal text-[#4D4D4D] [letter-spacing:0.05px]"
+          aria-live="polite"
+        >
+          Thank you for your feedback!
+        </p>
+      ) : (
+        <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
+          <p className="shrink-0 text-sm font-normal leading-normal text-[#4D4D4D] [letter-spacing:0.05px]">
+            Was this helpful?
+          </p>
+          <div className="flex items-center gap-1.5" role="group" aria-label="Feedback on this summary">
+            <button
+              type="button"
+              className={helpfulFeedbackBtn}
+              aria-label="Yes, this summary was helpful"
+              onClick={() => {
+                setFeedbackThanks(true)
+              }}
+            >
+              <img
+                alt=""
+                className="h-4 w-4"
+                src={figma.upvoteShape}
+                width={16}
+                height={16}
+                decoding="async"
+              />
+            </button>
+            <div className="-scale-y-100">
+              <button
+                type="button"
+                className={helpfulFeedbackBtn}
+                aria-label="No, this summary was not helpful"
+                onClick={() => {
+                  setFeedbackThanks(true)
+                }}
+              >
+                <img
+                  alt=""
+                  className="h-4 w-4"
+                  src={figma.upvoteShape}
+                  width={16}
+                  height={16}
+                  decoding="async"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <p className="w-full shrink-0 text-left text-[10px] font-normal leading-[14px] text-[#808080] [letter-spacing:0.05px] sm:max-w-[50%] sm:whitespace-nowrap sm:text-right">
+        From real guest reviews summarised by AI
+      </p>
+    </div>
   )
 }
 
@@ -1509,7 +1568,7 @@ export function ReviewsFigmaReplica({ summaryLayout = 'a' }: ReviewsFigmaReplica
 
   return (
     <div className="w-full border-t border-[#d9d9d9] bg-white">
-      <div className="mx-auto flex w-full max-w-[862px] flex-col gap-12 px-4 py-10 sm:px-6 sm:py-12">
+      <div className="mx-auto flex w-full max-w-[862px] flex-col gap-12 px-0 py-10 sm:px-6 sm:py-12">
         {/* Traveler photos */}
         <section className="space-y-6" aria-labelledby="traveler-photos-h">
           <h2
