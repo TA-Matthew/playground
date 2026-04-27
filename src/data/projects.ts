@@ -11,6 +11,7 @@ export const LOGISTICS_PROJECT_PATH = '/projects/logistics'
 export const AI_REVIEW_PROJECT_PATH = '/projects/ai-review-prototype'
 export const LOYALTY_LOGIN_BUTTON_PATH = '/projects/loyalty-login-button-animation'
 
+/** Order is oldest → newest; the home list shows the last item first. */
 export const projects: Project[] = [
   {
     id: 'logistics',

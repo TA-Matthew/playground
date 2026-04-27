@@ -91,17 +91,6 @@ function Upvote() {
   )
 }
 
-function ReadMore() {
-  return (
-    <div className="flex cursor-pointer items-center gap-2 text-black">
-      <span className="text-base leading-normal">Read more</span>
-      <div className="size-4 overflow-hidden">
-        <img alt="" className="size-4" src={figma.readMoreChevron} />
-      </div>
-    </div>
-  )
-}
-
 export const THEME_IDS = [
   'skip-the-line',
   'sistine-chapel',
@@ -114,34 +103,56 @@ export type ThemeId = (typeof THEME_IDS)[number]
 
 /** Figma / UI metadata only — counts (travelers, +/−) come from {@link getThemeMentionMap}. */
 const THEME_CHIPS: { id: ThemeId; label: string; endIcon: 'up' | 'down' | 'remove' }[] = [
-  { id: 'skip-the-line', label: 'Skip the line', endIcon: 'up' },
-  { id: 'sistine-chapel', label: 'Sistine Chapel', endIcon: 'up' },
+  { id: 'skip-the-line', label: 'Wait time', endIcon: 'up' },
+  { id: 'sistine-chapel', label: 'Points of Interest', endIcon: 'up' },
   { id: 'good-value', label: 'Good value', endIcon: 'up' },
-  { id: 'small-group', label: 'Small group', endIcon: 'remove' },
-  { id: 'expert-guide', label: 'Expert guide', endIcon: 'remove' },
+  { id: 'small-group', label: 'Tour Planning', endIcon: 'remove' },
+  { id: 'expert-guide', label: 'Guides', endIcon: 'remove' },
   { id: 'audio-headsets', label: 'Audio headsets', endIcon: 'down' },
 ]
 
 function defaultSentimentOnThemeSelect(id: ThemeId): ThemeSentimentKind {
   const chip = THEME_CHIPS.find((c) => c.id === id)
-  if (chip?.endIcon === 'down') return 'negative'
+  // Always default to positive sentiment in breakdown, even for “negative” themes like audio headsets.
   return 'positive'
 }
 
 const AI_REVIEW_DEFAULT_SUMMARY =
-  'Guests overwhelmingly praise this tour for its expert guides, seamless skip-the-line access, and the emotional impact of seeing the Sistine Chapel up close. The small group format and audio headsets are repeatedly called out as making a real difference.'
+  'Travelers consistently praise the guides for their extensive knowledge, engaging explanations, and professionalism, which enhance appreciation of Vatican art, history, and architecture. The skip-the-line feature significantly reduces wait times, improving the overall visit. The tour covers key sites comprehensively with clear commentary. Organization and group management are generally smooth, though some note delayed starts, rushed pacing, and communication issues about closures. While many find the tour worth the cost, others consider it expensive relative to the experience, citing hurried visits and occasional logistical challenges.'
+
+function ReadMore({ onClick }: { onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} className="mt-2 flex cursor-pointer items-center gap-2 rounded p-0 text-black transition hover:bg-stone-100 active:bg-stone-200 [-webkit-tap-highlight-color:transparent] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
+      <span className="text-base leading-normal">Read more</span>
+      <svg
+        className="h-4 w-4 shrink-0"
+        width={16}
+        height={16}
+        viewBox="0 0 16 16"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden
+      >
+        <path
+          d="M3.85355 5.39645C3.65829 5.20118 3.34171 5.20118 3.14645 5.39645C2.95118 5.59171 2.95118 5.90829 3.14645 6.10355L7.64645 10.6036C7.84171 10.7988 8.15829 10.7988 8.35355 10.6036L12.8536 6.10355C13.0488 5.90829 13.0488 5.59171 12.8536 5.39645C12.6583 5.20119 12.3417 5.20119 12.1464 5.39645L8 9.54289L3.85355 5.39645Z"
+          fill="currentColor"
+        />
+      </svg>
+    </button>
+  )
+}
 
 const AI_REVIEW_SUMMARY_BY_THEME: Record<ThemeId, string> = {
   'skip-the-line':
-    'Mentions of skip-the-line access skew positive: people describe cutting past the long general queue, smoother security, and less time roasting in the sun. A smaller share of reviews note a crowded meetup or a priority lane that still feeds into a busy building — worth reading both sides before you go.',
+    'Travelers enjoy the skip-the-line feature for significantly reducing wait times at the Vatican and related sites. This access allows guests to bypass extensive queues, maximizing time spent exploring and enhancing the overall visit experience.',
   'sistine-chapel':
-    'Sistine Chapel talk often centers the ceiling, the color, and the sheer scale — many reviews call it a highlight even when the room is tight and quiet rules are strict. A few bring up closings, short visits, or crowd stress; the overall story is still “unforgettable if you can roll with a packed, reverent hush for a few minutes.”',
+    'Travelers consistently praise this Vatican tour for its comprehensive coverage of St. Peter’s Basilica, the Sistine Chapel, and the museums. Guides provide detailed, clear commentary, enhancing appreciation of the art, architecture, and historical significance.',
   'good-value':
-    'When travelers mention value, it’s usually about the bundle: ticket handling, a clear route, and a guide that saves you from re‑reading the map all day. Some still compare the price to going alone or flag surprise fees — the consensus is that time saved and fewer mistakes are what nudge it over the line for most families.',
+    'Travelers value the guides for their extensive knowledge and engaging explanations of Vatican history, art, and architecture. The tours provide detailed, well-organized insights that enhance appreciation of the museums, Sistine Chapel, and St. Peter’s Basilica.',
   'small-group':
-    'Small group comments praise actually hearing the guide, asking one‑off questions, and not being the 40th person in a bubble. Criticism tends to focus on two groups being merged, tight halls, or “small” feeling relative to expectations — the sweet spot is early season or midweek if you want room to breathe.',
+    'Travelers praise the tour’s organization, punctuality, and effective group management, highlighting smooth navigation through crowds and well-timed breaks. However, many flag issues with delayed starts, rushed pacing, incomplete itineraries, and poor communication about closures and changes.',
   'expert-guide':
-    'Guides are the most emotional theme in the data: stories, context, and pacing show up in nearly every long review. People who flag negatives usually mention a rushed hour or an accent lost in an echoey hall, but the through‑line is that a strong guide rewrites the whole day.',
+    'Travelers consistently praise the tour guides for their extensive knowledge, engaging storytelling, and professionalism. Guides are described as friendly, patient, and skilled at managing groups and crowds, enhancing the overall educational and enjoyable experience.',
   'audio-headsets':
     'Headset feedback splits between “crystal clear in a noisy room” and “I fought the channel all morning.” The median experience is: fine once paired, a relief when the hall is packed, a minor annoyance when the battery or signal drops. Bring your own comfort tip if in‑ear buds bother you on long days.',
 }
@@ -165,7 +176,6 @@ const AI_REVIEW_MATRIX_BLURB_BY_THEME: Record<ThemeId, string> = {
 }
 
 function themeLabelForFigma(id: ThemeId, column: 'pos' | 'neg'): string {
-  if (column === 'neg' && id === 'expert-guide') return 'Informative'
   return THEME_CHIPS.find((c) => c.id === id)?.label ?? id
 }
 
@@ -446,26 +456,42 @@ function AiThemeSummaryParagraph({ activeTheme }: { activeTheme: ThemeId | null 
   useEffect(() => {
     if (activeTheme != null) setFilterEngaged(true)
   }, [activeTheme])
+
+  const [isExpanded, setIsExpanded] = useState(false)
+  useEffect(() => {
+    setIsExpanded(false)
+  }, [activeTheme])
+
   const text =
     activeTheme == null
       ? AI_REVIEW_DEFAULT_SUMMARY
       : (AI_REVIEW_SUMMARY_BY_THEME[activeTheme] ?? AI_REVIEW_DEFAULT_SUMMARY)
-  /** Match reviews list: fade on theme or default, once a theme was ever used (avoids first-load only). */
+
   const useFade = !reduceMotion && (activeTheme != null || filterEngaged)
+  const showReadMore = activeTheme == null && !isExpanded
 
   return (
-    <p
+    <div
       key={activeTheme ?? 'all'}
       className={[
-        'mt-4 min-h-[4.5rem] text-base leading-6 text-black [letter-spacing:0.05px] sm:min-h-[2.5rem]',
+        'mt-4 min-h-0 sm:min-h-0',
         useFade ? 'ai-summary-body-fade-in' : '',
       ]
         .filter(Boolean)
         .join(' ')}
       aria-live="polite"
     >
-      {text}
-    </p>
+      {showReadMore ? (
+        <>
+          <p className="m-0 text-base leading-6 text-black [letter-spacing:0.05px] line-clamp-3">
+            {text}
+          </p>
+          <ReadMore onClick={() => setIsExpanded(true)} />
+        </>
+      ) : (
+        <p className="m-0 text-base leading-6 text-black [letter-spacing:0.05px]">{text}</p>
+      )}
+    </div>
   )
 }
 

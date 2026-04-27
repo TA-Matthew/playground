@@ -22,7 +22,7 @@ export function HomePage() {
             All projects
           </h2>
           <ul className="flex flex-col gap-4">
-            {projects.map((project) => (
+            {[...projects].reverse().map((project) => (
               <li key={project.id}>
                 <Link
                   to={project.path}
