@@ -3,15 +3,14 @@ import { Link } from 'react-router-dom'
 import { animate, motion, type MotionValue, useMotionValue, useTransform, useReducedMotion } from 'framer-motion'
 import './LoyaltyLoginButtonPage.css'
 
-/** Figma linear: 0% / 25% / 75% / 99% (100% opacity each) */
+/** Figma linear (Custom): 0% / 50% / 100% — 100% opacity per stop. */
 const LOYALTY_BTN_GRADIENT =
-  'linear-gradient(90deg, #FF2478 0%, #F71B35 25%, #F76148 75%, #FFB8AC 99%)'
+  'linear-gradient(90deg, #FF2478 0%, #F71B35 50%, #F76148 100%)'
 
-const STOPS: readonly [string, string][] = [
+const STOPS: readonly (readonly [string, string])[] = [
   ['#FF2478', '0%'],
-  ['#F71B35', '25%'],
-  ['#F76148', '75%'],
-  ['#FFB8AC', '99%'],
+  ['#F71B35', '50%'],
+  ['#F76148', '100%'],
 ]
 
 const BLACK = '#000000'
@@ -69,11 +68,11 @@ function lerpHex(a: string, b: string, t: number): string {
   })
 }
 
-/** One `background-clip: text` model: t=0 → flat black, t=1 → loyalty 4 stops. */
+/** One `background-clip: text` model: t=0 → flat black, t=1 → loyalty 3 stops. */
 function labelGradientForBlend(t: number): string {
   const t2 = Math.min(1, Math.max(0, t))
   if (t2 === 0) {
-    return `linear-gradient(90deg, ${BLACK} 0%, ${BLACK} 25%, ${BLACK} 50%, ${BLACK} 100%)`
+    return `linear-gradient(90deg, ${BLACK} 0%, ${BLACK} 50%, ${BLACK} 100%)`
   }
   if (t2 === 1) {
     return LOYALTY_BTN_GRADIENT
@@ -129,7 +128,7 @@ type BlendCtaProps = {
 }
 
 /**
- * Loyalty 4-stop lerp in border + type; optional soft-light sheen on a 2s loop while the gradient is on.
+ * Loyalty 3-stop lerp in border + type; optional medium `soft-light` sheen on a 2s loop while the gradient is on.
  */
 function LoyaltyCtaBlend({ labelBackground, ringBackground, showSheen, shimOpacity }: Readonly<BlendCtaProps>) {
   return (
@@ -236,8 +235,8 @@ export function LoyaltyLoginButtonPage() {
             Log in button animation
           </h1>
           <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-stone-600">
-            4 loyalty stops, linear lerp in the <strong>ring + type</strong> — two variants: <strong>with</strong> a
-            2s soft-light sheen, or <strong>without</strong>. Same in / hold / out blend on both.{' '}
+            3 loyalty stops (0% / 50% / 100%), linear lerp in the <strong>ring + type</strong> — two variants: <strong>with</strong> a
+            2s medium sheen (soft-light), or <strong>without</strong>. Same in / hold / out blend on both.{' '}
             <strong>Replay</strong> restarts the sequence to {RING_DEFAULT}.
           </p>
         </header>
@@ -287,9 +286,8 @@ export function LoyaltyLoginButtonPage() {
           <p className="mt-16 max-w-md text-center text-sm text-stone-500 sm:mt-20">
             Stops:{' '}
             <code className="text-[0.9em] text-stone-700">#FF2478</code> 0% · <code className="text-[0.9em] text-stone-700">#F71B35</code>{' '}
-            25% · <code className="text-[0.9em] text-stone-700">#F76148</code> 75% ·{' '}
-            <code className="text-[0.9em] text-stone-700">#FFB8AC</code> 99% · {STROKE_PX}px ring · sheen (left only) uses blend
-            for opacity · flat <code className="text-[0.85em]">#D9D9D9</code> when the blend is off
+            50% · <code className="text-[0.9em] text-stone-700">#F76148</code> 100% · {STROKE_PX}px ring · sheen (left
+            only) uses blend for opacity · flat <code className="text-[0.85em]">#D9D9D9</code> when the blend is off
           </p>
         </section>
       </div>

@@ -22,13 +22,14 @@
   width: 65%;
   max-width: 8rem;
   min-width: 3.5rem;
+  /* Medium sheen: between soft and “flash” — soft-light + ~0.48 peak */
   background: linear-gradient(
     98deg,
     rgba(255, 255, 255, 0) 0%,
     rgba(255, 255, 255, 0) 18%,
-    rgba(255, 255, 255, 0.2) 32%,
-    rgba(255, 255, 255, 0.38) 50%,
-    rgba(255, 255, 255, 0.2) 68%,
+    rgba(255, 255, 255, 0.26) 32%,
+    rgba(255, 255, 255, 0.48) 50%,
+    rgba(255, 255, 255, 0.26) 68%,
     rgba(255, 255, 255, 0) 82%,
     rgba(255, 255, 255, 0) 100%
   );
