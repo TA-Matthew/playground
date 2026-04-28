@@ -85,7 +85,7 @@ export function AiReviewPage() {
           </div>
         </div>
 
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-10 xl:gap-12">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start lg:gap-6">
           <main id="main" className="min-w-0 lg:order-1" tabIndex={-1}>
             <ReviewsFigmaReplica key={summaryLayout} summaryLayout={summaryLayout} />
           </main>

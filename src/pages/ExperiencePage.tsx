@@ -102,8 +102,8 @@ export function ExperiencePage() {
           />
         ) : null}
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-6 xl:gap-6">
-          <main className="pdp-figma w-full min-w-0 max-w-[862px] lg:order-1">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start lg:gap-6 xl:gap-6">
+          <main className="pdp-figma w-full min-w-0 max-w-[864px] lg:order-1">
             <ViatorPdpBlock />
             {data.meetingAndPickup ? (
               <CollapsibleSection title="Meeting and Pickup" defaultOpen>

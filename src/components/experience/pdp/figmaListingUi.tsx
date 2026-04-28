@@ -170,7 +170,7 @@ function FigmaReadMore() {
 
 export function FigmaViatorReviewCard({ r }: { r: PdpReview }) {
   return (
-    <div className="flex w-full max-w-[862px] items-start justify-center gap-3">
+    <div className="flex w-full max-w-[864px] items-start justify-center gap-3">
       <div className="min-w-0 flex-1 space-y-4">
         <div>
           <div className="space-y-2">

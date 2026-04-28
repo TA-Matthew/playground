@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { animate, motion, type MotionValue, useMotionValue, useTransform, useReducedMotion } from 'framer-motion'
 import './LoyaltyLoginButtonPage.css'
@@ -22,11 +22,16 @@ const RING_DEFAULT = '#D9D9D9'
  */
 const STROKE_PX = 2
 
-/** Start after a short beat, hold the gradient for a few seconds, then ease back. */
+/** Start after a short beat, hold at full gradient (slider-controlled), then ease back. */
 const IN_DELAY_S = 0.4
 const FADE_IN_S = 0.55
-const HOLD_GRADIENT_S = 3.2
 const FADE_OUT_S = 0.6
+
+/** Default hold at blend = 1 (matches prior fixed timeline). Slider uses 0.5s steps. */
+const HOLD_GRADIENT_DEFAULT_S = 3.2
+const HOLD_GRADIENT_MIN_S = 0.5
+const HOLD_GRADIENT_MAX_S = 10
+const HOLD_GRADIENT_STEP_S = 0.5
 
 const labelClass =
   'm-0 whitespace-nowrap text-center text-[13px] font-medium leading-4 not-italic'
@@ -128,7 +133,7 @@ type BlendCtaProps = {
 }
 
 /**
- * Loyalty 3-stop lerp in border + type; optional medium `soft-light` sheen on a 2s loop while the gradient is on.
+ * Loyalty 3-stop lerp in border + type; optional medium `soft-light` sheen (fixed 2s sweep loop in CSS).
  */
 function LoyaltyCtaBlend({ labelBackground, ringBackground, showSheen, shimOpacity }: Readonly<BlendCtaProps>) {
   return (
@@ -165,6 +170,9 @@ function LoyaltyCtaBlend({ labelBackground, ringBackground, showSheen, shimOpaci
 export function LoyaltyLoginButtonPage() {
   const reduceMotion = useReducedMotion()
   const [playId, setPlayId] = useState(0)
+  const [holdGradientSec, setHoldGradientSec] = useState(HOLD_GRADIENT_DEFAULT_S)
+  const holdGradientSecRef = useRef(HOLD_GRADIENT_DEFAULT_S)
+  holdGradientSecRef.current = holdGradientSec
 
   const blend = useMotionValue(0)
   const labelBackground = useTransform(blend, labelGradientForBlend)
@@ -190,7 +198,7 @@ export function LoyaltyLoginButtonPage() {
       if (cancelled) {
         return
       }
-      await sleep(HOLD_GRADIENT_S * 1000)
+      await sleep(holdGradientSecRef.current * 1000)
       if (cancelled) {
         return
       }
@@ -236,7 +244,8 @@ export function LoyaltyLoginButtonPage() {
           </h1>
           <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-stone-600">
             3 loyalty stops (0% / 50% / 100%), linear lerp in the <strong>ring + type</strong> — two variants: <strong>with</strong> a
-            2s medium sheen (soft-light), or <strong>without</strong>. Same in / hold / out blend on both.{' '}
+            medium sheen (soft-light), or <strong>without</strong>. Adjust how long the gradient <strong>holds</strong>{' '}
+            at full strength below (0.5s steps). Same in / hold / out blend on both.{' '}
             <strong>Replay</strong> restarts the sequence to {RING_DEFAULT}.
           </p>
         </header>
@@ -271,6 +280,30 @@ export function LoyaltyLoginButtonPage() {
                 ringBackground={ringBackground}
               />
             </div>
+          </div>
+
+          <div className="mt-8 flex w-full max-w-md flex-col gap-2 px-2">
+            <label className="text-sm font-medium text-stone-800" htmlFor="loyalty-gradient-hold">
+              Hold at full gradient:{' '}
+              <span className="tabular-nums text-stone-600">{holdGradientSec}s</span>
+              <span className="font-normal text-stone-500"> (0.5s steps; applies after fade-in, before fade-out)</span>
+            </label>
+            <input
+              id="loyalty-gradient-hold"
+              type="range"
+              min={HOLD_GRADIENT_MIN_S}
+              max={HOLD_GRADIENT_MAX_S}
+              step={HOLD_GRADIENT_STEP_S}
+              value={holdGradientSec}
+              onChange={(e) => {
+                setHoldGradientSec(Number(e.target.value))
+              }}
+              className="w-full accent-stone-700"
+              aria-valuemin={HOLD_GRADIENT_MIN_S}
+              aria-valuemax={HOLD_GRADIENT_MAX_S}
+              aria-valuenow={holdGradientSec}
+              aria-valuetext={`${holdGradientSec} seconds hold`}
+            />
           </div>
 
           <button

@@ -101,8 +101,8 @@
 /* Icon: mask with asset alpha; fill = same gradient as title */
 .ai-summary-icon-animated {
   display: block;
-  width: 21px;
-  height: 21px;
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
   background-image: linear-gradient(
     100deg,
@@ -122,6 +122,13 @@
   -webkit-mask-position: center;
   mask-position: center;
   animation: ai-title-gradient-shift 3.5s ease-in-out infinite;
+}
+
+@media (min-width: 640px) {
+  .ai-summary-icon-animated {
+    width: 21px;
+    height: 21px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

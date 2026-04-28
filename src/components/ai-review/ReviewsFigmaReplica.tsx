@@ -8,7 +8,7 @@ import './ai-review-animations.css'
 export type ThemeSentimentKind = 'positive' | 'negative'
 
 const GRADIENT_CHIP =
-  'linear-gradient(90deg, rgba(245, 205, 114, 0.1) 0%, rgba(252, 86, 73, 0.1) 19.031%, rgba(243, 68, 116, 0.1) 40.336%, rgba(175, 101, 226, 0.1) 59.135%, rgba(69, 135, 252, 0.1) 78.352%, rgba(154, 206, 243, 0.1) 92.973%)'
+  'linear-gradient(90deg, rgba(245, 205, 114, 0.08) 0%, rgba(252, 86, 73, 0.08) 19.031%, rgba(243, 68, 116, 0.08) 40.336%, rgba(175, 101, 226, 0.08) 59.135%, rgba(69, 135, 252, 0.08) 78.352%, rgba(154, 206, 243, 0.08) 92.973%)'
 
 const RATING_COUNTS = {
   5: 26_354,
@@ -107,9 +107,9 @@ export type ThemeId = (typeof THEME_IDS)[number]
 /** Figma / UI metadata only — counts (travelers, +/−) come from {@link getThemeMentionMap}. */
 const THEME_CHIPS: { id: ThemeId; label: string; endIcon: 'up' | 'down' | 'remove' }[] = [
   { id: 'skip-the-line', label: 'Wait time', endIcon: 'up' },
-  { id: 'sistine-chapel', label: 'Points of Interest', endIcon: 'up' },
+  { id: 'sistine-chapel', label: 'Points of interest', endIcon: 'up' },
   { id: 'good-value', label: 'Good value', endIcon: 'up' },
-  { id: 'small-group', label: 'Tour Planning', endIcon: 'remove' },
+  { id: 'small-group', label: 'Tour planning', endIcon: 'remove' },
   { id: 'expert-guide', label: 'Guides', endIcon: 'remove' },
   { id: 'audio-headsets', label: 'Audio headsets', endIcon: 'down' },
 ]
@@ -125,7 +125,7 @@ const AI_REVIEW_DEFAULT_SUMMARY =
 function ReadMore({ onClick }: { onClick: () => void }) {
   return (
     <button type="button" onClick={onClick} className="mt-2 flex cursor-pointer items-center gap-2 rounded p-0 text-black transition hover:bg-stone-100 active:bg-stone-200 [-webkit-tap-highlight-color:transparent] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
-      <span className="text-base leading-normal">Read more</span>
+      <span className="text-sm leading-normal sm:text-base">Read more</span>
       <svg
         className="h-4 w-4 shrink-0"
         width={16}
@@ -159,109 +159,251 @@ const AI_REVIEW_SUMMARY_BY_THEME: Record<ThemeId, string> = {
     'Headset feedback splits between “crystal clear in a noisy room” and “I fought the channel all morning.” The median experience is: fine once paired, a relief when the hall is packed, a minor annoyance when the battery or signal drops. Bring your own comfort tip if in‑ear buds bother you on long days.',
 }
 
-/**
- * Two-line matrix blurbs: short summary of each theme, aligned with {@link AI_REVIEW_SUMMARY_BY_THEME}.
- */
-const AI_REVIEW_MATRIX_BLURB_BY_THEME: Record<ThemeId, string> = {
-  'skip-the-line':
-    'Most say skip-the-line cuts long waits; some grumble about crowded handoffs. On balance, time in line drops.',
-  'sistine-chapel':
-    'Wows for ceiling, color, and scale—even in a packed, hush-and-go room. Tight, short visit is the norm.',
-  'good-value':
-    'Praised as tickets, route, and guide in one. Time saved and fewer mix-ups; some still quibble on price.',
-  'small-group':
-    'Hear the guide, ask a question, skip the 40-person bubble. Sometimes merged groups or tight spaces.',
-  'expert-guide':
-    'Story and pacing carry reviews; a strong guide lands as the “whole day” upgrade. Rarer gripes: rush or hard-to-hear talk.',
-  'audio-headsets':
-    'Loud room or not, audio works for most. Pairing or battery annoyances show up, but are not the norm.',
-}
-
-function themeLabelForFigma(id: ThemeId, _column: 'pos' | 'neg'): string {
-  return THEME_CHIPS.find((c) => c.id === id)?.label ?? id
+/** Sort matrix rows: {@link THEME_CHIPS} positive (`up`) → neutral (`remove`) → negative (`down`). */
+function getMatrixThemeTier(themeId: ThemeId): number {
+  const endIcon = THEME_CHIPS.find((c) => c.id === themeId)?.endIcon ?? 'up'
+  if (endIcon === 'up') return 0
+  if (endIcon === 'remove') return 1
+  return 2
 }
 
 /**
- * Figma: [Q2 Decide Availability — AI review summary](https://www.figma.com/design/5lTovMIkLFFcyrjQUTRGbY/Q2-Decide-Availability-2026?node-id=20579-86717)
- * Two-column matrix: + (teal) vs − (coral) with underlined theme labels and snippet text.
+ * Same Figma assets as variant A {@link ThemeChip} ({@link figma.filterChipUp} / Down / Remove).
  */
-function MatrixSentimentIcon({ kind }: { kind: 'plus' | 'minus' }) {
-  if (kind === 'plus') {
-    return (
-      <svg
-        className="size-5 shrink-0"
-        width="20"
-        height="20"
-        viewBox="0 0 20 20"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden
-      >
-        <path
-          d="M10.0068 6.03979C10.421 6.03979 10.7568 6.37558 10.7568 6.78979V9.26306H13.2297C13.6439 9.26306 13.9797 9.59885 13.9797 10.0131C13.9797 10.4273 13.6439 10.7631 13.2297 10.7631H10.7568V13.2363C10.7568 13.6505 10.421 13.9863 10.0068 13.9863C9.59262 13.9863 9.25684 13.6505 9.25684 13.2363V10.7631H6.7832C6.36899 10.7631 6.0332 10.4273 6.0332 10.0131C6.0332 9.59885 6.36899 9.26306 6.7832 9.26306H9.25684V6.78979C9.25684 6.37558 9.59262 6.03979 10.0068 6.03979Z"
-          fill="#00AD86"
-        />
-        <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M2.00391 10.0013C2.00391 5.58178 5.58667 1.99902 10.0062 1.99902C14.4258 1.99902 18.0085 5.58179 18.0085 10.0013C18.0085 14.421 14.4258 18.0037 10.0062 18.0037C5.58667 18.0037 2.00391 14.421 2.00391 10.0013ZM10.0062 3.49902C6.41509 3.49902 3.50391 6.41021 3.50391 10.0013C3.50391 13.5925 6.41509 16.5037 10.0062 16.5037C13.5974 16.5037 16.5085 13.5925 16.5085 10.0013C16.5085 6.41021 13.5974 3.49902 10.0062 3.49902Z"
-          fill="#00AD86"
-        />
-      </svg>
-    )
-  }
+function MatrixSentimentIcon({ themeId }: { themeId: ThemeId }) {
+  const endIcon = THEME_CHIPS.find((c) => c.id === themeId)?.endIcon ?? 'up'
+  const src =
+    endIcon === 'remove'
+      ? figma.filterChipRemove
+      : endIcon === 'up'
+        ? figma.filterChipUp
+        : figma.filterChipDown
+
   return (
-    <svg
-      className="size-5 shrink-0"
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden
-    >
-      <path
-        d="M6.7749 9.25C6.36069 9.25 6.0249 9.58579 6.0249 10C6.0249 10.4142 6.36069 10.75 6.7749 10.75H13.2249C13.6391 10.75 13.9749 10.4142 13.9749 10C13.9749 9.58579 13.6391 9.25 13.2249 9.25H6.7749Z"
-        fill="#EA3338"
-      />
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58173 18 10 18C14.4183 18 18 14.4183 18 10C18 5.58173 14.4183 2 10 2ZM3.5 10C3.5 6.41015 6.41015 3.5 10 3.5C13.5899 3.5 16.5 6.41015 16.5 10C16.5 13.5899 13.5899 16.5 10 16.5C6.41015 16.5 3.5 13.5899 3.5 10Z"
-        fill="#EA3338"
-      />
-    </svg>
+    <div className="flex size-4 shrink-0 items-center justify-center" aria-hidden>
+      <img alt="" className="size-[12px] shrink-0" width={12} height={12} decoding="async" src={src} />
+    </div>
   )
 }
 
+const MATRIX_ITEM_PREVIEW_LINES = 3
+
+/** Collapsed trailing control label (must match measurement {@link matrixMeasureReplacePreview}). */
+const MATRIX_ITEM_MORE_LABEL = '... more'
+
+/** Hidden probe for {@link MatrixItem} line-fit (same typography as visible copy). */
+function matrixMeasureReplacePreview(
+  measureEl: HTMLDivElement,
+  headingTitle: string,
+  countDisplay: string,
+  words: readonly string[],
+  replaceAt: number,
+): number {
+  measureEl.replaceChildren()
+  const prefix = document.createElement('span')
+  prefix.className = 'font-medium'
+  prefix.append(`${headingTitle} `)
+  const countSpan = document.createElement('span')
+  countSpan.className = 'tabular-nums'
+  countSpan.append(`(${countDisplay}): `)
+  prefix.append(countSpan)
+
+  const bodySpan = document.createElement('span')
+  bodySpan.className = 'font-normal'
+  const before = words.slice(0, Math.max(0, replaceAt - 1)).join(' ')
+  bodySpan.append(before)
+  if (before.length > 0) bodySpan.append(' ')
+  bodySpan.append(MATRIX_ITEM_MORE_LABEL)
+
+  measureEl.append(prefix, bodySpan)
+  return measureEl.scrollHeight
+}
+
+function matrixMeasureFullBody(
+  measureEl: HTMLDivElement,
+  headingTitle: string,
+  countDisplay: string,
+  bodyText: string,
+): number {
+  measureEl.replaceChildren()
+  const prefix = document.createElement('span')
+  prefix.className = 'font-medium'
+  prefix.append(`${headingTitle} `)
+  const countSpan = document.createElement('span')
+  countSpan.className = 'tabular-nums'
+  countSpan.append(`(${countDisplay}): `)
+  prefix.append(countSpan)
+
+  const bodySpan = document.createElement('span')
+  bodySpan.className = 'font-normal'
+  bodySpan.append(bodyText)
+
+  measureEl.append(prefix, bodySpan)
+  return measureEl.scrollHeight
+}
+
 function MatrixItem({
-  kind,
   themeId,
   column,
+  headingTitle,
+  body,
   isActive,
+  mentionCount,
   onThemeClick,
 }: {
-  kind: 'plus' | 'minus'
   themeId: ThemeId
   column: 'pos' | 'neg'
+  headingTitle: string
+  body: string
   isActive: boolean
+  mentionCount: number
   onThemeClick: (id: ThemeId, column: 'pos' | 'neg') => void
 }) {
-  const label = themeLabelForFigma(themeId, column)
-  const blurb = (AI_REVIEW_MATRIX_BLURB_BY_THEME[themeId] ?? '').trim()
+  const [expanded, setExpanded] = useState(false)
+  const countDisplay = mentionCount.toLocaleString()
+  const containerRef = useRef<HTMLParagraphElement>(null)
+  const measureRef = useRef<HTMLDivElement>(null)
+  const [resizeTick, setResizeTick] = useState(0)
+  const [collapsedPreview, setCollapsedPreview] = useState<
+    | { kind: 'pending' }
+    | { kind: 'fits'; words: readonly string[] }
+    | { kind: 'replace'; words: readonly string[]; replaceAt: number }
+  >({ kind: 'pending' })
+
+  const bodyWords = useMemo(() => body.trim().split(/\s+/).filter(Boolean), [body])
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (el == null) return
+    const ro = new ResizeObserver(() => {
+      setResizeTick((t) => t + 1)
+    })
+    ro.observe(el)
+    return () => {
+      ro.disconnect()
+    }
+  }, [])
+
+  useLayoutEffect(() => {
+    if (expanded) return
+    const container = containerRef.current
+    const measureEl = measureRef.current
+    if (container == null || measureEl == null) return
+
+    measureEl.className = 'pointer-events-none invisible absolute left-0 top-0 -z-10 break-words text-left text-[14px] leading-5 text-black [letter-spacing:0.05px]'
+    measureEl.style.width = `${container.offsetWidth}px`
+
+    const lineHeight = Number.parseFloat(getComputedStyle(measureEl).lineHeight) || 20
+    const maxHeight = lineHeight * MATRIX_ITEM_PREVIEW_LINES
+
+    if (bodyWords.length === 0) {
+      setCollapsedPreview({ kind: 'fits', words: bodyWords })
+      return
+    }
+
+    const fullH = matrixMeasureFullBody(measureEl, headingTitle, countDisplay, bodyWords.join(' '))
+    if (fullH <= maxHeight) {
+      setCollapsedPreview({ kind: 'fits', words: bodyWords })
+      return
+    }
+
+    let lo = 1
+    let hi = bodyWords.length
+    let best = 0
+    while (lo <= hi) {
+      const mid = Math.floor((lo + hi) / 2)
+      const h = matrixMeasureReplacePreview(measureEl, headingTitle, countDisplay, bodyWords, mid)
+      if (h <= maxHeight) {
+        best = mid
+        lo = mid + 1
+      } else {
+        hi = mid - 1
+      }
+    }
+
+    setCollapsedPreview({
+      kind: 'replace',
+      words: bodyWords,
+      replaceAt: best > 0 ? best : 1,
+    })
+  }, [expanded, headingTitle, countDisplay, bodyWords, resizeTick])
+
+  const matrixToggleBaseStyles =
+    'inline cursor-pointer whitespace-nowrap border-0 bg-transparent p-0 align-baseline font-normal text-[#4D4D4D] no-underline decoration-solid [text-decoration-skip-ink:none] transition hover:text-[#333] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600'
+
   return (
-    <div className="flex gap-2">
-      <MatrixSentimentIcon kind={kind} />
-      <p className="min-w-0 text-[14px] leading-5 text-black [letter-spacing:0.05px]">
-        <button
-          type="button"
-          onClick={() => onThemeClick(themeId, column)}
-          aria-pressed={isActive}
-          className="inline cursor-pointer p-0 text-left font-medium text-black underline decoration-solid [text-decoration-skip-ink:none] transition hover:decoration-[currentColor] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
-        >
-          {label}:
-        </button>{' '}
-        <span className="font-normal">{blurb}</span>
+    <div className="flex items-start gap-2">
+      <MatrixSentimentIcon themeId={themeId} />
+      <p
+        ref={containerRef}
+        className="relative m-0 min-w-0 w-full flex-1 text-[14px] leading-5 text-black [letter-spacing:0.05px]"
+      >
+        <div ref={measureRef} aria-hidden />
+        {expanded ? (
+          <span className="block w-full min-w-0 break-words">
+            <button
+              type="button"
+              onClick={() => onThemeClick(themeId, column)}
+              aria-pressed={isActive}
+              className="inline cursor-pointer p-0 align-baseline text-left font-medium text-black underline decoration-solid [text-decoration-skip-ink:none] transition hover:decoration-[currentColor] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+            >
+              {headingTitle}{' '}
+              <span className="tabular-nums">({countDisplay})</span>:
+            </button>{' '}
+            <span className="font-normal">{body}</span>
+          </span>
+        ) : (
+          <>
+            {collapsedPreview.kind === 'pending' ? (
+              <span className="block min-h-[3.75rem] w-full min-w-0 rounded-sm bg-stone-100/60" aria-hidden />
+            ) : null}
+            {collapsedPreview.kind === 'fits' ? (
+              <span className="block w-full min-w-0 break-words">
+                <button
+                  type="button"
+                  onClick={() => onThemeClick(themeId, column)}
+                  aria-pressed={isActive}
+                  className="inline cursor-pointer p-0 align-baseline text-left font-medium leading-5 text-black underline decoration-solid [text-decoration-skip-ink:none] transition hover:decoration-[currentColor] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+                >
+                  {headingTitle}{' '}
+                  <span className="tabular-nums">({countDisplay})</span>:
+                </button>{' '}
+                <span className="font-normal leading-5">{body}</span>
+              </span>
+            ) : null}
+            {collapsedPreview.kind === 'replace' ? (
+              <span className="block w-full min-w-0 break-words">
+                <button
+                  type="button"
+                  onClick={() => onThemeClick(themeId, column)}
+                  aria-pressed={isActive}
+                  className="inline cursor-pointer p-0 align-baseline text-left font-medium leading-5 text-black underline decoration-solid [text-decoration-skip-ink:none] transition hover:decoration-[currentColor] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+                >
+                  {headingTitle}{' '}
+                  <span className="tabular-nums">({countDisplay})</span>:
+                </button>{' '}
+                <span className="font-normal leading-5">
+                  {collapsedPreview.words.slice(0, Math.max(0, collapsedPreview.replaceAt - 1)).join(' ')}{' '}
+                  <button
+                    type="button"
+                    aria-expanded={false}
+                    aria-label="Read more"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setExpanded(true)
+                    }}
+                    className={matrixToggleBaseStyles}
+                  >
+                    <span className="no-underline">... </span>
+                    <span className="underline decoration-solid decoration-[currentColor] [text-decoration-skip-ink:none]">
+                      more
+                    </span>
+                  </button>
+                </span>
+              </span>
+            ) : null}
+          </>
+        )}
       </p>
     </div>
   )
@@ -270,21 +412,75 @@ function MatrixItem({
 /** A = conic border + long summary + theme chips; B = two-column +/− matrix (no theme chips in card). */
 export type AiSummaryLayoutVariant = 'a' | 'b'
 
-const FIGMA_MATRIX_ROWS: { pos: ThemeId; neg?: ThemeId }[] = [
-  { pos: 'skip-the-line', neg: 'expert-guide' },
-  { pos: 'sistine-chapel', neg: 'audio-headsets' },
-  { pos: 'good-value' },
+/** Variant B matrix copy + {@link ThemeId} for filtering (prototype mapping; some ids repeat across rows). */
+type VariantBMatrixCell = { themeId: ThemeId; title: string; body: string }
+
+const VARIANT_B_MATRIX_ROWS: ReadonlyArray<{ pos: VariantBMatrixCell; neg?: VariantBMatrixCell }> = [
+  {
+    pos: {
+      themeId: 'sistine-chapel',
+      title: 'Point of Interest',
+      body:
+        'The Vatican Museum and Sistine Chapel are widely praised for their stunning art, sculptures, and architecture. Visitors appreciate the opportunity to explore at their own pace and find the experience uniquely captivating and memorable.',
+    },
+  },
+  {
+    pos: {
+      themeId: 'expert-guide',
+      title: 'Tour Guide',
+      body:
+        'Tour guides are praised for their knowledge and ability to enrich the experience with historical context. However, some guests report poor communication, rudeness, and insufficient guidance, causing confusion. Overall, travelers value clear, informative guides who enhance understanding.',
+    },
+  },
+  {
+    pos: {
+      themeId: 'expert-guide',
+      title: 'Communication',
+      body:
+        'Communication and guidance at the site are mixed, with helpful staff and clear initial instructions appreciated. However, many travelers note unclear directions, lack of accompaniment, and unresponsive or rude customer service, making on-site support inconsistent despite early clarity.',
+    },
+    neg: {
+      themeId: 'skip-the-line',
+      title: 'Tour Planning',
+      body:
+        'Staff are praised for efficiently managing ticketing and initial procedures amid crowds. However, many travelers note unclear directions, lack of escorts through lines, and misleading expectations about guided tours, though the smooth start is still appreciated.',
+    },
+  },
+  {
+    pos: {
+      themeId: 'good-value',
+      title: 'Value for Money',
+      body:
+        'Value for money receives mixed feedback, with many travelers appreciating the convenience of skipping long lines as worth the extra cost. While some find the pricing excessive, others still recognize the benefit of faster access to the Vatican.',
+    },
+    neg: {
+      themeId: 'audio-headsets',
+      title: 'Audio Guide',
+      body:
+        'Audio guides receive mixed feedback, with some travelers appreciating the informative content and flexibility to explore at their own pace. However, many find the app and devices unreliable, lacking detail, and difficult to navigate, which detracts from the overall experience.',
+    },
+  },
 ]
+
+/** Variant B matrix: how many theme rows show before tap-to-expand on narrow screens. */
+const AI_SUMMARY_MOBILE_MATRIX_PREVIEW_COUNT = 3
 
 /** 16px thumb; 44×44 tap target on mobile, 32×32 from sm. */
 const helpfulFeedbackBtn =
   'flex h-11 w-11 cursor-pointer items-center justify-center rounded-full p-0 [-webkit-tap-highlight-color:transparent] transition-colors sm:h-8 sm:w-8 sm:hover:bg-[#e8e8e8] sm:active:bg-[#dedede] max-sm:active:bg-[#dedede] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-emerald-600'
 
 /** [Figma — “Was this helpful?” + source](https://www.figma.com/design/5lTovMIkLFFcyrjQUTRGbY/Q2-Decide-Availability-2026?node-id=20618-93904) */
-function AiReviewSummarySourceFooter() {
+function AiReviewSummarySourceFooter({ className }: { className?: string }) {
   const [feedbackThanks, setFeedbackThanks] = useState(false)
   return (
-    <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div
+      className={[
+        'flex flex-col gap-0 sm:flex-row sm:items-center sm:justify-between sm:gap-3',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       {feedbackThanks ? (
         <p
           className="ai-summary-body-fade-in text-sm font-normal leading-normal text-[#4D4D4D] [letter-spacing:0.05px]"
@@ -293,7 +489,7 @@ function AiReviewSummarySourceFooter() {
           Thank you for your feedback!
         </p>
       ) : (
-        <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
+        <div className="flex min-h-0 min-w-0 flex-wrap items-center gap-x-3 gap-y-2 max-sm:gap-y-0 sm:gap-x-4">
           <p className="shrink-0 text-sm font-normal leading-normal text-[#4D4D4D] [letter-spacing:0.05px]">
             Was this helpful?
           </p>
@@ -347,47 +543,87 @@ function AiReviewSummarySourceFooter() {
 function AiReviewSummaryFigmaBlock({
   activeTheme,
   onMatrixThemeClick,
+  themeMentions,
 }: {
   activeTheme: ThemeId | null
   onMatrixThemeClick: (id: ThemeId, column: 'pos' | 'neg') => void
+  themeMentions: Readonly<Record<ThemeId, { count: number }>>
 }) {
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMaxSm, setIsMaxSm] = useState(false)
+  const [mobileSummaryExpanded, setMobileSummaryExpanded] = useState(false)
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 639px)') // Tailwind's sm breakpoint is 640px
-    const handleMediaQueryChange = (event: MediaQueryListEvent) => {
-      setIsMobile(event.matches)
+    const mq = globalThis.matchMedia('(max-width: 639px)')
+    const apply = () => {
+      setIsMaxSm(mq.matches)
     }
-
-    setIsMobile(mediaQuery.matches)
-    mediaQuery.addEventListener('change', handleMediaQueryChange)
-
+    apply()
+    mq.addEventListener('change', apply)
     return () => {
-      mediaQuery.removeEventListener('change', handleMediaQueryChange)
+      mq.removeEventListener('change', apply)
     }
   }, [])
 
-  const positiveRows = FIGMA_MATRIX_ROWS.filter((row) => row.pos != null)
-  const negativeRows = FIGMA_MATRIX_ROWS.filter((row) => row.neg != null)
+  const reduceMotion = useReducedMotion() === true
+
+  const matrixSlotsSorted = useMemo(() => {
+    const slots = VARIANT_B_MATRIX_ROWS.flatMap((row) => {
+      const posCell = {
+        column: 'pos' as const,
+        themeId: row.pos.themeId,
+        headingTitle: row.pos.title,
+        body: row.pos.body,
+      }
+      if (row.neg == null) return [posCell]
+      return [
+        posCell,
+        {
+          column: 'neg' as const,
+          themeId: row.neg.themeId,
+          headingTitle: row.neg.title,
+          body: row.neg.body,
+        },
+      ]
+    })
+    slots.sort((a, b) => getMatrixThemeTier(a.themeId) - getMatrixThemeTier(b.themeId))
+    return slots
+  }, [])
+
+  const previewSlots = useMemo(
+    () => matrixSlotsSorted.slice(0, AI_SUMMARY_MOBILE_MATRIX_PREVIEW_COUNT),
+    [matrixSlotsSorted],
+  )
+  const overflowSlots = useMemo(
+    () => matrixSlotsSorted.slice(AI_SUMMARY_MOBILE_MATRIX_PREVIEW_COUNT),
+    [matrixSlotsSorted],
+  )
+
+  const matrixOverflowsPreview =
+    matrixSlotsSorted.length > AI_SUMMARY_MOBILE_MATRIX_PREVIEW_COUNT
+  const mobileSummaryCollapsed =
+    isMaxSm && !mobileSummaryExpanded && matrixOverflowsPreview
+  const showSourceFooter = !isMaxSm || !matrixOverflowsPreview || mobileSummaryExpanded
+  const animateOverflowReveal =
+    isMaxSm && matrixOverflowsPreview && mobileSummaryExpanded && overflowSlots.length > 0
 
   return (
-    <AiSummaryBorderAnimatedFrame innerClassName="flex w-full flex-col gap-6 p-4 shadow-sm sm:rounded-[23px]">
+    <AiSummaryBorderAnimatedFrame innerClassName="flex w-full flex-col gap-4 p-4 shadow-sm sm:gap-6 sm:rounded-[23px]">
       <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex w-full min-w-0 items-start gap-2 pr-24 sm:pr-0">
-          <span
-            className="ai-summary-icon-animated"
-            style={{
-              WebkitMaskImage: `url('${figma.aiSparkle}')`,
-              maskImage: `url('${figma.aiSparkle}')`,
-            }}
-            aria-hidden
-          />
-          <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-2 sm:flex-nowrap">
+        <div className="flex w-full min-w-0 flex-col gap-1 pr-24 sm:flex-row sm:items-center sm:gap-2 sm:pr-0">
+          <div className="flex min-w-0 items-center gap-2">
+            <span
+              className="ai-summary-icon-animated shrink-0"
+              style={{
+                WebkitMaskImage: `url('${figma.aiSparkle}')`,
+                maskImage: `url('${figma.aiSparkle}')`,
+              }}
+              aria-hidden
+            />
             <p className="ai-summary-title-animated min-w-0 text-base font-bold leading-normal">Review summary</p>
-            <p className="min-w-0 text-sm font-normal leading-5 text-[#4D4D4D] [letter-spacing:0.05px]">
-              Explore by theme
-            </p>
           </div>
+          <p className="min-w-0 pl-6 text-xs font-normal leading-5 text-[#4D4D4D] [letter-spacing:0.05px] sm:flex-1 sm:pl-0 sm:text-sm">
+            Select a theme to learn more
+          </p>
         </div>
         <div className="absolute top-0 right-0 w-fit rounded-md bg-[#f7eeff] px-1 py-0.5 sm:relative sm:top-auto sm:right-auto">
           <p className="whitespace-nowrap text-center text-xs font-medium leading-4 text-[#351560]">
@@ -396,58 +632,96 @@ function AiReviewSummaryFigmaBlock({
         </div>
       </div>
 
-      <div className="grid w-full grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
-        {isMobile ? (
-          <>
-            {positiveRows.map((row, i) => (
-              <Fragment key={i}>
-                <MatrixItem
-                  kind="plus"
-                  themeId={row.pos}
-                  column="pos"
-                  isActive={activeTheme === row.pos}
-                  onThemeClick={onMatrixThemeClick}
-                />
-              </Fragment>
-            ))}
-            {negativeRows.map((row, i) => (
-              <Fragment key={i}>
-                <MatrixItem
-                  kind="minus"
-                  themeId={row.neg!}
-                  column="neg"
-                  isActive={activeTheme === row.neg}
-                  onThemeClick={onMatrixThemeClick}
-                />
-              </Fragment>
-            ))}
-          </>
-        ) : (
-          FIGMA_MATRIX_ROWS.map((row, i) => (
-            <Fragment key={i}>
+      <div className="relative">
+        <div
+          className={`grid w-full grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2 ${mobileSummaryCollapsed ? 'max-sm:pb-2' : ''}`}
+        >
+          {previewSlots.map((slot, i) => (
+            <Fragment key={`${slot.themeId}-${slot.column}-${slot.headingTitle}-${i}`}>
               <MatrixItem
-                kind="plus"
-                themeId={row.pos}
-                column="pos"
-                isActive={activeTheme === row.pos}
+                themeId={slot.themeId}
+                column={slot.column}
+                headingTitle={slot.headingTitle}
+                body={slot.body}
+                isActive={activeTheme === slot.themeId}
+                mentionCount={themeMentions[slot.themeId]?.count ?? 0}
                 onThemeClick={onMatrixThemeClick}
               />
-              {row.neg != null ? (
+            </Fragment>
+          ))}
+          {!mobileSummaryCollapsed &&
+            overflowSlots.map((slot, i) => {
+              const key = `${slot.themeId}-${slot.column}-${slot.headingTitle}-${previewSlots.length + i}`
+              const item = (
                 <MatrixItem
-                  kind="minus"
-                  themeId={row.neg}
-                  column="neg"
-                  isActive={activeTheme === row.neg}
+                  themeId={slot.themeId}
+                  column={slot.column}
+                  headingTitle={slot.headingTitle}
+                  body={slot.body}
+                  isActive={activeTheme === slot.themeId}
+                  mentionCount={themeMentions[slot.themeId]?.count ?? 0}
                   onThemeClick={onMatrixThemeClick}
                 />
-              ) : (
-                <div className="hidden min-h-0 min-w-0 sm:block" aria-hidden />
-              )}
-            </Fragment>
-          ))
-        )}
+              )
+              if (animateOverflowReveal && !reduceMotion) {
+                return (
+                  <motion.div
+                    key={key}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{
+                      duration: 0.42,
+                      delay: i * 0.06,
+                      ease: [0.25, 0.1, 0.25, 1],
+                    }}
+                    className="min-w-0"
+                  >
+                    {item}
+                  </motion.div>
+                )
+              }
+              return <Fragment key={key}>{item}</Fragment>
+            })}
+        </div>
+        <AnimatePresence>
+          {mobileSummaryCollapsed ? (
+            <motion.button
+              key="ai-summary-expand-scrim"
+              type="button"
+              initial={reduceMotion ? false : { opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: reduceMotion ? 0 : 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+              className="absolute inset-x-0 bottom-0 z-[1] flex min-h-[8.5rem] cursor-pointer flex-col items-center justify-end bg-gradient-to-t from-white via-white/90 to-transparent pb-3 pt-16 [-webkit-tap-highlight-color:transparent]"
+              aria-expanded={false}
+              aria-label="Expand review summary to show all themes"
+              onClick={() => {
+                setMobileSummaryExpanded(true)
+              }}
+            >
+              <span className="text-xs font-medium text-[#4D4D4D] underline decoration-solid decoration-[currentColor] [text-decoration-skip-ink:none]">
+                Show more
+              </span>
+            </motion.button>
+          ) : null}
+        </AnimatePresence>
       </div>
-      <AiReviewSummarySourceFooter />
+      {showSourceFooter ? (
+        animateOverflowReveal && !reduceMotion ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{
+              duration: 0.4,
+              delay: overflowSlots.length * 0.06 + 0.08,
+              ease: [0.25, 0.1, 0.25, 1],
+            }}
+          >
+            <AiReviewSummarySourceFooter />
+          </motion.div>
+        ) : (
+          <AiReviewSummarySourceFooter />
+        )
+      ) : null}
     </AiSummaryBorderAnimatedFrame>
   )
 }
@@ -485,13 +759,13 @@ function AiThemeSummaryParagraph({ activeTheme }: { activeTheme: ThemeId | null 
     >
       {showReadMore ? (
         <>
-          <p className="m-0 text-base leading-6 text-black [letter-spacing:0.05px] line-clamp-3">
+          <p className="m-0 text-sm leading-6 text-black [letter-spacing:0.05px] sm:text-base line-clamp-3">
             {text}
           </p>
           <ReadMore onClick={() => setIsExpanded(true)} />
         </>
       ) : (
-        <p className="m-0 text-base leading-6 text-black [letter-spacing:0.05px]">{text}</p>
+        <p className="m-0 text-sm leading-6 text-black [letter-spacing:0.05px] sm:text-base">{text}</p>
       )}
     </div>
   )
@@ -519,7 +793,7 @@ function ThemeFiltersSectionHeading({
 
   return (
     <div
-      key={activeTheme == null ? 'explore' : 'scroll'}
+      key={activeTheme == null ? 'select-theme' : 'scroll'}
       className={[
         'text-sm leading-normal text-[#4d4d4d]',
         useFade ? 'ai-summary-body-fade-in' : '',
@@ -528,7 +802,7 @@ function ThemeFiltersSectionHeading({
         .join(' ')}
     >
       {activeTheme == null ? (
-        'Explore by theme'
+        'Select a theme to learn more'
       ) : (
         <p className="m-0 flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
           <span>Scroll down to read more</span>
@@ -823,9 +1097,9 @@ function AiReviewSummaryBlock({
   return (
     <AiSummaryBorderAnimatedFrame innerClassName="p-4 sm:rounded-[23px]">
       <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex w-full min-w-0 items-start gap-2 pr-24 sm:pr-0">
+        <div className="flex w-full min-w-0 items-center gap-2 pr-24 sm:pr-0">
           <span
-            className="ai-summary-icon-animated"
+            className="ai-summary-icon-animated shrink-0"
             style={{
               WebkitMaskImage: `url('${figma.aiSparkle}')`,
               maskImage: `url('${figma.aiSparkle}')`,
@@ -872,7 +1146,7 @@ function AiReviewSummaryBlock({
           })}
         </div>
       </div>
-      <AiReviewSummarySourceFooter />
+      <AiReviewSummarySourceFooter className="mt-4" />
     </AiSummaryBorderAnimatedFrame>
   )
 }
@@ -1438,7 +1712,7 @@ function ReviewBlock({ r }: { r: Review }) {
   const pat: StarKind[] =
     r.pattern === 'five' ? (['solid', 'solid', 'solid', 'solid', 'solid'] as const) : r.pattern
   return (
-    <div className="flex w-full max-w-[862px] items-start justify-center gap-3">
+    <div className="flex w-full max-w-[864px] items-start justify-center gap-3">
       <div className="min-w-0 flex-1 space-y-4">
         <div>
           <div className="space-y-2">
@@ -1578,13 +1852,13 @@ export function ReviewsFigmaReplica({ summaryLayout = 'a' }: ReviewsFigmaReplica
     })
   }
 
-  /** Variant B matrix: +/− set sentiment. Re-clicking the active cell scrolls to the filter list. */
-  const onMatrixThemeClick = (id: ThemeId, column: 'pos' | 'neg') => {
+  /** Variant B matrix: column only picks the theme; breakdown + list default to positive (same as chips), including “neutral/remove” and minus-column themes. */
+  const onMatrixThemeClick = (id: ThemeId, _column: 'pos' | 'neg') => {
     if (activeTheme === id) {
       requestAnimationFrame(() => scrollToReviewsFilter())
       return
     }
-    setSentimentFilter(column === 'pos' ? 'positive' : 'negative')
+    setSentimentFilter(defaultSentimentOnThemeSelect(id))
     setActiveTheme(id)
     pendingMatrixScrollToFilter.current = true
   }
@@ -1596,7 +1870,7 @@ export function ReviewsFigmaReplica({ summaryLayout = 'a' }: ReviewsFigmaReplica
 
   return (
     <div className="w-full border-t border-[#d9d9d9] bg-white">
-      <div className="mx-auto flex w-full max-w-[862px] flex-col gap-12 px-0 py-10 sm:px-6 sm:py-12">
+      <div className="mx-auto flex w-full max-w-[864px] flex-col gap-12 px-0 py-10 sm:py-12">
         {/* Traveler photos */}
         <section className="space-y-6" aria-labelledby="traveler-photos-h">
           <h2
@@ -1723,6 +1997,7 @@ export function ReviewsFigmaReplica({ summaryLayout = 'a' }: ReviewsFigmaReplica
               <AiReviewSummaryFigmaBlock
                 activeTheme={activeTheme}
                 onMatrixThemeClick={onMatrixThemeClick}
+                themeMentions={THEME_MENTIONS}
               />
             ) : (
               <AiReviewSummaryBlock
