@@ -27,8 +27,8 @@ const IN_DELAY_S = 0.4
 const FADE_IN_S = 0.55
 const FADE_OUT_S = 0.6
 
-/** Default hold at blend = 1 (matches prior fixed timeline). Slider uses 0.5s steps. */
-const HOLD_GRADIENT_DEFAULT_S = 3.2
+/** Default hold at blend = 1. Slider uses 0.5s steps. */
+const HOLD_GRADIENT_DEFAULT_S = 3
 const HOLD_GRADIENT_MIN_S = 0.5
 const HOLD_GRADIENT_MAX_S = 10
 const HOLD_GRADIENT_STEP_S = 0.5
