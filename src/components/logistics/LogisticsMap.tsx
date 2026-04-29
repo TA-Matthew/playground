@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type MutableRefObject,
+} from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -11,6 +18,20 @@ import {
   logisticsPassbyPinButtonClass,
   logisticsPinButtonClass,
 } from './logisticsPinButtonClass'
+import {
+  MAP_MAP_PIN_COLLAPSED_OFFSET_Y,
+  MAP_MAP_SELECTED_STACK_HEIGHT_PX,
+  MAP_POI_SELECTED_PIN_OFFSET_Y,
+  mapB2MeetingCommittedCheckBadgeHtml,
+  mapSelectedTeardropMarkerHtml,
+  itineraryStopUsesTeardropWhenSelected,
+} from './logisticsTeardropMarkup'
+
+/** Persistent on the marker `<button>`: teardrop bounce intro at most once per marker element. */
+const MAP_PIN_DS_INTRO_SEEN = 'mapPinHeadIntroSeen'
+
+/** After the map block **intersects** the viewport and the pin intersects, wait this long before playing the intro. */
+const MAP_PIN_TEARDROP_INTRO_DELAY_MS = 500
 
 /** Fallback if POI order is missing (should not happen for itinerary POIs). */
 const MAP_PIN_SVG = `<svg class="pointer-events-none h-[18px] w-[18px] shrink-0 text-white" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path fill="currentColor" d="M12 2C8.13 2 5 5.13 5 9c0 4.17 4.15 9.27 6.24 11.47.42.45 1.1.45 1.52 0C14.85 18.27 19 13.17 19 9c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/></svg>`
@@ -70,71 +91,8 @@ function markerPoiNumberHtml(n: number): string {
   return `<span class="pointer-events-none flex h-[18px] min-w-[18px] items-center justify-center font-semibold leading-none text-white tabular-nums" style="font-size:${fs}px;line-height:1" aria-hidden="true">${n}</span>`
 }
 
-/**
- * Selected POI on the map: classic teardrop pin (black fill, white outline), number in the head — like a
- * standard map marker. Display size must stay in sync with wrapper / SVG / `setOffset` below.
- */
-const MAP_POI_SELECTED_PIN_WIDTH_PX = 40
-const MAP_POI_SELECTED_PIN_HEIGHT_PX = 54
-/** Center-anchored marker: shift up so the tip stays on lng/lat (half of pin height). */
-const MAP_POI_SELECTED_PIN_OFFSET_Y = -Math.round(MAP_POI_SELECTED_PIN_HEIGHT_PX / 2)
-
-/**
- * White border in SVG **user units** (path coordinate space). The artboard is ~32 units wide for
- * ~32px CSS width, so values track ~px on screen. Previously `stroke-width="2"` (~2px) — too subtle.
- */
-const MAP_POI_TEARDROP_STROKE_USER = 4
-/** Padding so the stroke isn’t clipped (stroke is centered on the path outline). */
-const MAP_POI_TEARDROP_VIEWBOX = `-4 -4 35 44`
-/** MapLibre-style pin silhouette (viewBox 27×36 user units) — shared by numbered + pass-by teardrops. */
-const MAP_POI_TEARDROP_PATH_D =
-  'M27,13.5 C27,19.074644 20.250001,27.000002 14.75,34.500002 C14.016665,35.500004 12.983335,35.500004 12.25,34.500002 C6.7499993,27.000002 0,19.222562 0,13.5 C0,6.0441559 6.0441559,0 13.5,0 C20.955844,0 27,6.0441559 27,13.5 Z'
-
 /** Quadratic route bulge: control point offset as a fraction of segment length. Higher = deeper arch. */
 const MAP_ROUTE_CURVE_BULGE = 0.4
-
-function mapPoiSelectedTeardropHtml(n: number): string {
-  const fs = n >= 10 ? 11 : 13
-  const sw = MAP_POI_TEARDROP_STROKE_USER
-  const w = MAP_POI_SELECTED_PIN_WIDTH_PX
-  const h = MAP_POI_SELECTED_PIN_HEIGHT_PX
-  const d = MAP_POI_TEARDROP_PATH_D
-  return `<svg class="pointer-events-none block h-[54px] w-10 shrink-0 overflow-visible drop-shadow-xl animate-logistics-map-pin-teardrop-in" width="${w}" height="${h}" viewBox="${MAP_POI_TEARDROP_VIEWBOX}" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path fill="#0a0a0a" stroke="#ffffff" stroke-width="${sw}" stroke-linejoin="round" d="${d}"/><text x="13.5" y="13.5" dominant-baseline="central" text-anchor="middle" fill="#fff" font-size="${fs}" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">${n}</text></svg>`
-}
-
-/** Pass-by: same teardrop shell; white dot in the head instead of a number. */
-function mapPassbySelectedTeardropHtml(): string {
-  const sw = MAP_POI_TEARDROP_STROKE_USER
-  const w = MAP_POI_SELECTED_PIN_WIDTH_PX
-  const h = MAP_POI_SELECTED_PIN_HEIGHT_PX
-  const d = MAP_POI_TEARDROP_PATH_D
-  return `<svg class="pointer-events-none block h-[54px] w-10 shrink-0 overflow-visible drop-shadow-xl animate-logistics-map-pin-teardrop-in" width="${w}" height="${h}" viewBox="${MAP_POI_TEARDROP_VIEWBOX}" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path fill="#0a0a0a" stroke="#ffffff" stroke-width="${sw}" stroke-linejoin="round" d="${d}"/><circle cx="13.5" cy="13.5" r="3.25" fill="#fff"/></svg>`
-}
-
-/** Tailwind `emerald-600` — matches green rail / disc markers */
-const MAP_EMERALD_TEARDROP_FILL = '#059669'
-
-/** Viator mark paths from `assets/viator.svg`, scaled into the pin head (user space). */
-const MAP_VIATOR_TEARDROP_ICON_G = `<g transform="translate(13.5, 13.5) scale(0.78) translate(-9, -9)"><path d="M13.7529 6.61223C15.5677 6.61223 17.0389 5.13203 17.0389 3.30611C17.0389 1.4802 15.5677 0 13.7529 0C11.938 0 10.4668 1.4802 10.4668 3.30611C10.4668 5.13203 11.938 6.61223 13.7529 6.61223Z" fill="white"/><path d="M10.1357 17.9998L11.8518 14.1231L5.76402 0.367188H0L7.80382 17.9998H10.1357Z" fill="white"/></g>`
-
-/** Variant B meeting — emerald teardrop + white Viator icon in the head. */
-function mapMeetingSelectedTeardropHtml(): string {
-  const sw = MAP_POI_TEARDROP_STROKE_USER
-  const w = MAP_POI_SELECTED_PIN_WIDTH_PX
-  const h = MAP_POI_SELECTED_PIN_HEIGHT_PX
-  const d = MAP_POI_TEARDROP_PATH_D
-  return `<svg class="pointer-events-none block h-[54px] w-10 shrink-0 overflow-visible drop-shadow-xl animate-logistics-map-pin-teardrop-in" width="${w}" height="${h}" viewBox="${MAP_POI_TEARDROP_VIEWBOX}" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path fill="${MAP_EMERALD_TEARDROP_FILL}" stroke="#ffffff" stroke-width="${sw}" stroke-linejoin="round" d="${d}"/>${MAP_VIATOR_TEARDROP_ICON_G}</svg>`
-}
-
-/** Variant B end — emerald teardrop + white flag in the head. */
-function mapEndSelectedTeardropHtml(): string {
-  const sw = MAP_POI_TEARDROP_STROKE_USER
-  const w = MAP_POI_SELECTED_PIN_WIDTH_PX
-  const h = MAP_POI_SELECTED_PIN_HEIGHT_PX
-  const d = MAP_POI_TEARDROP_PATH_D
-  const flagG = `<g transform="translate(13.5, 13.5) scale(0.58) translate(-12, -12)"><path fill="white" d="M5 3h2v18H5zm3 3h12v7H8z"/></g>`
-  return `<svg class="pointer-events-none block h-[54px] w-10 shrink-0 overflow-visible drop-shadow-xl animate-logistics-map-pin-teardrop-in" width="${w}" height="${h}" viewBox="${MAP_POI_TEARDROP_VIEWBOX}" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path fill="${MAP_EMERALD_TEARDROP_FILL}" stroke="#ffffff" stroke-width="${sw}" stroke-linejoin="round" d="${d}"/>${flagG}</svg>`
-}
 
 /** Selected map marker uses the large teardrop when active (POI, pass-by, or variant B meeting/end), unless overlap forces compact. */
 function isMapTeardropPin(
@@ -144,12 +102,8 @@ function isMapTeardropPin(
   poiOrder: number | null,
   overlapCompact: boolean,
 ): boolean {
-  if (overlapCompact) return false
-  if (!active) return false
-  if (isVariantBLayout(variantId) && stop?.kind === 'meeting') return true
-  if (isVariantBLayout(variantId) && stop?.kind === 'end') return true
-  if (stop?.kind === 'passby') return true
-  return poiOrder != null
+  if (overlapCompact || !active) return false
+  return itineraryStopUsesTeardropWhenSelected(stop, variantId, poiOrder)
 }
 
 function markerSvgForStop(
@@ -157,9 +111,17 @@ function markerSvgForStop(
   variantId: VariantId,
   poiOrder: number | null,
   overlapCompact: boolean,
+  b2CommittedPickupId: string | null,
 ): string {
   if (isVariantBLayout(variantId) && stop?.kind === 'meeting') {
     if (overlapCompact) return MAP_PASSBY_DOT_HTML
+    const showB2DiscCheck =
+      variantId === 'b2' &&
+      b2CommittedPickupId != null &&
+      stop.id === b2CommittedPickupId
+    if (showB2DiscCheck) {
+      return `<span class="absolute inset-0 flex items-center justify-center overflow-visible">${MAP_MEETING_VIATOR_SVG}${mapB2MeetingCommittedCheckBadgeHtml()}</span>`
+    }
     return MAP_MEETING_VIATOR_SVG
   }
   if (isVariantBLayout(variantId) && stop?.kind === 'end') {
@@ -263,7 +225,139 @@ const LIGHT_BASEMAP_STYLE: maplibregl.StyleSpecification = {
   ],
 }
 
-/** Map-only marker chrome: selected → teardrop SVG (charcoal or emerald); else disc / compact. */
+/**
+ * In-view: bounce photo + teardrop once (see `index.css`). Head photo stays until the pin is deselected
+ * — no timed dismiss; selection sync calls `expandMapPinHead` so the image returns on tap.
+ *
+ * Pin intros wait until `getMapInViewport()` is true (map wrapper intersects the viewport); until then the pin
+ * stays deferred — see `flushDeferred` when the map scrolls into view. After that, `MAP_PIN_TEARDROP_INTRO_DELAY_MS`
+ * runs before the bounce (skipped when `prefers-reduced-motion`).
+ */
+function attachMarkerTeardropInViewAnimation(
+  markerElsRef: MutableRefObject<HTMLButtonElement[]>,
+  getMapInViewport: () => boolean,
+): { cleanup: () => void; flushDeferred: () => void } {
+  const reduceMotion =
+    typeof globalThis !== 'undefined' &&
+    globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  const introDelayMs = reduceMotion ? 0 : MAP_PIN_TEARDROP_INTRO_DELAY_MS
+
+  /**
+   * `root: null` = **browser viewport** (not the map div). Otherwise a pin that is only
+   * “in view” of the map canvas can still be off-screen when the map is scrolled away.
+   */
+  const pinIoByEl = new Map<HTMLButtonElement, IntersectionObserver>()
+  const introTimers = new Map<HTMLButtonElement, ReturnType<typeof setTimeout>>()
+  const cleanups: (() => void)[] = []
+
+  const runIntroForEl = (el: HTMLButtonElement) => {
+    const pendingTimer = introTimers.get(el)
+    if (pendingTimer) clearTimeout(pendingTimer)
+    introTimers.delete(el)
+
+    const stack = el.querySelector('.logistics-map-selected-pin-stack')
+    if (!stack || el.dataset[MAP_PIN_DS_INTRO_SEEN] === '1') return
+    delete el.dataset.mapPinIntroDeferred
+    el.dataset[MAP_PIN_DS_INTRO_SEEN] = '1'
+    stack.classList.add('logistics-map-pin-in-view')
+    stack.setAttribute('data-map-pin-view-done', '1')
+    pinIoByEl.get(el)?.disconnect()
+    pinIoByEl.delete(el)
+  }
+
+  const scheduleIntroForEl = (el: HTMLButtonElement) => {
+    const stack = el.querySelector('.logistics-map-selected-pin-stack')
+    if (!stack || el.dataset[MAP_PIN_DS_INTRO_SEEN] === '1') return
+
+    const prev = introTimers.get(el)
+    if (prev) clearTimeout(prev)
+
+    if (introDelayMs <= 0) {
+      runIntroForEl(el)
+      return
+    }
+
+    introTimers.set(
+      el,
+      window.setTimeout(() => {
+        introTimers.delete(el)
+        if (el.dataset[MAP_PIN_DS_INTRO_SEEN] === '1') return
+        if (!getMapInViewport()) {
+          el.dataset.mapPinIntroDeferred = '1'
+          return
+        }
+        runIntroForEl(el)
+      }, introDelayMs),
+    )
+  }
+
+  const flushDeferred = () => {
+    if (!getMapInViewport()) return
+    for (const el of markerElsRef.current) {
+      if (!el || el.dataset.mapPinIntroDeferred !== '1') continue
+      scheduleIntroForEl(el)
+    }
+  }
+
+  for (const el of markerElsRef.current) {
+    const stack = el.querySelector('.logistics-map-selected-pin-stack')
+    if (!stack || el.dataset[MAP_PIN_DS_INTRO_SEEN] === '1') continue
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.target !== el) continue
+          if (entry.isIntersecting) {
+            if (getMapInViewport()) {
+              scheduleIntroForEl(el)
+            } else {
+              el.dataset.mapPinIntroDeferred = '1'
+            }
+          } else {
+            const t = introTimers.get(el)
+            if (t) clearTimeout(t)
+            introTimers.delete(el)
+            delete el.dataset.mapPinIntroDeferred
+          }
+        }
+      },
+      { root: null, rootMargin: '0px', threshold: [0, 0.1, 0.25] },
+    )
+    io.observe(el)
+    pinIoByEl.set(el, io)
+    cleanups.push(() => io.disconnect())
+  }
+
+  queueMicrotask(() => {
+    if (getMapInViewport()) flushDeferred()
+  })
+
+  const cleanup = () => {
+    for (const t of introTimers.values()) clearTimeout(t)
+    introTimers.clear()
+    cleanups.forEach((c) => c())
+    pinIoByEl.clear()
+  }
+
+  return { cleanup, flushDeferred }
+}
+
+/** Re-run teardrop bounce (`logistics-map-pin-teardrop-in`) when the selected pin changes — IO only fires once per marker. */
+function replayMapPinTeardropIntroAnimation(el: HTMLButtonElement) {
+  const reduceMotion =
+    typeof globalThis !== 'undefined' &&
+    globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  if (reduceMotion) return
+
+  const stack = el.querySelector('.logistics-map-selected-pin-stack')
+  if (!stack) return
+
+  stack.classList.remove('logistics-map-pin-in-view')
+  void (stack as HTMLElement).offsetWidth
+  stack.classList.add('logistics-map-pin-in-view')
+}
+
+/** Map-only marker chrome: selected → photo + teardrop stack (`MAP_MAP_SELECTED_STACK_HEIGHT_PX`); else disc / compact. */
 function mapMarkerWrapperClass(
   stop: Stop | undefined,
   variantId: VariantId,
@@ -276,7 +370,8 @@ function mapMarkerWrapperClass(
       isVariantBLayout(variantId) && (stop?.kind === 'meeting' || stop?.kind === 'end')
         ? 'focus-visible:ring-emerald-600'
         : 'focus-visible:ring-black'
-    return `flex h-[54px] w-10 cursor-pointer items-center justify-center border-0 bg-transparent p-0 shadow-none outline-none ring-0 focus-visible:outline focus-visible:ring-2 focus-visible:ring-offset-0 ${focusRing}`
+    /** `150` = `MAP_MAP_SELECTED_STACK_HEIGHT_PX` in `logisticsTeardropMarkup.ts` */
+    return `relative flex min-h-[150px] w-20 cursor-pointer items-center justify-center border-0 bg-transparent p-0 shadow-none outline-none ring-0 focus-visible:outline focus-visible:ring-2 focus-visible:ring-offset-0 ${focusRing}`
   }
   if (overlapCompact) {
     if (isVariantBMeetingOrEnd(variantId, stop)) {
@@ -295,7 +390,35 @@ function mapMarkerWrapperClass(
 /** HTML markers share one layer; selected pin + popup stack above other pins. */
 const MAP_MARKER_Z_INACTIVE = '1'
 const MAP_MARKER_Z_SELECTED = '50'
+/** Itinerary row hover preview — above other selected-style pins when stacked. */
+const MAP_MARKER_Z_TIMELINE_HOVER = '55'
+
+/**
+ * First time the user list-hovers a POI, wait before teardrop intro replays; after that,
+ * every hover change replays immediately until the next page / variant.
+ */
+const HOVER_TEARDROP_FIRST_ANIM_DWELL_MS = 2000
+
 const MAP_POI_POPUP_Z_INDEX = '100'
+/** Re-centre / zoom controls sit above selected pins (`MAP_MARKER_Z_SELECTED`) but under popups. */
+const MAP_CHROME_ABOVE_MARKERS_CLASS = 'z-[60]'
+
+/** Full photo + teardrop stack — keeps image visible while this marker stays selected (clears timed-dismiss styling). */
+function expandMapPinHead(el: HTMLElement) {
+  const stack = el.querySelector('.logistics-map-selected-pin-stack')
+  if (!stack) return
+  /**
+   * `index.css` hides `.logistics-map-pin-motion-wrap` until this class exists. Map marker HTML from
+   * `mapSelectedTeardropMarkerHtml` does not include it (IO used to add it after viewport delay); without
+   * it here, list-hover innerHTML swaps leave the teardrop invisible until the next IO tick — feels like
+   * the pin vanishes during dwell / repeated sync.
+   */
+  stack.classList.add('logistics-map-pin-in-view')
+  stack.classList.remove('logistics-map-pin-stack--head-collapsed')
+  stack.querySelector('.logistics-map-pin-head-photo')?.classList.remove('logistics-map-pin-head-photo--dismiss')
+  delete el.dataset.mapPinHeadCollapsed
+  el.classList.remove('logistics-map-marker-head-collapsed')
+}
 
 function applyMarkerSelectedState(
   el: HTMLElement,
@@ -304,6 +427,8 @@ function applyMarkerSelectedState(
   variantId: VariantId,
   poiOrder: number | null,
   overlapCompact: boolean,
+  b2CommittedPickupId: string | null,
+  isTimelineRowHoverPin = false,
 ) {
   /** MapLibre adds `maplibregl-marker` (position:absolute;inset 0) and anchor classes. Replacing
    * `className` wholesale removes them and breaks alignment with the GL route line. */
@@ -313,41 +438,67 @@ function applyMarkerSelectedState(
   const wasActive = el.dataset.mapPinActive === '1'
   el.dataset.mapPinActive = active ? '1' : '0'
 
+  const b2ShowCommittedCheck =
+    variantId === 'b2' &&
+    stop?.kind === 'meeting' &&
+    teardrop &&
+    b2CommittedPickupId != null &&
+    stop.id === b2CommittedPickupId
+
+  const showB2MeetingDiscCheck =
+    !teardrop &&
+    variantId === 'b2' &&
+    stop?.kind === 'meeting' &&
+    !overlapCompact &&
+    b2CommittedPickupId != null &&
+    stop.id === b2CommittedPickupId
+
   /** Avoid replacing identical markup so teardrop CSS animation does not restart on every effect run. */
   const compactTag = overlapCompact ? ':c' : ':f'
+  const imgKey = stop?.popupImageSrc ?? ''
   const nextHtmlKey = teardrop
     ? stop?.kind === 'passby'
-      ? 'td:passby'
+      ? `td:passby:${imgKey}`
       : stop?.kind === 'meeting'
-        ? 'td:meeting'
+        ? `td:meeting:${imgKey}${b2ShowCommittedCheck ? ':chk' : ''}`
         : stop?.kind === 'end'
-          ? 'td:end'
-          : `td:${poiOrder}`
-    : `pl:${variantId}:${stop?.id ?? ''}:${poiOrder ?? ''}${compactTag}`
+          ? `td:end:${imgKey}`
+          : `td:${poiOrder}:${imgKey}`
+    : `pl:${variantId}:${stop?.id ?? ''}:${poiOrder ?? ''}${compactTag}${showB2MeetingDiscCheck ? ':b2chk' : ''}`
   const prevHtmlKey = el.getAttribute('data-marker-html-key') ?? ''
   if (prevHtmlKey !== nextHtmlKey) {
-    if (teardrop) {
-      if (stop?.kind === 'passby') {
-        el.innerHTML = mapPassbySelectedTeardropHtml()
-      } else if (stop?.kind === 'meeting') {
-        el.innerHTML = mapMeetingSelectedTeardropHtml()
-      } else if (stop?.kind === 'end') {
-        el.innerHTML = mapEndSelectedTeardropHtml()
-      } else {
-        el.innerHTML = mapPoiSelectedTeardropHtml(poiOrder!)
-      }
+    delete el.dataset.mapPinHeadCollapsed
+    if (teardrop && stop) {
+      el.innerHTML = mapSelectedTeardropMarkerHtml(stop, poiOrder, {
+        b2ShowCommittedCheck,
+      })
     } else {
-      el.innerHTML = markerSvgForStop(stop, variantId, poiOrder, overlapCompact)
+      el.innerHTML = markerSvgForStop(stop, variantId, poiOrder, overlapCompact, b2CommittedPickupId)
     }
     el.setAttribute('data-marker-html-key', nextHtmlKey)
   }
 
+  if (!active || !teardrop) {
+    delete el.dataset.mapPinHeadCollapsed
+  }
+
+  if (teardrop && active) {
+    expandMapPinHead(el)
+  }
+
   let cls = mapMarkerWrapperClass(stop, variantId, active, poiOrder, overlapCompact)
+  if (teardrop && el.dataset.mapPinHeadCollapsed === '1') {
+    cls += ' logistics-map-marker-head-collapsed'
+  }
   if (active && !wasActive && !teardrop) {
     cls += ' animate-logistics-map-pin-disc-in'
   }
   el.className = [...maplibreglClasses, cls].join(' ')
-  el.style.zIndex = active ? MAP_MARKER_Z_SELECTED : MAP_MARKER_Z_INACTIVE
+  el.style.zIndex = active
+    ? isTimelineRowHoverPin
+      ? MAP_MARKER_Z_TIMELINE_HOVER
+      : MAP_MARKER_Z_SELECTED
+    : MAP_MARKER_Z_INACTIVE
 }
 
 const POI_FOCUS_DURATION_MS = 900
@@ -372,11 +523,17 @@ const ZERO_PADDING: maplibregl.PaddingOptions = {
 }
 
 /**
- * Inset from canvas edges for `fitBounds` only (top: “Re-centre” control, right: zoom stack).
+ * Extra top inset on default-route overview so the selected pin’s photo+teardrop stack clears the map edge
+ * (`MAP_MAP_SELECTED_STACK_HEIGHT_PX` — anchor sits near the bottom of the stack).
+ */
+const OVERVIEW_FIT_TOP_PIN_HEADROOM_PX = Math.round(MAP_MAP_SELECTED_STACK_HEIGHT_PX * 0.35)
+
+/**
+ * Inset from canvas edges for `fitBounds` only (top: Re-centre + photo headroom, right: zoom stack).
  * Do not combine with `setPadding(POI_VIEW_PADDING)` here — that double-count was clipping pins.
  */
 const OVERVIEW_FIT_PADDING: maplibregl.PaddingOptions = {
-  top: 56,
+  top: 56 + OVERVIEW_FIT_TOP_PIN_HEADROOM_PX,
   bottom: 52,
   left: 32,
   right: 80,
@@ -387,7 +544,7 @@ const OVERVIEW_FIT_PADDING: maplibregl.PaddingOptions = {
  * sits closer to the route. **Decrease** to zoom in further (leave room for Re-centre + zoom stack).
  */
 const OVERVIEW_FIT_PADDING_MOBILE: maplibregl.PaddingOptions = {
-  top: 26,
+  top: 26 + OVERVIEW_FIT_TOP_PIN_HEADROOM_PX,
   bottom: 22,
   left: 8,
   right: 34,
@@ -398,6 +555,10 @@ const OVERVIEW_MAX_ZOOM = 22
 
 /** Optional tighter cap for mobile overview (lower = never zoom in past this level). Usually padding drives zoom. */
 const OVERVIEW_MAX_ZOOM_MOBILE = OVERVIEW_MAX_ZOOM
+
+/** Route overview readjustments use animated `fitBounds` (MapLibre `duration`), not instant jumps. */
+const OVERVIEW_ZOOM_ANIM_MS_DESKTOP = 650
+const OVERVIEW_ZOOM_ANIM_MS_MOBILE = 480
 
 /** Viewport width at or below this value uses the mobile map pattern (locked preview + sheet). */
 const MOBILE_COOPERATIVE_MAX_WIDTH_PX = 768
@@ -435,16 +596,16 @@ type MapInteractionMode = 'desktop' | 'mobile-preview' | 'mobile-sheet'
 function syncMapInteractions(map: maplibregl.Map, mode: MapInteractionMode) {
   const coop = map.cooperativeGestures
   coop.disable()
+  // Never wheel-zoom — keeps document scroll when the cursor is over the embedded map.
+  map.scrollZoom.disable()
   if (mode === 'desktop' || mode === 'mobile-sheet') {
     map.dragPan.enable()
-    map.scrollZoom.enable()
     map.doubleClickZoom.enable()
     map.touchZoomRotate.enable()
     map.boxZoom.enable()
     map.keyboard.enable()
   } else {
     map.dragPan.disable()
-    map.scrollZoom.disable()
     map.doubleClickZoom.disable()
     map.touchZoomRotate.disable()
     map.boxZoom.disable()
@@ -458,13 +619,15 @@ const ICON_TICKET = `<svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" st
 type OpenPoiPopupOptions = {
   /** When true, show 2-line description preview + Read more (mobile map sheet only). */
   isMobile?: boolean
+  /** PDP / DW: square image only — no title, duration, or description (see `LogisticsBlock`). */
+  content?: 'full' | 'image-only'
 }
 
 const POI_POPUP_EDGE_PAD_PX = 12
 /** Vertical gap (px) between map anchor and popup card — larger so the card clears the teardrop pin. */
 const POI_POPUP_OFFSET_FROM_ANCHOR_PX = 64
-/** Marker button uses `h-8 w-8` (32px); MapLibre default anchor is center on the lng/lat. */
-const MAP_MARKER_SCREEN_PX = 32
+/** Approx. marker span for pin–popup union (`panMapToCenterPoiGroup`). Selected teardrop uses `w-20` (80px). */
+const MAP_MARKER_SCREEN_PX = 80
 
 /**
  * Pans the map so the POI popup’s bounding box stays inside the map container (with padding).
@@ -548,11 +711,19 @@ function openPoiPopup(
 ) {
   popupHolder.current?.remove()
   const isMobilePopup = options?.isMobile ?? false
+  const contentMode = options?.content ?? 'full'
   const title = stop.title?.trim() || 'Stop'
   const meta = stop.durationLine ? parseDurationAndAdmission(stop.durationLine.trim()) : null
 
+  const imgSrcEarly = stop.popupImageSrc?.trim()
+  if (contentMode === 'image-only' && !imgSrcEarly) {
+    return
+  }
+
   const descPreview =
-    isMobilePopup && stop.description?.trim()
+    contentMode === 'image-only'
+      ? ''
+      : isMobilePopup && stop.description?.trim()
       ? `<div class="border-t border-stone-100/90 bg-white px-4 pb-3 pt-2.5">
           <p class="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-stone-400">About</p>
           <div class="relative">
@@ -564,7 +735,9 @@ function openPoiPopup(
       : ''
 
   const rows =
-    meta != null
+    contentMode === 'image-only'
+      ? ''
+      : meta != null
       ? `<div class="flex flex-wrap items-center gap-x-2 gap-y-1 bg-white px-4 py-2 text-[12px] leading-snug text-stone-500 [&_svg]:h-3 [&_svg]:w-3">
           <span class="inline-flex min-w-0 items-center gap-1.5">
             <span class="shrink-0 text-current" aria-hidden="true">${ICON_CLOCK}</span>
@@ -582,7 +755,22 @@ function openPoiPopup(
           </div>`
         : ''
 
-  const html = `<div class="flex max-h-[min(50svh,320px)] min-w-0 flex-col overflow-hidden rounded-2xl bg-white shadow-xl shadow-stone-900/12 ring-1 ring-stone-200/90">
+  /** Square hero — matches PDP gallery primary tile (`PdpViatorHeroGallery` / Figma DW): `aspect-square` + cover. */
+  const imgSrc = stop.popupImageSrc?.trim()
+  const imageOnlyFrame = contentMode === 'image-only' ? 'rounded-2xl' : 'rounded-t-2xl border-b border-stone-100/90'
+  const imageBlock = imgSrc
+    ? `<div class="relative aspect-square w-full shrink-0 overflow-hidden bg-stone-100 ${imageOnlyFrame}">
+        <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml((stop.popupImageAlt ?? title).trim())}" class="absolute inset-0 size-full object-cover" loading="lazy" width="256" height="256" decoding="async" />
+      </div>`
+    : ''
+
+  const html =
+    contentMode === 'image-only'
+      ? `<div class="min-w-0 overflow-hidden rounded-2xl bg-white shadow-xl shadow-stone-900/12 ring-1 ring-stone-200/90">
+    ${imageBlock}
+  </div>`
+      : `<div class="flex max-h-[min(56svh,380px)] min-w-0 flex-col overflow-hidden rounded-2xl bg-white shadow-xl shadow-stone-900/12 ring-1 ring-stone-200/90">
+    ${imageBlock}
     <div class="shrink-0 bg-gradient-to-br from-stone-50 via-white to-stone-50/80 px-4 pb-3 pt-4">
       <h3 class="text-[15px] font-medium leading-snug tracking-tight text-stone-900">${escapeHtml(title)}</h3>
     </div>
@@ -627,6 +815,34 @@ function expandBoundsGeographic(bounds: maplibregl.LngLatBounds, padFactor = 0.2
   )
 }
 
+/**
+ * B2 + committed pickup: overview framing uses only the chosen meeting plus POI / pass-by / end legs —
+ * not the two alternate meeting locations (they’re hidden on the map anyway).
+ */
+function routeCoordsForVariantOverview(
+  variantId: VariantId,
+  routeLngLat: [number, number][],
+  stops: Stop[],
+  b2CommittedPickupId: string | null,
+): [number, number][] {
+  if (variantId !== 'b2' || b2CommittedPickupId == null || stops.length === 0 || routeLngLat.length === 0) {
+    return routeLngLat
+  }
+  const out: [number, number][] = []
+  const n = Math.min(stops.length, routeLngLat.length)
+  for (let i = 0; i < n; i++) {
+    const s = stops[i]
+    if (s?.kind === 'meeting') {
+      if (s.id === b2CommittedPickupId) {
+        out.push(routeLngLat[i])
+      }
+    } else {
+      out.push(routeLngLat[i])
+    }
+  }
+  return out.length > 0 ? out : routeLngLat
+}
+
 /** Union of all stop coordinates and the curved itinerary polyline (bulges can sit outside stop hull). */
 function computeOverviewBounds(stopCoords: [number, number][], mobile?: boolean): maplibregl.LngLatBounds {
   const b = new maplibregl.LngLatBounds(stopCoords[0], stopCoords[0])
@@ -646,12 +862,22 @@ function fitRouteOverview(
   map: maplibregl.Map,
   coords: [number, number][],
   options: { duration: number; isMobile?: boolean },
+  /** When set, incremented during programmatic `fitBounds` so `zoomend` handlers can ignore those moves. */
+  programmaticCameraDepth?: MutableRefObject<number>,
 ) {
   if (coords.length === 0) return
   map.resize()
   map.setPadding(ZERO_PADDING)
   const mobile = options.isMobile === true
   const bounds = computeOverviewBounds(coords, mobile)
+
+  if (programmaticCameraDepth) {
+    programmaticCameraDepth.current++
+    map.once('idle', () => {
+      programmaticCameraDepth.current = Math.max(0, programmaticCameraDepth.current - 1)
+    })
+  }
+
   map.fitBounds(bounds, {
     padding: mobile ? OVERVIEW_FIT_PADDING_MOBILE : OVERVIEW_FIT_PADDING,
     maxZoom: mobile ? OVERVIEW_MAX_ZOOM_MOBILE : OVERVIEW_MAX_ZOOM,
@@ -734,28 +960,58 @@ function runMobileModalPoiFocus(
 type Props = {
   variantId: VariantId
   routeLngLat: [number, number][]
+  /** When set, dashed line uses these coords (else `routeLngLat`). B2: core POI path only. */
+  routePolylineLngLat?: [number, number][]
+  /** B2: hide dashed itinerary until a pickup is chosen (`false`). */
+  showItineraryPolyline?: boolean
   mapKey: string
   stops: Stop[]
   selectedStopId: string
   /** Last channel used to change selection — list/accordion must not move the map on mobile. */
   lastSelectSource: SelectSource
+  /**
+   * First timeline row expanded on load — desktop keeps initial route overview zoom for that selection only;
+   * user collapse/reopen or another list selection uses normal POI zoom.
+   */
+  landingDefaultExpandedStopId?: string
   /** When false, all pins stay the default black style until the user has selected a POI once. */
   highlightSelectedPin: boolean
   onSelectStop: (id: string, source: SelectSource) => void
   /** Called when Re-centre is used — clear list/map selection in the parent. */
   onRecentre?: () => void
+  /** Map pin popup: `image-only` drops title/duration/body (PDP embedded map). */
+  poiPopupContent?: 'full' | 'image-only'
+  /** B2: meeting pin id while dropdown option is hovered (preview = same styling as selected). */
+  b2HoverMeetingId?: string | null
+  /** B2: chosen pickup — other meeting pins render dimmed until changed. */
+  b2CommittedPickupId?: string | null
+  /** Itinerary list row hover — map pin uses full teardrop + image like the selected stop. */
+  timelineHoverStopId?: string | null
+  /**
+   * Open timeline accordion row id (if any). When set on mobile+list, the selected teardrop still
+   * shows for the expanded POI; without it we keep pins neutral to avoid list-driven map chrome.
+   */
+  expandedStopId?: string | null
 }
 
 export function LogisticsMap({
   variantId,
   routeLngLat,
+  routePolylineLngLat,
+  showItineraryPolyline = true,
   mapKey,
   stops,
   selectedStopId,
   lastSelectSource,
+  landingDefaultExpandedStopId = '',
   highlightSelectedPin,
   onSelectStop,
   onRecentre,
+  poiPopupContent = 'full',
+  b2HoverMeetingId = null,
+  b2CommittedPickupId = null,
+  timelineHoverStopId = null,
+  expandedStopId = null,
 }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const previewMapHostRef = useRef<HTMLDivElement>(null)
@@ -764,14 +1020,23 @@ export function LogisticsMap({
   const mapRef = useRef<maplibregl.Map | null>(null)
   const markersRef = useRef<maplibregl.Marker[]>([])
   const markerElsRef = useRef<HTMLButtonElement[]>([])
+  const markerInViewAnimCleanupRef = useRef<(() => void) | null>(null)
+  /** Map chrome wrapper (`wrapRef`) intersects the viewport — pins defer intro until then. */
+  const mapWrapInViewportRef = useRef(false)
+  /** Latest `flushDeferred` from `attachMarkerTeardropInViewAnimation` — invoked when map scrolls into range. */
+  const deferredPinIntroFlushRef = useRef<(() => void) | null>(null)
   const stopsRef = useRef(stops)
   const onSelectRef = useRef(onSelectStop)
   /** After map ready, first run only syncs markers — no camera move so landing keeps `fitBounds` overview. */
   const previousSelectionForCameraRef = useRef<string | undefined>(undefined)
+  /** Desktop: skip auto-opening the POI popup once for the same landing default-expanded row as the no-zoom rule. */
+  const previousListSelectionForPopupRef = useRef<string | undefined>(undefined)
   /** Detect `highlightSelectedPin` false → true so zoom runs when user first engages the default-selected POI. */
   const prevHighlightForCameraRef = useRef(false)
   /** When true, debounced resize refits the route overview; false after POI focus or manual zoom. */
   const overviewModeRef = useRef(true)
+  /** >0 while `fitRouteOverview` is animating the camera — suppresses mistaking that for user zoom in `zoomend`. */
+  const programmaticOverviewCameraDepthRef = useRef(0)
   const routeCoordsRef = useRef(routeLngLat)
   /** After initial overview has settled — before this, `moveend` is ignored for “Re-centre” visibility. */
   const trackRecentreHintRef = useRef(false)
@@ -782,11 +1047,24 @@ export function LogisticsMap({
   const selectedStopIdRef = useRef(selectedStopId)
   const highlightSelectedPinRef = useRef(highlightSelectedPin)
   const lastSelectSourceRef = useRef(lastSelectSource)
+  const b2HoverMeetingIdRef = useRef<string | null>(null)
+  const b2CommittedPickupIdRef = useRef<string | null>(null)
+  const timelineHoverStopIdRef = useRef<string | null>(null)
+  const expandedStopIdRef = useRef<string | null>(null)
   /** Re-applies marker HTML/classes/offset from current selection + screen-space overlap. */
   const syncMarkersAppearanceRef = useRef<() => void>(() => {})
+  /** Replays teardrop entrance when `selectedStopId` changes (IntersectionObserver only adds class once per marker). */
+  const previousSelectedStopIdForTeardropAnimRef = useRef<string | undefined>(undefined)
+  /** B2: replay bounce when dropdown/map hover target changes (same animation as selection). */
+  const previousB2HoverMeetingIdForTeardropAnimRef = useRef<string | null>(null)
+  const previousTimelineHoverStopIdForTeardropAnimRef = useRef<string | null>(null)
+  const hoverTeardropAnimPrimedRef = useRef(false)
+  const hoverTeardropDwellTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const interactionRef = useRef({ isMobile: false, sheetOpen: false })
   const poiPopupRef = useRef<maplibregl.Popup | null>(null)
+  const poiPopupContentRef = useRef(poiPopupContent)
+  poiPopupContentRef.current = poiPopupContent
   /** Detect sheet close so we can reset the camera to the locked overview on the inline map. */
   const prevMobileSheetOpenRef = useRef(false)
 
@@ -811,6 +1089,10 @@ export function LogisticsMap({
   highlightSelectedPinRef.current = highlightSelectedPin
   lastSelectSourceRef.current = lastSelectSource
   isMobileRef.current = isMobile
+  b2HoverMeetingIdRef.current = b2HoverMeetingId
+  b2CommittedPickupIdRef.current = b2CommittedPickupId
+  timelineHoverStopIdRef.current = timelineHoverStopId ?? null
+  expandedStopIdRef.current = expandedStopId ?? null
 
   syncMarkersAppearanceRef.current = () => {
     const map = mapRef.current
@@ -822,22 +1104,195 @@ export function LogisticsMap({
     const vid = variantIdRef.current
     const selId = selectedStopIdRef.current
     const selIdx = stopsLocal.findIndex((s) => s.id === selId)
+    const committedPickup = b2CommittedPickupIdRef.current
+    const selectedStopForFocus = selIdx >= 0 ? stopsLocal[selIdx] : undefined
+    /** Dim non-focused meeting pins when a pickup is committed or the current list/map selection is a meeting. */
+    let b2FocusMeetingId: string | null = null
+    if (vid === 'b2') {
+      if (committedPickup != null) {
+        b2FocusMeetingId = committedPickup
+      } else if (selectedStopForFocus?.kind === 'meeting') {
+        b2FocusMeetingId = selectedStopForFocus.id
+      }
+    }
+    const hoverMeetingId =
+      variantIdRef.current === 'b2' ? b2HoverMeetingIdRef.current : null
+    const hoverIdx = hoverMeetingId
+      ? stopsLocal.findIndex((s) => s.id === hoverMeetingId)
+      : -1
     /** Mobile inline preview only: pins stay neutral. Desktop + mobile modal use teardrop when selected. */
     const mapInPageEmbed =
       isMobileRef.current && !mobileSheetOpenRef.current
+    const timelineHoverId = timelineHoverStopIdRef.current
+    const timelineHoverIdx = timelineHoverId
+      ? stopsLocal.findIndex((s) => s.id === timelineHoverId)
+      : -1
+    const timelineHoverActive =
+      !mapInPageEmbed && timelineHoverIdx >= 0 && timelineHoverId != null
+    const mobileListSelection =
+      isMobileRef.current && lastSelectSourceRef.current === 'list'
+    /**
+     * Show teardrop+image for the current selection when `highlightSelectedPin` says so. On mobile
+     * with list-originated selection, only while a timeline row is expanded (or not list) so
+     * collapsed list browsing does not light up the map; list hover can still take over below.
+     */
     const showMapPinSelected =
       !mapInPageEmbed &&
       highlightSelectedPinRef.current &&
-      !(isMobileRef.current && lastSelectSourceRef.current === 'list')
+      (!mobileListSelection || expandedStopIdRef.current != null)
+    const selectionActiveIdx =
+      selIdx >= 0 && showMapPinSelected ? selIdx : -1
 
     markerElsRef.current.forEach((el, i) => {
-      const active = selIdx >= 0 && showMapPinSelected && i === selIdx
+      /** Selection stays teardrop+image while browsing other rows; list hover adds a second preview pin. */
+      const selectedPinActive =
+        selectionActiveIdx >= 0 && i === selectionActiveIdx
+      const timelineHoverPinActive =
+        timelineHoverActive && i === timelineHoverIdx
+      const b2MeetingHoverPinActive =
+        !mapInPageEmbed && hoverIdx >= 0 && i === hoverIdx
+      const active =
+        selectedPinActive || timelineHoverPinActive || b2MeetingHoverPinActive
       const poiOrder = getPoiOrderForStopIndex(stopsLocal, vid, i)
       const oc = mapInPageEmbed ? true : (overlap[i] ?? false)
-      applyMarkerSelectedState(el, active, stopsLocal[i], vid, poiOrder, oc)
-      const teardrop = isMapTeardropPin(active, stopsLocal[i], vid, poiOrder, oc)
-      markersRef.current[i]?.setOffset(teardrop ? [0, MAP_POI_SELECTED_PIN_OFFSET_Y] : [0, 0])
+      const isTimelineRowHoverPin = timelineHoverPinActive
+      /** Map overlap uses compact dots for clustered pins; the active pin always renders full teardrop+photo. */
+      const ocForMarker = active ? false : oc
+      applyMarkerSelectedState(
+        el,
+        active,
+        stopsLocal[i],
+        vid,
+        poiOrder,
+        ocForMarker,
+        b2CommittedPickupIdRef.current,
+        isTimelineRowHoverPin,
+      )
+      const teardrop = isMapTeardropPin(active, stopsLocal[i], vid, poiOrder, ocForMarker)
+      const collapsed = el.dataset.mapPinHeadCollapsed === '1'
+      const offY = teardrop
+        ? collapsed
+          ? MAP_MAP_PIN_COLLAPSED_OFFSET_Y
+          : MAP_POI_SELECTED_PIN_OFFSET_Y
+        : 0
+      markersRef.current[i]?.setOffset([0, offY])
+
+      const stopAt = stopsLocal[i]
+      if (vid === 'b2' && stopAt?.kind === 'meeting') {
+        if (b2FocusMeetingId != null) {
+          const hoverId = b2HoverMeetingIdRef.current
+          const isFocus =
+            stopAt.id === b2FocusMeetingId ||
+            (hoverId != null && stopAt.id === hoverId)
+          if (isFocus) {
+            el.removeAttribute('data-logistics-b2-meeting-hidden')
+            el.removeAttribute('aria-hidden')
+          } else {
+            el.setAttribute('data-logistics-b2-meeting-hidden', 'true')
+            el.setAttribute('aria-hidden', 'true')
+          }
+        } else {
+          el.removeAttribute('data-logistics-b2-meeting-hidden')
+          el.removeAttribute('aria-hidden')
+        }
+      } else {
+        el.removeAttribute('data-logistics-b2-meeting-hidden')
+        el.removeAttribute('aria-hidden')
+      }
     })
+
+    const hoverMeetingIdForAnim =
+      !timelineHoverActive && hoverIdx >= 0 && stopsLocal[hoverIdx] ? hoverMeetingId : null
+    const hoverMeetingAnimChanged =
+      previousB2HoverMeetingIdForTeardropAnimRef.current !== hoverMeetingIdForAnim
+    previousB2HoverMeetingIdForTeardropAnimRef.current = hoverMeetingIdForAnim
+
+    if (
+      !mapInPageEmbed &&
+      !timelineHoverActive &&
+      hoverIdx >= 0 &&
+      hoverMeetingAnimChanged &&
+      stopsLocal[hoverIdx] &&
+      !(selectionActiveIdx >= 0 && hoverIdx === selectionActiveIdx)
+    ) {
+      const poiOrderH = getPoiOrderForStopIndex(stopsLocal, vid, hoverIdx)
+      const ocH = overlap[hoverIdx] ?? false
+      const elH = markerElsRef.current[hoverIdx]
+      const teardropH = isMapTeardropPin(
+        true,
+        stopsLocal[hoverIdx],
+        vid,
+        poiOrderH,
+        ocH,
+      )
+      if (teardropH && elH) {
+        replayMapPinTeardropIntroAnimation(elH)
+      }
+    }
+
+    const timelineHoverIdForAnim =
+      timelineHoverActive && stopsLocal[timelineHoverIdx] ? timelineHoverId : null
+    const timelineHoverAnimChanged =
+      previousTimelineHoverStopIdForTeardropAnimRef.current !== timelineHoverIdForAnim
+
+    if (
+      hoverTeardropAnimPrimedRef.current &&
+      !mapInPageEmbed &&
+      timelineHoverIdx >= 0 &&
+      timelineHoverAnimChanged &&
+      stopsLocal[timelineHoverIdx] &&
+      !(selectionActiveIdx >= 0 && timelineHoverIdx === selectionActiveIdx)
+    ) {
+      const poiOrderT = getPoiOrderForStopIndex(stopsLocal, vid, timelineHoverIdx)
+      const elT = markerElsRef.current[timelineHoverIdx]
+      const teardropT = isMapTeardropPin(
+        true,
+        stopsLocal[timelineHoverIdx],
+        vid,
+        poiOrderT,
+        false,
+      )
+      if (teardropT && elT) {
+        replayMapPinTeardropIntroAnimation(elT)
+      }
+    }
+
+    /** Keep in sync every pass so `animChanged` is not stuck true during unprimed dwell (avoids marker churn / disc flash). */
+    previousTimelineHoverStopIdForTeardropAnimRef.current = timelineHoverIdForAnim
+
+    const selChangedForAnim = previousSelectedStopIdForTeardropAnimRef.current !== selId
+    if (
+      showMapPinSelected &&
+      selIdx >= 0 &&
+      selChangedForAnim &&
+      stopsLocal[selIdx]
+    ) {
+      const poiOrderSel = getPoiOrderForStopIndex(stopsLocal, vid, selIdx)
+      const ocSel = mapInPageEmbed ? true : (overlap[selIdx] ?? false)
+      const activeEl = markerElsRef.current[selIdx]
+      const teardropSel = isMapTeardropPin(
+        true,
+        stopsLocal[selIdx],
+        vid,
+        poiOrderSel,
+        ocSel,
+      )
+      if (teardropSel && activeEl) {
+        replayMapPinTeardropIntroAnimation(activeEl)
+      }
+    }
+    previousSelectedStopIdForTeardropAnimRef.current = selId
+
+    markerInViewAnimCleanupRef.current?.()
+    const { cleanup, flushDeferred } = attachMarkerTeardropInViewAnimation(
+      markerElsRef,
+      () => mapWrapInViewportRef.current,
+    )
+    deferredPinIntroFlushRef.current = flushDeferred
+    markerInViewAnimCleanupRef.current = () => {
+      cleanup()
+      deferredPinIntroFlushRef.current = null
+    }
   }
 
   const closeMobileSheet = useCallback(() => {
@@ -909,6 +1364,85 @@ export function LogisticsMap({
   }, [routeLngLat])
 
   useEffect(() => {
+    if (!mapReady) return
+    syncMarkersAppearanceRef.current()
+  }, [
+    mapReady,
+    selectedStopId,
+    highlightSelectedPin,
+    lastSelectSource,
+    b2HoverMeetingId,
+    b2CommittedPickupId,
+    isMobile,
+    mobileSheetOpen,
+    variantId,
+    timelineHoverStopId,
+    expandedStopId,
+  ])
+
+  useEffect(() => {
+    hoverTeardropAnimPrimedRef.current = false
+  }, [variantId])
+
+  /** First list-hover session: wait `HOVER_TEARDROP_FIRST_ANIM_DWELL_MS` before priming instant hover replays. */
+  useEffect(() => {
+    if (hoverTeardropDwellTimerRef.current) {
+      clearTimeout(hoverTeardropDwellTimerRef.current)
+      hoverTeardropDwellTimerRef.current = null
+    }
+    /** Leaving the row clears the dwell timer; next hover starts the 2s window again (until primed). */
+    if (timelineHoverStopId == null || timelineHoverStopId === '') {
+      return
+    }
+    if (hoverTeardropAnimPrimedRef.current) {
+      return
+    }
+    const id = timelineHoverStopId
+    hoverTeardropDwellTimerRef.current = setTimeout(() => {
+      hoverTeardropDwellTimerRef.current = null
+      if (timelineHoverStopIdRef.current !== id) return
+      hoverTeardropAnimPrimedRef.current = true
+      /** Force one `animChanged` so the first intro replay runs after dwell (steady hover tracks id above). */
+      previousTimelineHoverStopIdForTeardropAnimRef.current = null
+      syncMarkersAppearanceRef.current()
+    }, HOVER_TEARDROP_FIRST_ANIM_DWELL_MS)
+    return () => {
+      if (hoverTeardropDwellTimerRef.current) {
+        clearTimeout(hoverTeardropDwellTimerRef.current)
+        hoverTeardropDwellTimerRef.current = null
+      }
+    }
+  }, [timelineHoverStopId])
+
+  /** When the embedded map block intersects the viewport (any amount), allow deferred pin teardrop intros. */
+  useEffect(() => {
+    const wrap = wrapRef.current
+    if (!wrap || !mapReady) return
+
+    const applyEntries = (entries: IntersectionObserverEntry[]) => {
+      let ok = false
+      for (const e of entries) {
+        if (e.target !== wrap) continue
+        ok = e.isIntersecting && e.intersectionRatio > 0
+      }
+      mapWrapInViewportRef.current = ok
+      if (ok) deferredPinIntroFlushRef.current?.()
+    }
+
+    const io = new IntersectionObserver(applyEntries, {
+      root: null,
+      threshold: [0, 0.01, 0.1, 0.25, 0.5, 0.75, 1],
+    })
+    io.observe(wrap)
+    const pending = io.takeRecords()
+    if (pending.length) applyEntries(pending)
+
+    return () => {
+      io.disconnect()
+    }
+  }, [mapReady])
+
+  useEffect(() => {
     stopsRef.current = stops
     onSelectRef.current = onSelectStop
   }, [stops, onSelectStop])
@@ -938,7 +1472,7 @@ export function LogisticsMap({
       zoom: 13,
       attributionControl: false,
       dragPan: true,
-      scrollZoom: true,
+      scrollZoom: false,
       doubleClickZoom: true,
       touchZoomRotate: true,
       boxZoom: true,
@@ -977,35 +1511,36 @@ export function LogisticsMap({
     map.on('dragstart', revealRecentreIfAllowed)
     map.on('zoomstart', revealRecentreIfAllowed)
 
+    /**
+     * True user zoom (wheel, pinch, double-click, trackpad) — not our `fitRouteOverview` camera.
+     * `fitRouteOverview` bumps `programmaticOverviewCameraDepthRef` until `idle` so we don’t clear overview during route fits.
+     */
+    const clearOverviewModeOnUserZoom = (e: maplibregl.MapLibreEvent) => {
+      if (cancelled) return
+      if (programmaticOverviewCameraDepthRef.current > 0) return
+      if (e.originalEvent) overviewModeRef.current = false
+    }
+    map.on('zoomend', clearOverviewModeOnUserZoom)
+
     const resize = () => {
       map.resize()
     }
 
-    let resizeOverviewTimer: ReturnType<typeof setTimeout> | undefined
     let attributionCollapseTimer: ReturnType<typeof setTimeout> | undefined
     let attributionFadeFallbackTimer: ReturnType<typeof setTimeout> | undefined
-    const scheduleOverviewRefit = () => {
-      window.clearTimeout(resizeOverviewTimer)
-      resizeOverviewTimer = window.setTimeout(() => {
-        if (cancelled || !overviewModeRef.current) return
-        const m = mapRef.current
-        if (!m) return
-        bumpIgnoreMoveEnd(80)
-        fitRouteOverview(m, routeCoordsRef.current, {
-          duration: 0,
-          isMobile: interactionRef.current.isMobile,
-        })
-        requestAnimationFrame(() => syncMarkersAppearanceRef.current())
-      }, 140)
-    }
 
+    /** Only update GL canvas size — do not refit bounds here (was undoing user zoom). */
     const ro = new ResizeObserver(() => {
       resize()
-      scheduleOverviewRefit()
     })
     if (wrapRef.current) ro.observe(wrapRef.current)
 
-    window.addEventListener('orientationchange', resize)
+    /** Update canvas size only — do not `fitBounds` here; window `resize` was fighting user zoom. */
+    const onWindowResizeOrOrientation = () => {
+      resize()
+    }
+    window.addEventListener('resize', onWindowResizeOrOrientation)
+    window.addEventListener('orientationchange', onWindowResizeOrOrientation)
 
     requestAnimationFrame(() => {
       resize()
@@ -1018,7 +1553,11 @@ export function LogisticsMap({
       const idRoute = `route-${safeKey}`
       const idLine = `route-line-${safeKey}`
 
-      const curvedCoords = buildCurvedRouteLngLat(routeLngLat)
+      const baseLineCoords = routePolylineLngLat ?? routeLngLat
+      const curvedCoords =
+        baseLineCoords.length >= 2 ? buildCurvedRouteLngLat(baseLineCoords) : []
+      const lineVisible =
+        showItineraryPolyline !== false && curvedCoords.length >= 2
 
       map.addSource(idRoute, {
         type: 'geojson',
@@ -1027,7 +1566,7 @@ export function LogisticsMap({
           properties: {},
           geometry: {
             type: 'LineString',
-            coordinates: curvedCoords,
+            coordinates: curvedCoords.length >= 2 ? curvedCoords : [],
           },
         },
       })
@@ -1037,6 +1576,7 @@ export function LogisticsMap({
         type: 'line',
         source: idRoute,
         layout: {
+          visibility: lineVisible ? 'visible' : 'none',
           'line-cap': 'round',
           'line-join': 'round',
         },
@@ -1061,10 +1601,16 @@ export function LogisticsMap({
         const stopAtI = stopsRef.current[i]
         const poiOrder = getPoiOrderForStopIndex(stopsRef.current, variantId, i)
         markerEl.className = mapMarkerWrapperClass(stopAtI, variantId, false, poiOrder, false)
-        markerEl.innerHTML = markerSvgForStop(stopAtI, variantId, poiOrder, false)
+        const b2c = b2CommittedPickupIdRef.current
+        const initialB2DiscChk =
+          variantId === 'b2' &&
+          stopAtI?.kind === 'meeting' &&
+          b2c != null &&
+          stopAtI.id === b2c
+        markerEl.innerHTML = markerSvgForStop(stopAtI, variantId, poiOrder, false, b2c)
         markerEl.setAttribute(
           'data-marker-html-key',
-          `pl:${variantId}:${stopAtI?.id ?? ''}:${poiOrder ?? ''}:f`,
+          `pl:${variantId}:${stopAtI?.id ?? ''}:${poiOrder ?? ''}:f${initialB2DiscChk ? ':b2chk' : ''}`,
         )
         markerEl.dataset.mapPinActive = '0'
         markerEl.style.zIndex = MAP_MARKER_Z_INACTIVE
@@ -1087,6 +1633,16 @@ export function LogisticsMap({
               return
             }
 
+            /** B2: meeting pickup is chosen only in the timeline list / dropdown, not by tapping map pins. */
+            const currentStop = stopsRef.current[i]
+            if (
+              variantIdRef.current === 'b2' &&
+              i < 3 &&
+              currentStop?.kind === 'meeting'
+            ) {
+              return
+            }
+
             // Mobile sheet: teardrop + popup on the same tap; camera zoom runs in parallel (next frames).
             if (mobile && sheetOpen) {
               onSelectRef.current(stop.id, 'mapModal')
@@ -1100,7 +1656,15 @@ export function LogisticsMap({
                 ignoreMoveEndForRecentreUntilRef.current,
                 Date.now() + 150,
               )
-              openPoiPopup(map, coord, stop, poiPopupRef, { isMobile: true })
+              if (poiPopupContentRef.current === 'image-only') {
+                poiPopupRef.current?.remove()
+                poiPopupRef.current = null
+              } else {
+                openPoiPopup(map, coord, stop, poiPopupRef, {
+                  isMobile: true,
+                  content: poiPopupContentRef.current,
+                })
+              }
               requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                   runMobileModalPoiFocus(map, coord, routeCoordsRef.current, i, POI_FOCUS_DURATION_MS)
@@ -1110,7 +1674,15 @@ export function LogisticsMap({
             }
 
             onSelectRef.current(stop.id, 'map')
-            openPoiPopup(map, coord, stop, poiPopupRef, { isMobile: false })
+            if (poiPopupContentRef.current === 'image-only') {
+              poiPopupRef.current?.remove()
+              poiPopupRef.current = null
+            } else {
+              openPoiPopup(map, coord, stop, poiPopupRef, {
+                isMobile: false,
+                content: poiPopupContentRef.current,
+              })
+            }
           })
         }
 
@@ -1148,7 +1720,8 @@ export function LogisticsMap({
 
       const applyOverview = () => {
         if (cancelled) return
-        fitRouteOverview(map, routeLngLat, { duration: 0, isMobile: initialMobile })
+        /** Fast stabilizing passes while layout settles; animated fit happens on `idle` below. */
+        fitRouteOverview(map, routeLngLat, { duration: 0, isMobile: initialMobile }, programmaticOverviewCameraDepthRef)
       }
       applyOverview()
       requestAnimationFrame(() => {
@@ -1158,7 +1731,15 @@ export function LogisticsMap({
       map.once('idle', () => {
         if (cancelled) return
         bumpIgnoreMoveEnd(80)
-        fitRouteOverview(map, routeLngLat, { duration: 0, isMobile: initialMobile })
+        fitRouteOverview(
+          map,
+          routeLngLat,
+          {
+            duration: initialMobile ? OVERVIEW_ZOOM_ANIM_MS_MOBILE : OVERVIEW_ZOOM_ANIM_MS_DESKTOP,
+            isMobile: initialMobile,
+          },
+          programmaticOverviewCameraDepthRef,
+        )
         syncMarkersAppearanceRef.current()
         map.once('idle', () => {
           if (cancelled) return
@@ -1208,7 +1789,6 @@ export function LogisticsMap({
 
     return () => {
       cancelled = true
-      window.clearTimeout(resizeOverviewTimer)
       window.clearTimeout(attributionCollapseTimer)
       window.clearTimeout(attributionFadeFallbackTimer)
       overviewModeRef.current = true
@@ -1216,6 +1796,7 @@ export function LogisticsMap({
       map.off('moveend', revealRecentreIfAllowed)
       map.off('dragstart', revealRecentreIfAllowed)
       map.off('zoomstart', revealRecentreIfAllowed)
+      map.off('zoomend', clearOverviewModeOnUserZoom)
       if (onMarkerOverlapSync) {
         map.off('moveend', onMarkerOverlapSync)
         map.off('zoomend', onMarkerOverlapSync)
@@ -1224,18 +1805,54 @@ export function LogisticsMap({
       cancelAnimationFrame(overlapRaf)
       map.off('load', onLoad)
       ro.disconnect()
-      window.removeEventListener('orientationchange', resize)
+      window.removeEventListener('resize', onWindowResizeOrOrientation)
+      window.removeEventListener('orientationchange', onWindowResizeOrOrientation)
       poiPopupRef.current?.remove()
       poiPopupRef.current = null
       markersRef.current.forEach((m) => m.remove())
       markersRef.current = []
       markerElsRef.current = []
+      markerInViewAnimCleanupRef.current?.()
+      markerInViewAnimCleanupRef.current = null
+      previousSelectedStopIdForTeardropAnimRef.current = undefined
+      previousB2HoverMeetingIdForTeardropAnimRef.current = null
       map.remove()
       mapRef.current = null
       setMapReady(false)
       setShowRecentre(false)
     }
-  }, [mapKey, routeLngLat, variantId])
+  /**
+   * Do not depend on `showItineraryPolyline` here — B2 flips it when the first meeting is chosen, and
+   * re-running this effect would `map.remove()` the instance (flash) and cancel in-flight re-centre fits.
+   * Visibility + GeoJSON are updated in the effect below.
+   */
+  }, [mapKey, routeLngLat, routePolylineLngLat, variantId])
+
+  /** Toggle dashed route when B2 reveals itinerary after pickup selection. */
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !mapReady) return
+    const safeKey = mapKey.replace(/[^a-zA-Z0-9_-]/g, '')
+    const idLine = `route-line-${safeKey}`
+    if (!map.getLayer(idLine)) return
+    const baseCoords = routePolylineLngLat ?? routeLngLat
+    const curved =
+      baseCoords.length >= 2 ? buildCurvedRouteLngLat(baseCoords) : []
+    const visible = showItineraryPolyline !== false && curved.length >= 2
+    map.setLayoutProperty(idLine, 'visibility', visible ? 'visible' : 'none')
+    const idRoute = `route-${safeKey}`
+    const src = map.getSource(idRoute) as maplibregl.GeoJSONSource | undefined
+    if (src && curved.length >= 2) {
+      src.setData({
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: curved,
+        },
+      })
+    }
+  }, [mapReady, mapKey, routeLngLat, routePolylineLngLat, showItineraryPolyline])
 
   useLayoutEffect(() => {
     const map = mapRef.current
@@ -1276,7 +1893,21 @@ export function LogisticsMap({
           ignoreMoveEndForRecentreUntilRef.current,
           Date.now() + 150,
         )
-        fitRouteOverview(map, routeCoordsRef.current, { duration: 0, isMobile: true })
+        const ovCoords = routeCoordsForVariantOverview(
+          variantIdRef.current,
+          routeCoordsRef.current,
+          stopsRef.current,
+          b2CommittedPickupIdRef.current,
+        )
+        fitRouteOverview(
+          map,
+          ovCoords,
+          {
+            duration: OVERVIEW_ZOOM_ANIM_MS_MOBILE,
+            isMobile: true,
+          },
+          programmaticOverviewCameraDepthRef,
+        )
       }
       prevMobileSheetOpenRef.current = mobileSheetOpen
       return
@@ -1298,7 +1929,21 @@ export function LogisticsMap({
         ignoreMoveEndForRecentreUntilRef.current,
         Date.now() + 150,
       )
-      fitRouteOverview(map, routeCoordsRef.current, { duration: 0, isMobile: true })
+      const ovCoords = routeCoordsForVariantOverview(
+        variantIdRef.current,
+        routeCoordsRef.current,
+        stopsRef.current,
+        b2CommittedPickupIdRef.current,
+      )
+      fitRouteOverview(
+        map,
+        ovCoords,
+        {
+          duration: OVERVIEW_ZOOM_ANIM_MS_MOBILE,
+          isMobile: true,
+        },
+        programmaticOverviewCameraDepthRef,
+      )
     }
 
     prevMobileSheetOpenRef.current = mobileSheetOpen
@@ -1314,9 +1959,64 @@ export function LogisticsMap({
     }
   }, [mapReady, isMobile, mobileSheetOpen])
 
+  /**
+   * Same framing as the visible “Re-centre” control (`routeCoordsForVariantOverview` + 800ms overview).
+   * Optional `syncParent: 'after'` defers `onRecentre` until after `fitRouteOverview` starts (rare debugging).
+   */
+  const runRecentreLikeButton = useCallback(
+    (fitIsMobile: boolean, opts?: { syncParent?: 'before' | 'after' }) => {
+      const syncParent = opts?.syncParent ?? 'before'
+      poiPopupRef.current?.remove()
+      poiPopupRef.current = null
+      setPoiDescriptionSheet(null)
+      const applyFit = () => {
+        const m = mapRef.current
+        if (!m) return
+        m.stop()
+        overviewModeRef.current = true
+        setShowRecentre(false)
+        ignoreMoveEndForRecentreUntilRef.current = Math.max(
+          ignoreMoveEndForRecentreUntilRef.current,
+          Date.now() + 950,
+        )
+        const ovCoords = routeCoordsForVariantOverview(
+          variantId,
+          routeLngLat,
+          stops,
+          b2CommittedPickupId,
+        )
+        fitRouteOverview(m, ovCoords, { duration: 800, isMobile: fitIsMobile }, programmaticOverviewCameraDepthRef)
+      }
+      if (syncParent === 'before') {
+        onRecentre?.()
+        applyFit()
+      } else {
+        applyFit()
+        onRecentre?.()
+      }
+    },
+    [onRecentre, variantId, routeLngLat, stops, b2CommittedPickupId],
+  )
+
   useEffect(() => {
     const map = mapRef.current
     if (!mapReady || !map) return
+
+    /**
+     * Must run before the `idx` / `routeLngLat[idx]` guard below. That guard can return early when coords
+     * and stops are temporarily misaligned or a vertex is missing — meeting picks would otherwise skip
+     * `runRecentreLikeButton` entirely (user sees no re-centre).
+     */
+    if (lastSelectSource === 'b2MeetingPick') {
+      syncMarkersAppearanceRef.current()
+      previousSelectionForCameraRef.current = selectedStopId
+      try {
+        runRecentreLikeButton(isMobile)
+      } finally {
+        prevHighlightForCameraRef.current = highlightSelectedPin
+      }
+      return
+    }
 
     const idx = stops.findIndex((s) => s.id === selectedStopId)
     if (idx < 0 || !routeLngLat[idx]) {
@@ -1336,7 +2036,21 @@ export function LogisticsMap({
           ignoreMoveEndForRecentreUntilRef.current,
           Date.now() + 850,
         )
-        fitRouteOverview(map, routeCoordsRef.current, { duration: 600, isMobile: false })
+        const ovCoords = routeCoordsForVariantOverview(
+          variantId,
+          routeLngLat,
+          stops,
+          b2CommittedPickupId,
+        )
+        fitRouteOverview(
+          map,
+          ovCoords,
+          {
+            duration: OVERVIEW_ZOOM_ANIM_MS_DESKTOP,
+            isMobile: false,
+          },
+          programmaticOverviewCameraDepthRef,
+        )
       }
       return
     }
@@ -1350,9 +2064,16 @@ export function LogisticsMap({
       highlightSelectedPin && !prevHighlightForCameraRef.current
 
     try {
-      // Landing: mobile preview keeps overview; desktop may zoom on first POI selection too.
+      // Landing: mobile preview keeps overview. Desktop: default-expanded first row keeps overview until user changes list selection.
       if (previous === undefined) {
         if (isMobile) return
+        if (
+          lastSelectSource === 'list' &&
+          landingDefaultExpandedStopId !== '' &&
+          selectedStopId === landingDefaultExpandedStopId
+        ) {
+          return
+        }
       } else if (previous === selectedStopId && !highlightJustEnabled) {
         return
       }
@@ -1374,6 +2095,18 @@ export function LogisticsMap({
 
       // Desktop: zoom to the selected POI when choosing from the timeline or from a map pin.
       if (!isMobile) {
+        const selStop = stops[idx]
+        /** B2: committed meeting is framed by overview fits — never tight zoom here (avoids zoom-in then overview). */
+        if (
+          variantId === 'b2' &&
+          selStop?.kind === 'meeting' &&
+          b2CommittedPickupId != null &&
+          selStop.id === b2CommittedPickupId
+        ) {
+          overviewModeRef.current = true
+          setShowRecentre(false)
+          return
+        }
         const center = routeLngLat[idx]
         overviewModeRef.current = false
         setShowRecentre(true)
@@ -1396,7 +2129,56 @@ export function LogisticsMap({
     isMobile,
     mobileSheetOpen,
     lastSelectSource,
+    landingDefaultExpandedStopId,
     variantId,
+    b2CommittedPickupId,
+    runRecentreLikeButton,
+  ])
+
+  /** Desktop: opening a stop from the timeline also opens the map popup (with hero image), mirroring pin taps. */
+  useEffect(() => {
+    const map = mapRef.current
+    if (!mapReady || !map || isMobile) return
+    if (lastSelectSource !== 'list') return
+
+    const idx = stops.findIndex((s) => s.id === selectedStopId)
+    if (idx < 0 || !routeLngLat[idx]) {
+      previousListSelectionForPopupRef.current = selectedStopId
+      return
+    }
+
+    const skipLandingDefaultPopup =
+      previousListSelectionForPopupRef.current === undefined &&
+      landingDefaultExpandedStopId !== '' &&
+      selectedStopId === landingDefaultExpandedStopId
+
+    previousListSelectionForPopupRef.current = selectedStopId
+
+    if (skipLandingDefaultPopup) return
+
+    const stop = stops[idx]
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (poiPopupContentRef.current === 'image-only') {
+          poiPopupRef.current?.remove()
+          poiPopupRef.current = null
+        } else {
+          openPoiPopup(map, routeLngLat[idx], stop, poiPopupRef, {
+            isMobile: false,
+            content: poiPopupContentRef.current,
+          })
+        }
+      })
+    })
+  }, [
+    selectedStopId,
+    lastSelectSource,
+    mapReady,
+    isMobile,
+    stops,
+    routeLngLat,
+    landingDefaultExpandedStopId,
+    poiPopupContent,
   ])
 
   const showDesktopChrome = !isMobile
@@ -1411,7 +2193,7 @@ export function LogisticsMap({
     <>
       <div
         ref={wrapRef}
-        className={`relative h-[200px] w-full overflow-hidden rounded-2xl border border-stone-200/70 bg-stone-50 shadow-sm shadow-stone-900/5 ring-1 ring-stone-200/50 md:h-[480px] [&_.maplibregl-ctrl-attrib]:text-[10px] [&_.maplibregl-ctrl-attrib]:leading-snug [&_.maplibregl-ctrl-attrib_a]:text-[10px] ${mobilePreviewCursor}`}
+        className={`relative h-[200px] w-full overflow-hidden rounded-2xl border border-stone-200/70 bg-stone-50 md:h-[480px] [&_.maplibregl-ctrl-attrib]:text-[10px] [&_.maplibregl-ctrl-attrib]:leading-snug [&_.maplibregl-ctrl-attrib_a]:text-[10px] ${mobilePreviewCursor}`}
       >
         <div ref={previewMapHostRef} className="absolute inset-0 min-h-0">
           <div
@@ -1424,7 +2206,9 @@ export function LogisticsMap({
           />
         </div>
         {showDesktopChrome && showRecentre ? (
-          <div className="pointer-events-none absolute left-1/2 top-2.5 z-20 flex -translate-x-1/2 justify-center">
+          <div
+            className={`pointer-events-none absolute left-1/2 top-2.5 flex -translate-x-1/2 justify-center ${MAP_CHROME_ABOVE_MARKERS_CLASS}`}
+          >
             <button
               type="button"
               disabled={!mapReady}
@@ -1432,20 +2216,7 @@ export function LogisticsMap({
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
-                poiPopupRef.current?.remove()
-                poiPopupRef.current = null
-                setPoiDescriptionSheet(null)
-                onRecentre?.()
-                const m = mapRef.current
-                if (!m) return
-                m.stop()
-                overviewModeRef.current = true
-                setShowRecentre(false)
-                ignoreMoveEndForRecentreUntilRef.current = Math.max(
-                  ignoreMoveEndForRecentreUntilRef.current,
-                  Date.now() + 950,
-                )
-                fitRouteOverview(m, routeLngLat, { duration: 800, isMobile: false })
+                runRecentreLikeButton(false)
               }}
               aria-label="Re-centre map on the full itinerary"
             >
@@ -1454,7 +2225,9 @@ export function LogisticsMap({
           </div>
         ) : null}
         {showDesktopChrome ? (
-          <div className="absolute right-2.5 top-2.5 z-20 flex flex-col gap-0.5 overflow-hidden rounded-xl border border-stone-200 bg-white/95 shadow-md backdrop-blur-sm">
+          <div
+            className={`absolute right-2.5 top-2.5 flex flex-col gap-0.5 overflow-hidden rounded-xl border border-stone-200 bg-white/95 shadow-md backdrop-blur-sm ${MAP_CHROME_ABOVE_MARKERS_CLASS}`}
+          >
             <button
               type="button"
               className="flex h-9 w-9 items-center justify-center text-lg font-medium text-stone-700 transition hover:bg-stone-50 active:bg-stone-100"
@@ -1530,7 +2303,9 @@ export function LogisticsMap({
             <div className="relative min-h-0 flex-1 overflow-hidden">
               <div ref={sheetMapHostRef} className="absolute inset-0 min-h-0 bg-stone-50" />
               {showRecentre ? (
-                <div className="pointer-events-none absolute left-1/2 top-2.5 z-20 flex -translate-x-1/2 justify-center">
+                <div
+                  className={`pointer-events-none absolute left-1/2 top-2.5 flex -translate-x-1/2 justify-center ${MAP_CHROME_ABOVE_MARKERS_CLASS}`}
+                >
                   <button
                     type="button"
                     disabled={!mapReady}
@@ -1538,20 +2313,7 @@ export function LogisticsMap({
                     onClick={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
-                      poiPopupRef.current?.remove()
-                      poiPopupRef.current = null
-                      setPoiDescriptionSheet(null)
-                      onRecentre?.()
-                      const m = mapRef.current
-                      if (!m) return
-                      m.stop()
-                      overviewModeRef.current = true
-                      setShowRecentre(false)
-                      ignoreMoveEndForRecentreUntilRef.current = Math.max(
-                        ignoreMoveEndForRecentreUntilRef.current,
-                        Date.now() + 950,
-                      )
-                      fitRouteOverview(m, routeLngLat, { duration: 800, isMobile: true })
+                      runRecentreLikeButton(true)
                     }}
                     aria-label="Re-centre map on the full itinerary"
                   >
@@ -1559,7 +2321,9 @@ export function LogisticsMap({
                   </button>
                 </div>
               ) : null}
-              <div className="absolute right-2.5 top-2.5 z-20 flex flex-col gap-0.5 overflow-hidden rounded-xl border border-stone-200 bg-white/95 shadow-md backdrop-blur-sm">
+              <div
+                className={`absolute right-2.5 top-2.5 flex flex-col gap-0.5 overflow-hidden rounded-xl border border-stone-200 bg-white/95 shadow-md backdrop-blur-sm ${MAP_CHROME_ABOVE_MARKERS_CLASS}`}
+              >
                   <button
                     type="button"
                     className="flex h-9 w-9 items-center justify-center text-lg font-medium text-stone-700 transition hover:bg-stone-50 active:bg-stone-100"

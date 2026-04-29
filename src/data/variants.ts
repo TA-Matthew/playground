@@ -1,6 +1,6 @@
 import { viatorListing } from './viatorListing'
 
-export type VariantId = 'a' | 'b' | 'c'
+export type VariantId = 'a' | 'b' | 'b2' | 'c'
 
 export interface Stop {
   id: string
@@ -14,6 +14,9 @@ export interface Stop {
    * Variant A POIs omit `kind` (treated as normal POIs).
    */
   kind?: 'poi' | 'meeting' | 'end' | 'passby'
+  /** Optional hero for map popups (desktop + mobile sheet) — from gallery / media. */
+  popupImageSrc?: string
+  popupImageAlt?: string
 }
 
 export interface BookingContent {
@@ -28,7 +31,7 @@ export interface BookingContent {
   bookAheadSubtitle: string
 }
 
-/** Variant A — “Meeting and Pickup” card above itinerary (desktop: two columns; mobile: stacked). */
+/** Shared meeting / end copy for the `MeetingAndPickupCard` (placement in `ExperiencePage` is variant-specific). */
 export type MeetingAndPickupContent = {
   meeting: {
     address: string
@@ -48,14 +51,18 @@ export interface ExperienceVariant {
   label: string
   tourTitle: string
   ratingLine: string
-  /** Variant A only — lead + expanded copy above itinerary (Variant B omits for UXR). */
+  /** Optional lead + expanded copy above itinerary + map (`LogisticsBlock`). Variant A/B use shared PDP copy where shown. */
   whatToExpectIntro?: string
   whatToExpectExtra?: string
-  /** Variant A only — meeting / end card above itinerary. */
+  /** Optional “Meeting and Pickup” card — order relative to Itinerary is set in the page. */
   meetingAndPickup?: MeetingAndPickupContent
   stops: Stop[]
   /** GeoJSON order: [lng, lat][] — must match stops order */
   routeLngLat: [number, number][]
+  /**
+   * Dashed itinerary path (when shown). B2: core POI path only — meetings/end use `routeLngLat` for pins.
+   */
+  routePolylineLngLat?: [number, number][]
   booking: BookingContent
 }
 
@@ -77,11 +84,16 @@ const VATICAN_ROUTE_B: [number, number][] = VATICAN_ROUTE.map(
   ([lng, lat]) => [lng + 0.0006, lat - 0.00025] as [number, number],
 )
 
+const PDP_MEDIA = viatorListing.media
+const PDP_THUMB = PDP_MEDIA.thumbnails
+
 const STOPS_A: Stop[] = [
   {
     id: 'poi-borgo',
     title: 'Borgo',
     durationLine: '40 minutes • Admission Ticket Free',
+    popupImageSrc: PDP_THUMB[3]?.src,
+    popupImageAlt: PDP_THUMB[3]?.alt,
     description: `Meet your tour guide at our office, located in the oldest neighbourhoods of the Vatican, Borgo Pio. Following a self introduction by your guide, you will walk through the charming shops of the Borgo, as he/she shares some local tips for eating and site seeing in Rome, including off the beaten track sites that you must visit during your holiday!
 
 Some background will also be provided on the history of the Sistine Chapel (we do it here as the chapel forbids noise and travellers are expected to observe silence once entering).`,
@@ -91,6 +103,8 @@ Some background will also be provided on the history of the Sistine Chapel (we d
     kind: 'passby',
     title: 'Via Della Conciliazione (Pass By)',
     durationLine: 'Pass by',
+    popupImageSrc: PDP_THUMB[1]?.src,
+    popupImageAlt: PDP_THUMB[1]?.alt,
     description:
       'Admire the flags and surrounding embassies as you walk through this street, which serve as the primary access point to St. Peter\'s Square, and by extension, to the Vatican City itself.',
   },
@@ -98,6 +112,8 @@ Some background will also be provided on the history of the Sistine Chapel (we d
     id: 'poi-st-peters-square',
     title: 'St. Peter\'s Square',
     durationLine: '20 minutes • Admission Ticket Free',
+    popupImageSrc: PDP_THUMB[1]?.src,
+    popupImageAlt: PDP_THUMB[1]?.alt,
     description: `We arrive at St. Peter's Square, which is marked by a towering Egyptian obelisk and enveloped by columns and statues of saints. Hear about the history of the square and the legendary artist Bernini who designed it.
 
 Fun fact — the Pope addresses crowds from his apartment window overlooking St. Peter's Square, during the Papal audience held every Wednesday and Sunday morning.`,
@@ -106,6 +122,8 @@ Fun fact — the Pope addresses crowds from his apartment window overlooking St.
     id: 'poi-citta-vaticano',
     title: 'Città del Vaticano',
     durationLine: '15 minutes • Admission Ticket Free',
+    popupImageSrc: PDP_THUMB[2]?.src,
+    popupImageAlt: PDP_THUMB[2]?.alt,
     description: `En route to the museum, you will get to see and hear about how residents of the smallest city in the world go about their day to day life (including getting their mail!) Snap a pic of the Swiss guards — the pontifical bodyguards in their distinctly Renaissance uniforms.
 
 Our tip: send yourself a postcard after the tour. The post office sells a variety of memorabilia, including stamps with Pope Francis's face!
@@ -116,6 +134,8 @@ Then, slowly head towards the museum's entrance, where you will be led to a spec
     id: 'poi-vatican-museums',
     title: 'Vatican Museums',
     durationLine: '45 minutes • Admission Ticket Included',
+    popupImageSrc: PDP_THUMB[0]?.src,
+    popupImageAlt: PDP_THUMB[0]?.alt,
     description:
       'Be prepared to hear stories as your guide walks you through an astonishing collection of Roman and Greek statues, the gallery of tapestries, and a gallery of maps depicting 16th century Italy.',
   },
@@ -123,6 +143,8 @@ Then, slowly head towards the museum's entrance, where you will be led to a spec
     id: 'poi-sistine',
     title: 'Sistine Chapel',
     durationLine: '15 minutes • Admission Ticket Included',
+    popupImageSrc: PDP_MEDIA.hero.src,
+    popupImageAlt: PDP_MEDIA.hero.alt,
     description: `Admire Michelangelo's famous works, including the Creation of Adam and the Last Judgement. This spectacular fresco evokes lifelike images within the mind, vividly portraying stories of mankind in the biblical era.
 
 Note that the museum requires visitors to observe silence and a dress code (knees and shoulders covered).`,
@@ -131,6 +153,8 @@ Note that the museum requires visitors to observe silence and a dress code (knee
     id: 'poi-st-peters-basilica',
     title: 'St. Peter\'s Basilica',
     durationLine: '15 minutes • Admission Ticket Free',
+    popupImageSrc: PDP_THUMB[2]?.src,
+    popupImageAlt: PDP_THUMB[2]?.alt,
     description:
       'You will be brought in front of St. Peter\'s Church, where a special entrance will allow you to enter directly from the museum and bypass the long queue out in the square. Got questions? Ask your guide before parting ways!',
   },
@@ -163,6 +187,8 @@ const STOP_B_MEETING: Stop = {
   kind: 'meeting',
   title: 'Meeting point',
   durationLine: 'Via Plauto, 17, 00193 Roma RM, Italy',
+  popupImageSrc: PDP_THUMB[3]?.src,
+  popupImageAlt: PDP_THUMB[3]?.alt,
   description:
     "The meeting point is located in Borgo Pio, near St. Peter's square. The exact address is Via Plauto 17/A. IMPORTANT: Please check your booking for the start time of the Vatican ENGLISH tour. Arrive 20 minutes before at the meeting point (Via Plauto 17A) for check-in. Thank you!",
 }
@@ -172,6 +198,8 @@ const STOP_B_END: Stop = {
   kind: 'end',
   title: 'End point',
   durationLine: 'Saint Peter’s Basilica',
+  popupImageSrc: PDP_THUMB[1]?.src,
+  popupImageAlt: PDP_THUMB[1]?.alt,
   description: 'Piazza San Pietro, 00120 Città del Vaticano, Vatican City',
 }
 
@@ -179,6 +207,53 @@ const STOP_B_END: Stop = {
 const STOPS_B: Stop[] = [STOP_B_MEETING, ...STOPS_B_CORE, STOP_B_END]
 
 const ROUTE_LNG_LAT_B: [number, number][] = [MEETING_LNG_LAT_B, ...VATICAN_ROUTE_B, END_LNG_LAT_B]
+
+/** Rome (Prati / outside Vatican walls) — pickup pins kept off the dashed POI path */
+const B2_MEETING_LNG_LAT: [number, number][] = [
+  [12.4656, 41.9093],
+  [12.4614, 41.9062],
+  MEETING_LNG_LAT_B,
+]
+
+const B2_MEETING_STOPS: Stop[] = [
+  {
+    id: 'b2-meeting-a',
+    kind: 'meeting',
+    title: 'Meeting point',
+    durationLine: 'Piazza del Risorgimento, 00192 Roma RM, Italy',
+    popupImageSrc: PDP_THUMB[3]?.src,
+    popupImageAlt: PDP_THUMB[3]?.alt,
+    description:
+      'North Prati pickup, outside the Vatican walls. Arrive 20 minutes before departure — check your voucher for the exact corner.',
+  },
+  {
+    id: 'b2-meeting-b',
+    kind: 'meeting',
+    title: 'Meeting point',
+    durationLine: 'Via Ottaviano, 00192 Roma RM, Italy',
+    popupImageSrc: PDP_THUMB[1]?.src,
+    popupImageAlt: PDP_THUMB[1]?.alt,
+    description:
+      'Near Ottaviano metro, Rome side. Meet where noted on your voucher — arrive 20 minutes early.',
+  },
+  {
+    id: 'b2-meeting-c',
+    kind: 'meeting',
+    title: 'Meeting point',
+    durationLine: 'Via Plauto, 17, 00193 Roma RM, Italy',
+    popupImageSrc: PDP_THUMB[3]?.src,
+    popupImageAlt: PDP_THUMB[3]?.alt,
+    description:
+      "Borgo Pio pickup near St. Peter's square — same corner as the classic Via Plauto meeting. Arrive 20 minutes before departure; confirm details on your voucher.",
+  },
+]
+
+const STOPS_B2: Stop[] = [...B2_MEETING_STOPS, ...STOPS_B_CORE, STOP_B_END]
+
+const ROUTE_LNG_LAT_B2: [number, number][] = [...B2_MEETING_LNG_LAT, ...VATICAN_ROUTE_B, END_LNG_LAT_B]
+
+/** Main tour walking path (POIs 1–6 legs incl. pass-by) — no meeting/end vertices */
+const ROUTE_POLYLINE_B2_CORE: [number, number][] = [...VATICAN_ROUTE_B]
 
 const MEETING_AND_PICKUP_A: MeetingAndPickupContent = {
   meeting: {
@@ -232,8 +307,32 @@ export const variants: Record<VariantId, ExperienceVariant> = {
     label: 'Variant B',
     tourTitle: viatorListing.tourTitle,
     ratingLine: viatorListing.ratingLine,
+    meetingAndPickup: MEETING_AND_PICKUP_A,
+    whatToExpectIntro: ITINERARY_SECTION_INTRO,
+    whatToExpectExtra: ITINERARY_SECTION_EXTRA,
     stops: STOPS_B,
     routeLngLat: ROUTE_LNG_LAT_B,
+    booking: {
+      priceAmount: '$40.56',
+      badgeExceptionalDeal: 'Exceptional deal',
+      badgeKidsDiscount: 'Discounted rates for kids',
+      dateLabel: 'Wed, Apr 29',
+      travellers: 2,
+      bookAheadTitle: 'Book ahead!',
+      bookAheadSubtitle: 'On average, booked 8 days in advance.',
+    },
+  },
+  b2: {
+    id: 'b2',
+    label: 'B2 (multiple meeting)',
+    tourTitle: viatorListing.tourTitle,
+    ratingLine: viatorListing.ratingLine,
+    meetingAndPickup: MEETING_AND_PICKUP_A,
+    whatToExpectIntro: ITINERARY_SECTION_INTRO,
+    whatToExpectExtra: ITINERARY_SECTION_EXTRA,
+    stops: STOPS_B2,
+    routeLngLat: ROUTE_LNG_LAT_B2,
+    routePolylineLngLat: ROUTE_POLYLINE_B2_CORE,
     booking: {
       priceAmount: '$40.56',
       badgeExceptionalDeal: 'Exceptional deal',
@@ -249,6 +348,7 @@ export const variants: Record<VariantId, ExperienceVariant> = {
     label: 'Variant C',
     tourTitle: viatorListing.tourTitle,
     ratingLine: viatorListing.ratingLine,
+    meetingAndPickup: MEETING_AND_PICKUP_A,
     stops: STOPS_B,
     routeLngLat: ROUTE_LNG_LAT_B,
     booking: {
@@ -267,11 +367,26 @@ export const DEFAULT_VARIANT: VariantId = 'a'
 
 export function getVariant(id: string | null | undefined): VariantId {
   if (id === 'b') return 'b'
+  if (id === 'b2') return 'b2'
   if (id === 'c') return 'c'
   return 'a'
 }
 
-/** Variant B and C share the same itinerary / map behavior (meeting + end stops, B-route offset). */
+/** Variant B, B2, and C share the same itinerary / map behavior (meeting + end stops, B-route offset). */
 export function isVariantBLayout(variantId: VariantId): boolean {
-  return variantId === 'b' || variantId === 'c'
+  return variantId === 'b' || variantId === 'b2' || variantId === 'c'
 }
+
+/** B2 timeline/map: three meeting stops first, then core + end */
+export function isVariantB2TripleMeeting(variantId: VariantId, stops: Stop[]): boolean {
+  return (
+    variantId === 'b2' &&
+    stops.length >= 3 &&
+    stops[0]?.kind === 'meeting' &&
+    stops[1]?.kind === 'meeting' &&
+    stops[2]?.kind === 'meeting'
+  )
+}
+
+/** Single itinerary row + dropdown (`Timeline` uses this id for expand state) */
+export const B2_MEETING_TIMELINE_ROW_ID = 'b2-meeting-row'

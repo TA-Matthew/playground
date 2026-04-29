@@ -1,50 +1,36 @@
 import type { MeetingAndPickupContent } from '../../data/variants'
 
-function googleMapsSearchUrl(query: string): string {
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
-}
-
 export function MeetingAndPickupCard({
   content,
 }: {
   readonly content: MeetingAndPickupContent
 }) {
   return (
-    <div className="flex flex-col gap-0 self-stretch rounded-2xl border border-stone-200/90 bg-white p-6 shadow-sm ring-1 ring-stone-100 md:flex-row md:items-stretch md:gap-0">
+    <div className="flex flex-col gap-0 self-stretch rounded-2xl border border-stone-200/90 bg-white px-4 py-6 md:flex-row md:items-stretch md:gap-0 md:p-6">
       <div className="min-w-0 flex-1 border-b border-stone-200/90 pb-8 md:border-b-0 md:pb-0 md:pr-8">
         <div className="mb-4 flex items-start gap-2">
           <PinIcon className="mt-0.5 h-6 w-6 shrink-0" />
           <h3 className="text-[18px] font-medium leading-6 text-black">Meeting point</h3>
         </div>
         <p className="pdp-meeting-detail-text">{content.meeting.address}</p>
-        <a
-          href={googleMapsSearchUrl(content.meeting.mapsQuery)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-3 inline-flex items-center gap-1 text-[15px] font-medium text-stone-900 underline decoration-stone-300 underline-offset-[3px] hover:decoration-stone-500"
-        >
+        <span className="mt-3 inline-flex cursor-default items-center gap-1 text-[15px] font-medium text-stone-900 underline decoration-stone-300 underline-offset-[3px] pointer-events-none">
           Open in Google Maps
           <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
-        </a>
+        </span>
         <p className="pdp-location-instruction">{content.meeting.directions}</p>
       </div>
 
-      <div className="min-w-0 flex-1 border-stone-200/90 pt-8 md:border-l md:border-t-0 md:pl-8 md:pt-0">
+      <div className="min-w-0 flex-1 border-stone-200/90 pt-4 md:border-l md:border-t-0 md:pl-8 md:pt-0">
         <div className="mb-4 flex items-start gap-2">
           <FlagIcon className="mt-0.5 h-6 w-6 shrink-0" />
           <h3 className="text-[18px] font-medium leading-6 text-black">End point</h3>
         </div>
         <p className="pdp-meeting-detail-text">{content.end.placeName}</p>
         <p className="pdp-meeting-detail-text mt-1">{content.end.address}</p>
-        <a
-          href={googleMapsSearchUrl(content.end.mapsQuery)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-3 inline-flex items-center gap-1 text-[15px] font-medium text-stone-900 underline decoration-stone-300 underline-offset-[3px] hover:decoration-stone-500"
-        >
+        <span className="mt-3 inline-flex cursor-default items-center gap-1 text-[15px] font-medium text-stone-900 underline decoration-stone-300 underline-offset-[3px] pointer-events-none">
           Open in Google Maps
           <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
-        </a>
+        </span>
       </div>
     </div>
   )

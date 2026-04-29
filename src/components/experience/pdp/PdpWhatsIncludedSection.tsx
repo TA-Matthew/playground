@@ -12,37 +12,32 @@ export function PdpWhatsIncludedSection() {
       disableLastBorderReset
       dividerTop
     >
-      <div className="mt-6 grid gap-6 md:grid-cols-2 md:gap-10">
-        <ul className="space-y-3 text-base leading-[1.5] text-[#333]">
+      <div className="mt-2 grid gap-6 md:grid-cols-2 md:gap-10 md:mt-4">
+        <ul className="space-y-3 text-base leading-[1.5] text-black">
           {w.inclusions.map((t) => (
             <li key={t} className="flex gap-2.5">
-              <span className="mt-0.5 text-black" aria-hidden>
+              <span className="mt-0.5 shrink-0" aria-hidden>
                 ✓
               </span>
               <span>{t}</span>
             </li>
           ))}
-          {w.hiddenInclusionCount > 0 ? (
-            <li>
-              <button
-                type="button"
-                className="text-sm font-medium text-[#0d0d0d] underline [text-decoration-skip-ink:none] decoration-[#0d0d0d] underline-offset-2"
-              >
-                See {w.hiddenInclusionCount} more
-              </button>
-            </li>
-          ) : null}
         </ul>
-        <ul className="space-y-3 text-base leading-[1.5] text-[#333]">
+        <ul className="space-y-3 text-base leading-[1.5] text-black">
           {w.exclusions.map((t) => (
             <li key={t} className="flex gap-2.5">
-              <span className="mt-0.5 text-[#707070]" aria-hidden>
+              <span className="mt-0.5 shrink-0" aria-hidden>
                 ✕
               </span>
               <span>{t}</span>
             </li>
           ))}
         </ul>
+        {w.hiddenInclusionCount > 0 ? (
+          <button type="button" className="pdp-body-link-underline w-fit text-left">
+            See {w.hiddenInclusionCount} more
+          </button>
+        ) : null}
       </div>
     </CollapsibleSection>
   )

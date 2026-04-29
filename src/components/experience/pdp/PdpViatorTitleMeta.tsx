@@ -1,3 +1,4 @@
+import { Tag } from '../../common/Tag'
 import { FigmaRatingRow } from './figmaListingUi'
 
 type Props = {
@@ -33,23 +34,28 @@ function PriceTagIcon() {
   )
 }
 
-/** DS tag shell + Global/Body micro 02 Medium: neutral 95 chip; type neutral-30, Aeonik 12/16 medium 0.05px LS, centered. */
+/** Neutral variant of shared {@link Tag} — gray fill, no border. */
 function LowestPriceGuaranteeLabel() {
   return (
-    <span className="inline-flex h-6 w-fit shrink-0 flex-row items-center justify-center gap-1 whitespace-nowrap rounded-[6px] bg-[#F5F5F5] p-1 text-center font-sans text-[12px] font-medium not-italic leading-4 tracking-[0.05px] text-[#4D4D4D]">
+    <Tag variant="neutral">
       <PriceTagIcon />
       Lowest price guarantee
-    </span>
+    </Tag>
   )
 }
 
+/** Secondary cohort tag — [Figma 17671:82254](https://www.figma.com/design/XLfn1VEQ5xuNYjx2FF9D2Y/B2C-Web---Page-templates?node-id=17671-82254). */
+function ReserveNowPayLaterTag() {
+  return <Tag variant="secondary">Reserve Now & Pay Later</Tag>
+}
+
 function MetaDivider() {
-  return <span className="hidden h-3 w-px shrink-0 bg-[#d9d9d9] sm:block" aria-hidden />
+  return <span className="hidden h-3 w-px shrink-0 self-center bg-[#d9d9d9] md:block" aria-hidden />
 }
 
 function BadgeOfExcellence() {
   return (
-    <span className="inline-flex items-center gap-1.5">
+    <span className="inline-flex shrink-0 items-center gap-1.5">
       <span className="shrink-0" aria-hidden>
         <svg
           width={20}
@@ -98,37 +104,47 @@ export function PdpViatorTitleMeta({
 }: Props) {
   return (
     <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2 md:hidden">
+        <ReserveNowPayLaterTag />
+        <LowestPriceGuaranteeLabel />
+      </div>
       <h1
-        className="font-sans text-[28px] font-medium leading-[1.2] text-[#000]"
+        className="font-sans text-[20px] font-medium leading-[22px] tracking-[0.2px] text-[#000] sm:text-[28px] sm:leading-[1.2] sm:tracking-normal"
         style={{ fontFeatureSettings: '"liga" 0, "clig" 0' }}
       >
         {title}
       </h1>
-      <div
-        className="flex w-full flex-wrap items-center justify-between gap-x-4 gap-y-2"
-        role="group"
-        aria-label="Product rating, location, and pricing"
-      >
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-2 sm:gap-x-3">
-          <span
-            className="text-base font-bold tabular-nums text-black sm:text-lg"
-            style={{ fontFeatureSettings: "'lnum' 1" }}
-          >
-            {averageRating.toFixed(1)}
-          </span>
-          <FigmaRatingRow value={averageRating} size={16} />
-          <a
-            className="text-[12px] font-medium leading-normal text-black underline decoration-black underline-offset-2 [text-decoration-skip-ink:none] hover:decoration-[#00c295]"
-            href={reviewsHref}
-          >
-            {reviewCount.toLocaleString()} reviews
-          </a>
+      <div className="flex w-full min-w-0 flex-col gap-y-2 md:flex-row md:items-center md:justify-between md:gap-x-4">
+        <div
+          className="flex min-w-0 w-full flex-1 flex-col items-start gap-y-2 md:min-w-0 md:flex-row md:flex-nowrap md:items-center md:gap-x-3"
+          role="group"
+          aria-label="Product rating, location, and pricing"
+        >
+          <div className="flex min-w-0 shrink-0 flex-nowrap items-center gap-x-2 sm:gap-x-3">
+            <span
+              className="shrink-0 text-[14px] font-bold leading-tight tabular-nums text-black"
+              style={{ fontFeatureSettings: "'lnum' 1" }}
+            >
+              {averageRating.toFixed(1)}
+            </span>
+            <FigmaRatingRow value={averageRating} size={16} />
+            <a
+              className="shrink-0 whitespace-nowrap text-[12px] font-normal leading-normal text-[#4d4d4d] underline decoration-[#4d4d4d] underline-offset-2 [text-decoration-skip-ink:none] transition-colors hover:text-[#00c295] hover:decoration-[#00c295]"
+              href={reviewsHref}
+            >
+              {reviewCount.toLocaleString()} reviews
+            </a>
+          </div>
           <MetaDivider />
           <BadgeOfExcellence />
           <MetaDivider />
-          <span className="text-[12px] leading-normal text-[#4d4d4d]">{locationLine}</span>
+          <span className="min-w-0 flex-1 truncate text-[12px] leading-normal text-[#4d4d4d] md:flex-none md:overflow-visible md:whitespace-nowrap">
+            {locationLine}
+          </span>
         </div>
-        <LowestPriceGuaranteeLabel />
+        <div className="hidden shrink-0 self-center md:block">
+          <LowestPriceGuaranteeLabel />
+        </div>
       </div>
     </div>
   )

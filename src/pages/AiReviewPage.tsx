@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { BookingSidebar } from '../components/booking/BookingSidebar'
 import {
@@ -10,8 +10,21 @@ import { parseVariant } from '../uxr/urlState'
 
 export function AiReviewPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  /** `variant` query: `a` default (omit), `b` / `c` matrix layouts. */
-  const summaryLayout: VariantId = parseVariant(searchParams)
+  /** `variant` query: `a` default (omit), `b` / `c` matrix layouts. B2 is logistics-only — never used here. */
+  const rawVariant = parseVariant(searchParams)
+  const summaryLayout: VariantId = rawVariant === 'b2' ? 'b' : rawVariant
+  /** Normalize `?variant=b2` (e.g. shared logistics URL) to `b` so the query matches what we render. */
+  useEffect(() => {
+    if (rawVariant !== 'b2') return
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        next.set('variant', 'b')
+        return next
+      },
+      { replace: true },
+    )
+  }, [rawVariant, setSearchParams])
   const setSummaryLayout = useCallback(
     (v: AiSummaryLayoutVariant) => {
       setSearchParams(

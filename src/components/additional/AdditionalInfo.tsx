@@ -27,8 +27,8 @@ export function AdditionalInfo() {
           </li>
         </ul>
       </div>
-      <div className="mt-6 flex justify-start md:mt-8">
-        <button type="button" className="pdp-neutral-outline-btn-md">
+      <div className="mt-6 w-full md:mt-8">
+        <button type="button" className="pdp-neutral-outline-btn-md w-full sm:w-auto">
           Show 4 more
         </button>
       </div>

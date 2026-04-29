@@ -49,12 +49,12 @@ export function CollapsibleSection({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="group flex w-full cursor-pointer items-center justify-between gap-4 py-4 text-left md:py-5"
+        className="group flex w-full cursor-pointer items-center justify-between gap-4 py-6 text-left md:py-5"
         aria-expanded={open}
       >
         <h2
           id={headingId}
-          className="inline-flex items-center gap-1.5 text-[28px] font-medium leading-[1.2] tracking-[0.2px] text-black group-hover:underline underline-offset-[0.22em] [text-decoration-skip-ink:none]"
+          className="inline-flex items-center gap-1.5 text-[20px] font-medium leading-[1.2] tracking-[0.2px] text-black sm:text-[28px] group-hover:underline underline-offset-[0.22em] [text-decoration-skip-ink:none]"
         >
           {title}
         </h2>
@@ -76,7 +76,7 @@ export function CollapsibleSection({
           height: open ? 'auto' : 0,
         }}
         transition={panelTransition}
-        className="overflow-hidden"
+        className={open ? 'overflow-visible' : 'overflow-hidden'}
       >
         <div className={`pb-10 ${open ? '' : 'pointer-events-none'}`}>{children}</div>
       </motion.div>

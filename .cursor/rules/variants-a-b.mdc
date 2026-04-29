@@ -5,19 +5,19 @@ alwaysApply: true
 
 # Variant A / Variant B
 
-This project has two research variants (`a` and `b`) in `src/data/variants.ts` (e.g. `STOPS_A` / `STOPS_B`, `VATICAN_ROUTE` / `VATICAN_ROUTE_B`, copy under `variants.a` / `variants.b`).
+This project has research variants (`a`, `b`, `b2`, `c`) in `src/data/variants.ts` (e.g. `STOPS_A` / `STOPS_B`, `VATICAN_ROUTE` / `VATICAN_ROUTE_B`, `variants.a` / `variants.b` / `variants.b2` / `variants.c`). **`b2` is a copy of B** for “multiple meeting” UXR — keep it in sync with B unless a deliberate difference is needed.
 
 ## When editing
 
 **Before finishing or after substantive edits** to itinerary copy, map routes, booking blocks, or anything that should stay in sync or intentionally differ between variants:
 
-1. **Ask the user explicitly**: Should this change apply to **Variant A**, **Variant B**, or **both**?
-2. If they say both, update the corresponding fields for `variants.a` and `variants.b` (or shared constants) so neither variant is left stale unless they asked for a deliberate A/B difference.
+1. **Ask the user explicitly**: Should this change apply to **Variant A**, **Variant B / B2 / C** (B-layout group), or **all** that should match?
+2. If they say both (or the whole B-layout set), update the corresponding fields for `variants.a` and `variants.b` / `b2` / `c` (or shared constants like `STOPS_B`) so no variant is left stale unless they asked for a deliberate difference.
 3. If the change is UI-only and identical for both variants (e.g. shared components), say so briefly—no variant question needed.
 
 ## Quick reference
 
-- Variant ids: `'a' | 'b'` — labels like “Variant A” / “Variant B”.
+- Variant ids: `'a' | 'b' | 'b2' | 'c'` — e.g. “Variant A”, “Variant B”, “B2 (multiple meeting)”, “Variant C”.
 - Shared structure: same stops order and keys; B often offsets the map route slightly and may append copy for research.
 
 Do **not** silently update only one variant when the same content should match—confirm first.

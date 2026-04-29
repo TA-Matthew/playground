@@ -78,20 +78,20 @@ export function FigmaReviewsSummarySection({
     >
       <h2
         id="pdp-figma-reviews-section-h"
-        className="inline-flex items-center gap-1.5 text-[28px] font-medium leading-[1.2] tracking-[0.2px] text-black"
+        className="inline-flex items-center gap-1.5 text-[20px] font-medium leading-[1.2] tracking-[0.2px] text-black sm:text-[28px]"
       >
         Reviews
       </h2>
-      <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,220px)_1fr]">
+      <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,220px)_1fr] lg:items-center">
         <div className="flex flex-col items-center gap-2 text-center">
           <p
-            className="text-4xl font-black leading-tight text-black"
+            className="text-4xl font-medium leading-tight text-black"
             style={{ fontFeatureSettings: "'lnum' 1" }}
           >
             {averageDisplay}
           </p>
           <FigmaStarRow pattern={ratingToPattern(Number(averageDisplay))} size={24} />
-          <p className="text-sm font-bold leading-normal text-black">
+          <p className="text-sm font-medium leading-normal text-black">
             based on {reviewCount.toLocaleString()} reviews
           </p>
         </div>
@@ -161,13 +161,23 @@ function FigmaReadMore() {
   return (
     <div className="flex cursor-default items-center gap-2 text-black" aria-hidden>
       <span className="text-base leading-normal">Read more</span>
-      <div className="size-4 overflow-hidden">
-        <img alt="" className="size-4" src={figma.readMoreChevron} />
-      </div>
+      <svg
+        className="size-4 shrink-0 text-current"
+        width={16}
+        height={16}
+        viewBox="0 0 16 16"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden
+      >
+        <path
+          d="M3.85355 5.39645C3.65829 5.20118 3.34171 5.20118 3.14645 5.39645C2.95118 5.59171 2.95118 5.90829 3.14645 6.10355L7.64645 10.6036C7.84171 10.7988 8.15829 10.7988 8.35355 10.6036L12.8536 6.10355C13.0488 5.90829 13.0488 5.59171 12.8536 5.39645C12.6583 5.20119 12.3417 5.20119 12.1464 5.39645L8 9.54289L3.85355 5.39645Z"
+          fill="currentColor"
+        />
+      </svg>
     </div>
   )
 }
-
 export function FigmaViatorReviewCard({ r }: { r: PdpReview }) {
   return (
     <div className="flex w-full max-w-[864px] items-start justify-center gap-3">
@@ -179,18 +189,16 @@ export function FigmaViatorReviewCard({ r }: { r: PdpReview }) {
               pattern={['solid', 'solid', 'solid', 'solid', 'solid']}
             />
             <p
-              className="text-base font-bold leading-[1.4] text-black"
+              className="text-base font-medium leading-[1.4] text-black"
               style={{ fontFeatureSettings: "'lnum' 1, 'tnum' 1" }}
             >
               {r.title}
             </p>
-            <p className="text-sm leading-normal text-[#4d4d4d]">
-              {r.ratingLabel} · {r.dateLabel} · {r.author}, {r.authorLocation}
-            </p>
+            <p className="text-sm leading-normal text-[#4d4d4d]">{r.byline}</p>
           </div>
         </div>
-        <div className="space-y-4 text-base leading-normal text-black">
-          <p className="whitespace-pre-wrap">{r.body}</p>
+        <div className="flex flex-col gap-0 text-base leading-normal text-black">
+          <p className="min-w-0 break-words text-pretty line-clamp-2">{r.body}</p>
           <FigmaReadMore />
         </div>
       </div>
@@ -201,104 +209,14 @@ export function FigmaViatorReviewCard({ r }: { r: PdpReview }) {
   )
 }
 
-function FigmaChevronDown({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className ?? 'size-4 shrink-0 text-black'}
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      aria-hidden
-    >
-      <path
-        d="M3.85355 5.39645C3.65829 5.20118 3.34171 5.20118 3.14645 5.39645C2.95118 5.59171 2.95118 5.90829 3.14645 6.10355L7.64645 10.6036C7.84171 10.7988 8.15829 10.7988 8.35355 10.6036L12.8536 6.10355C13.0488 5.90829 13.0488 5.59171 12.8536 5.39645C12.6583 5.20119 12.3417 5.20119 12.1464 5.39645L8 9.54289L3.85355 5.39645Z"
-        fill="currentColor"
-      />
-    </svg>
-  )
-}
-
 /**
- * Figma search + chip row with real review count (static controls).
- */
-export function FigmaReviewFilterStrip({ reviewCount }: { reviewCount: number }) {
-  return (
-    <div className="flex w-full min-w-0 max-w-full flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-      <div className="flex min-h-10 w-full min-w-0 flex-1 touch-pan-x items-center gap-2 overflow-x-auto pb-0.5 sm:flex-wrap sm:pb-0">
-        <button
-          type="button"
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-[1.5px] border-[#d9d9d9] bg-white"
-          aria-label="Search reviews"
-        >
-          <img alt="" className="size-4" src={figma.searchIcon} />
-        </button>
-        <div
-          className="hidden h-0 w-px self-stretch bg-[#d9d9d9] sm:block"
-          style={{ minHeight: 24 }}
-          aria-hidden
-        />
-        {(['All travelers', 'Ratings', 'Most recent'] as const).map((label) => (
-          <div
-            key={label}
-            className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[#f5f5f5] px-3 py-2.5 sm:px-4 sm:py-3"
-          >
-            <span className="whitespace-nowrap text-sm font-medium leading-5 text-[#333]">
-              {label}
-            </span>
-            <FigmaChevronDown />
-          </div>
-        ))}
-      </div>
-      <p
-        className="w-full shrink-0 text-left text-sm leading-5 text-[#333] tabular-nums sm:ml-auto sm:w-auto sm:shrink-0 sm:text-right sm:text-base sm:leading-normal"
-        style={{ fontFeatureSettings: "'lnum' 1" }}
-      >
-        {reviewCount.toLocaleString()} reviews
-      </p>
-    </div>
-  )
-}
-
-/**
- * Figma-style circular pagination (visual only), matches ReviewsFigmaReplica.
+ * “Show more” control (research) — DS neutral outline, replaces circular pagination replica.
  */
 export function FigmaReviewPagination() {
-  const items: { key: string; t: string; current?: boolean }[] = [
-    { key: '1', t: '1' },
-    { key: 'e1', t: '...' },
-    { key: '6', t: '6' },
-    { key: '7', t: '7', current: true },
-    { key: '8', t: '8' },
-    { key: 'e2', t: '...' },
-    { key: '15', t: '15' },
-  ]
   return (
-    <div className="flex flex-wrap items-center gap-2 sm:gap-4" aria-label="Page navigation (example)">
-      <button
-        type="button"
-        className="flex size-10 shrink-0 items-center justify-center rounded-full border-[1.5px] border-black bg-white"
-        aria-label="Previous page"
-      >
-        <img alt="" className="size-5" src={figma.pagePrev} />
-      </button>
-      {items.map((it) => (
-        <div
-          key={it.key}
-          className={[
-            'flex size-10 items-center justify-center rounded-full text-base font-medium',
-            it.current ? 'bg-black text-white' : 'bg-white text-black',
-          ].join(' ')}
-        >
-          {it.t}
-        </div>
-      ))}
-      <button
-        type="button"
-        className="flex size-10 shrink-0 items-center justify-center rounded-full border-[1.5px] border-black bg-white"
-        aria-label="Next page"
-      >
-        <img alt="" className="size-5" src={figma.pageNext} />
+    <div className="flex justify-center">
+      <button type="button" className="pdp-neutral-outline-btn-md" aria-label="Show 10 more reviews">
+        Show 10 more reviews
       </button>
     </div>
   )

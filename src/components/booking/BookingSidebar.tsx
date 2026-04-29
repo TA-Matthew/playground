@@ -1,4 +1,5 @@
 import { useId, type SVGProps } from 'react'
+import { Tag } from '../common/Tag'
 import bookAheadFlame from '../../assets/book-ahead-flame.png'
 import type { BookingContent } from '../../data/variants'
 
@@ -8,15 +9,18 @@ const MINT_PANEL = 'bg-[#f0faf7]'
 
 type Props = {
   booking: BookingContent
+  /** Mobile PDP inline: strip outer booking card border/padding; book-ahead row keeps its border. */
+  embedded?: boolean
 }
 
-export function BookingSidebar({ booking }: Props) {
+export function BookingSidebar({ booking, embedded }: Props) {
+  const shellCard = embedded
+    ? 'bg-transparent p-0'
+    : `rounded-[12px] border ${CARD_BORDER} bg-white p-6`
+
   return (
     <div className="space-y-4">
-      <div
-        className={`rounded-[12px] border ${CARD_BORDER} bg-white p-6`}
-        aria-label="Book this experience"
-      >
+      <div className={shellCard} aria-label="Book this experience">
         {/* Price */}
         <p className="leading-[1.2] text-black">
           <span className="text-[clamp(22px,2.75vw,28px)] font-bold tracking-[-0.02em]">
@@ -25,20 +29,16 @@ export function BookingSidebar({ booking }: Props) {
           <span className="text-[14px] font-normal">per person</span>
         </p>
 
-        {/* Badges — Space-050 chip; Global/Body micro 02 Medium */}
+        {/* Badges — shared Tag component, outlined variant */}
         <div className="mt-4 flex flex-wrap gap-2">
-          <span
-            className={`inline-flex items-center justify-center gap-1 rounded-[10px] border ${CARD_BORDER} bg-white p-1 text-center font-sans text-[12px] font-medium not-italic leading-4 tracking-[0.05px] text-[#4D4D4D]`}
-          >
+          <Tag variant="outlined">
             <DealBadgeIcon aria-hidden />
             {booking.badgeExceptionalDeal}
-          </span>
-          <span
-            className={`inline-flex items-center justify-center gap-1 rounded-[10px] border ${CARD_BORDER} bg-white p-1 text-center font-sans text-[12px] font-medium not-italic leading-4 tracking-[0.05px] text-[#4D4D4D]`}
-          >
+          </Tag>
+          <Tag variant="outlined">
             <KidsDiscountIcon aria-hidden />
             {booking.badgeKidsDiscount}
-          </span>
+          </Tag>
         </div>
 
         {/* Date + Travelers */}
@@ -119,7 +119,7 @@ export function BookingSidebar({ booking }: Props) {
           <p className="text-[14px] font-medium not-italic leading-[150%]">
             {booking.bookAheadTitle}
           </p>
-          <p className="mt-1 text-[13px] font-normal not-italic leading-[150%]">
+          <p className="text-[13px] font-normal not-italic leading-[150%]">
             {booking.bookAheadSubtitle}
           </p>
         </div>

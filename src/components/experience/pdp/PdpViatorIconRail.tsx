@@ -88,13 +88,13 @@ const iconMap = {
 type Props = { items: readonly IconRailItem[] }
 
 /**
- * Features row — flex wrap, 16px gap, neutral/80 borders; DS icons #008768;
- * copy global/body title (16px / 400 / #000).
+ * Features row — vertical stack on small screens; horizontal wrap from `md` up.
+ * 16px gap, neutral/80 borders; DS icons #008768; global/body (16px / 400 / #000).
  */
 export function PdpViatorIconRail({ items }: Props) {
   return (
     <ul
-      className="box-border flex w-full flex-row flex-wrap content-start items-start gap-4 border-y border-[#d9d9d9] py-4 font-sans"
+      className="box-border flex w-full flex-col content-start items-start gap-4 border-y border-[#d9d9d9] py-4 font-sans md:flex-row md:flex-wrap"
       aria-label="Quick facts"
     >
       {items.map((it) => {

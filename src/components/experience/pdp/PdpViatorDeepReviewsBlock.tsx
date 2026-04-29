@@ -1,10 +1,10 @@
 import { viatorListing } from '../../../data/viatorListing'
 import {
-  FigmaReviewFilterStrip,
   FigmaReviewPagination,
   FigmaReviewsSummarySection,
   FigmaViatorReviewCard,
 } from './figmaListingUi'
+import { InfoCircleIcon } from './InfoCircleIcon'
 
 function starCounts() {
   const m = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } as Record<1 | 2 | 3 | 4 | 5, number>
@@ -15,7 +15,7 @@ function starCounts() {
 }
 
 /**
- * Figma / Viator full “Reviews” region (search + sort row, distribution, list, pagination).
+ * Figma / Viator full Reviews region (summary + search/sort + distribution + list + pagination).
  * Anchor id `reviews` lives on the summary in {@link FigmaReviewsSummarySection}.
  */
 export function PdpViatorDeepReviewsBlock() {
@@ -39,8 +39,8 @@ export function PdpViatorDeepReviewsBlock() {
             star2={s[2]}
             star1={s[1]}
           />
-          <div className="flex w-full min-w-0 max-w-full flex-col gap-3 sm:flex-row sm:items-stretch sm:gap-3">
-            <div className="flex min-h-11 w-full min-w-0 flex-1 items-center gap-2 rounded-full border border-[#d9d9d9] bg-white px-3.5">
+          <div className="flex w-full min-w-0 max-w-full flex-col gap-3">
+            <div className="flex min-h-11 w-full min-w-0 items-center gap-2 rounded-full border border-[#d9d9d9] bg-white px-3.5">
               <svg
                 className="size-4 shrink-0 text-[#4d4d4d]"
                 viewBox="0 0 24 24"
@@ -62,20 +62,30 @@ export function PdpViatorDeepReviewsBlock() {
             </div>
             <button
               type="button"
-              className="inline-flex h-11 shrink-0 items-center justify-between gap-2 rounded-full border border-[#d9d9d9] bg-white px-3.5 text-left text-sm text-[#333] sm:min-w-[10rem]"
+              className="inline-flex shrink-0 items-center gap-1.5 py-2 text-left text-sm text-black"
+              aria-label={`Sort reviews. Current sort: ${sort}`}
             >
-              <span>
-                <span className="text-[#4d4d4d]">Sort by: </span>
-                <span className="font-medium text-black">{sort}</span>
+              <span className="inline-flex flex-wrap items-baseline gap-x-1">
+                <span className="font-normal">Sort by:</span>
+                <span className="font-bold">{sort}</span>
               </span>
-              <span className="shrink-0 -rotate-90 text-[#4d4d4d]" aria-hidden>
-                ‹
-              </span>
+              <svg
+                className="size-4 shrink-0 text-black"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+              <InfoCircleIcon className="size-4 shrink-0" aria-hidden />
             </button>
           </div>
         </div>
         <div className="space-y-8">
-          <FigmaReviewFilterStrip reviewCount={l.reviewCount} />
           <div className="min-h-0">
             <div className="flex flex-col gap-12">
               {l.reviewSamples.map((r) => (

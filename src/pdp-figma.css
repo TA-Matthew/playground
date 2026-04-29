@@ -4,6 +4,7 @@
  */
 @layer components {
   .pdp-figma {
+    --black: #000000;
     --pdp-ink: #000000;
     --pdp-body: #333333;
     --pdp-muted: #4d4d4d;
@@ -13,15 +14,20 @@
     color: var(--pdp-ink);
   }
 
-  /** Promoted carousel disclaimer — global/body small (neutral/40). */
+  /** Promoted carousel disclaimer — global/body small (neutral/40); 12px MW, 14px sm+. */
   .pdp-figma .pdp-disclaimer-label {
     font-family: var(--font-sans);
     font-style: normal;
     font-weight: 400;
-    font-size: 14px;
+    font-size: 12px;
     line-height: 150%;
     letter-spacing: var(--viator-typeface-letter-spacing-none);
     color: #707070;
+  }
+  @media (min-width: 640px) {
+    .pdp-figma .pdp-disclaimer-label {
+      font-size: 14px;
+    }
   }
 
   /** Overview / tour summary — global/body (#tour.summary) */
@@ -44,6 +50,34 @@
     font-size: 16px;
     line-height: 150%;
     color: var(--pdp-ink);
+  }
+
+  /**
+   * Underlined global/body text (16px / 150%, regular, Aeonik).
+   * Figma-style link control — use with native <button> or <span>.
+   */
+  .pdp-figma .pdp-body-link-underline {
+    font-family: var(--font-sans);
+    font-style: normal;
+    font-weight: 400;
+    font-feature-settings: 'liga' 0, 'clig' 0;
+    font-size: 16px;
+    line-height: 150%;
+    color: var(--black, #000000);
+    text-decoration-line: underline;
+    text-decoration-style: solid;
+    text-decoration-skip-ink: none;
+    text-decoration-thickness: auto;
+    text-underline-offset: auto;
+    text-underline-position: from-font;
+  }
+
+  .pdp-figma button.pdp-body-link-underline {
+    background-color: transparent;
+    border-style: none;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
   }
 
   /** Meeting / pickup instruction — global/body small, neutral/30. */

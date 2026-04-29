@@ -18,13 +18,23 @@
   }
 
   html {
-    @apply antialiased leading-relaxed text-stone-800;
+    @apply overflow-x-clip antialiased leading-relaxed text-stone-800;
     font-size: 16px;
     font-family: var(--font-sans);
     font-feature-settings: "kern" 1, "liga" 1;
   }
+  /** Same-page links (e.g. `#reviews`) animate instead of jumping; respect reduced-motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
   body {
-    @apply m-0 min-h-screen bg-white text-stone-800;
+    @apply m-0 min-h-screen overflow-x-clip bg-white text-stone-800;
+  }
+
+  #root {
+    @apply isolate min-h-screen w-full max-w-full overflow-x-clip;
   }
   ::selection {
     @apply bg-emerald-200/60 text-stone-900;
@@ -44,6 +54,22 @@
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
+  }
+}
+
+/** Map pin photo — reverse of `logistics-map-pin-teardrop-in`, shrink toward teardrop + fade out */
+@keyframes logistics-map-pin-head-dismiss {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  35% {
+    opacity: 1;
+    transform: scale(1.06) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.55) translateY(12px);
   }
 }
 
@@ -98,8 +124,73 @@
     animation: logistics-map-pin-teardrop-in 0.42s cubic-bezier(0.34, 1.45, 0.64, 1) both;
     transform-origin: 50% 100%;
   }
+  /**
+   * Map only (before IO adds `logistics-map-pin-in-view`): hide photo+teardrop until the map intersects
+   * the viewport, the pin intersects, and the intro delay elapses (`LogisticsMap`).
+   * Timeline rows include `logistics-map-pin-in-view` in markup — they stay visible.
+   */
+  .logistics-map-selected-pin-stack:not(.logistics-map-pin-in-view) .logistics-map-pin-motion-wrap {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  /**
+   * Map + itinerary timeline: bounce the motion wrapper — map adds `logistics-map-pin-in-view` via IO;
+   * timeline injects the same classes in `wrapTimelineTeardropForMapAnimation` (expand remount replays).
+   */
+  .logistics-map-selected-pin-stack.logistics-map-pin-in-view .logistics-map-pin-motion-wrap {
+    visibility: visible;
+    animation: logistics-map-pin-teardrop-in 0.42s cubic-bezier(0.34, 1.45, 0.64, 1) both;
+    transform-origin: 50% 100%;
+  }
+
+  /**
+   * Dismiss uses `transform` on the photo, which creates a stacking context and can paint
+   * above the teardrop; keep the head image strictly behind the teardrop.
+   */
+  .logistics-map-pin-head-photo {
+    position: relative;
+    z-index: 0;
+  }
+
+  .logistics-map-pin-teardrop-slot {
+    position: relative;
+    z-index: 1;
+  }
+
+  .logistics-map-pin-head-photo.logistics-map-pin-head-photo--dismiss {
+    animation: logistics-map-pin-head-dismiss 0.42s cubic-bezier(0.34, 1.45, 0.64, 1) forwards !important;
+    transform-origin: 50% 100%;
+    pointer-events: none;
+  }
+
+  .logistics-map-pin-stack--head-collapsed .logistics-map-pin-head-photo {
+    display: none !important;
+  }
+
+  .logistics-map-pin-stack--head-collapsed .logistics-map-pin-teardrop-slot {
+    margin-top: 0 !important;
+  }
+
+  .logistics-map-pin-stack--head-collapsed .logistics-map-pin-motion-wrap {
+    padding-top: 0 !important;
+  }
+
+  /** Teardrop-only marker height after photo dismiss — matches `MAP_POI_SELECTED_PIN_HEIGHT_PX` (54) */
+  button.maplibregl-marker.logistics-map-marker-head-collapsed {
+    min-height: 54px !important;
+  }
   .animate-logistics-map-pin-disc-in {
     animation: logistics-map-pin-disc-in 0.32s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+  }
+
+  /**
+   * B2: non-chosen meeting pins — fully hidden (pickup is selected in the timeline only).
+   * Keep `visibility` (not `display:none`) so MapLibre’s marker transform/anchor stays stable.
+   */
+  button.maplibregl-marker[data-logistics-b2-meeting-hidden='true'] {
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
 
   .loyalty-login-btn-glow {
@@ -112,6 +203,14 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .logistics-map-selected-pin-stack.logistics-map-pin-in-view .logistics-map-pin-motion-wrap {
+      animation: none !important;
+      opacity: 1 !important;
+    }
+    .logistics-map-pin-head-photo.logistics-map-pin-head-photo--dismiss {
+      animation: none !important;
+      opacity: 0 !important;
+    }
     .loyalty-login-btn-glow,
     .loyalty-login-btn-shimmer {
       animation: none;

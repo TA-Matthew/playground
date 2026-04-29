@@ -24,7 +24,7 @@ export function FacilitatorBar({
           <span className="text-[11px] font-medium uppercase tracking-widest text-amber-900/90">
             UXR — Variations
           </span>
-          <div className="inline-flex rounded-xl border border-amber-200/90 bg-white/90 p-1 shadow-sm">
+          <div className="inline-flex flex-wrap gap-1 rounded-xl border border-amber-200/90 bg-white/90 p-1 shadow-sm">
             <button
               type="button"
               className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
@@ -46,6 +46,18 @@ export function FacilitatorBar({
               onClick={() => onVariantChange('b')}
             >
               Variant B
+            </button>
+            <button
+              type="button"
+              title="B2 (multiple meeting)"
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                variant === 'b2'
+                  ? 'bg-amber-600 text-white shadow-sm'
+                  : 'text-amber-950 hover:bg-amber-50'
+              }`}
+              onClick={() => onVariantChange('b2')}
+            >
+              B2 (multiple meeting)
             </button>
           </div>
         </div>

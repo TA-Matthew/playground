@@ -4,6 +4,8 @@ import { AdditionalInfo } from '../components/additional/AdditionalInfo'
 import { BookingSidebar } from '../components/booking/BookingSidebar'
 import { CollapsibleSection } from '../components/common/CollapsibleSection'
 import { MeetingAndPickupCard } from '../components/experience/MeetingAndPickupCard'
+import { PdpCompareSimilarExperiences } from '../components/experience/pdp/PdpCompareSimilarExperiences'
+import { PdpCustomersAlsoBought } from '../components/experience/pdp/PdpCustomersAlsoBought'
 import { PdpCancellationQuestionsSection } from '../components/experience/pdp/PdpCancellationQuestionsSection'
 import { PdpTravelerPhotosSection } from '../components/experience/pdp/PdpTravelerPhotosSection'
 import { PdpViatorDeepReviewsBlock } from '../components/experience/pdp/PdpViatorDeepReviewsBlock'
@@ -31,6 +33,12 @@ export function ExperiencePage() {
   const hideUi = parseHideUi(searchParams)
   const variant: VariantId = parseVariant(searchParams)
   const data = variants[variant]
+
+  const meetingAndPickupSection = data.meetingAndPickup ? (
+    <CollapsibleSection title="Meeting and Pickup" defaultOpen={!isVariantBLayout(variant)}>
+      <MeetingAndPickupCard content={data.meetingAndPickup} />
+    </CollapsibleSection>
+  ) : null
 
   const showFacilitatorChrome = useMemo(
     () => shouldShowFacilitatorChrome(hideUi, unlock),
@@ -80,7 +88,7 @@ export function ExperiencePage() {
 
   return (
     <div className="min-h-screen bg-white text-stone-900">
-      <div className="mx-auto w-full max-w-[1308px] px-4 pb-14 pt-8 sm:px-6 md:pb-20 md:pt-10 lg:px-8 xl:px-10">
+      <div className="mx-auto w-full max-w-[1308px] px-4 pb-14 pt-8 sm:px-6 md:pb-20 md:pt-10 lg:px-8 xl:px-0">
         {!hideUi ? (
           <div className="mb-6">
             <Link
@@ -115,17 +123,10 @@ export function ExperiencePage() {
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start lg:gap-6 xl:gap-6">
           <main className="pdp-figma w-full min-w-0 max-w-[864px] lg:order-1">
-            <ViatorPdpBlock />
-            {data.meetingAndPickup ? (
-              <CollapsibleSection title="Meeting and Pickup" defaultOpen>
-                <MeetingAndPickupCard content={data.meetingAndPickup} />
-              </CollapsibleSection>
-            ) : null}
+            <ViatorPdpBlock booking={data.booking} />
+            {!isVariantBLayout(variant) && meetingAndPickupSection}
 
-            <CollapsibleSection
-              title={isVariantBLayout(variant) ? 'Itinerary & Meeting point' : 'Itinerary'}
-              defaultOpen
-            >
+            <CollapsibleSection title="Itinerary" defaultOpen>
               {data.whatToExpectIntro || data.whatToExpectExtra ? (
                 <WhatToExpectIntroBlock
                   key={variant}
@@ -139,9 +140,13 @@ export function ExperiencePage() {
                 variantId={variant}
                 stops={data.stops}
                 routeLngLat={data.routeLngLat}
+                routePolylineLngLat={data.routePolylineLngLat}
                 mapKey={`logistics-${variant}`}
+                poiPopupContent="image-only"
               />
             </CollapsibleSection>
+
+            {isVariantBLayout(variant) && meetingAndPickupSection}
 
             <CollapsibleSection title="Additional Info" defaultOpen>
               <AdditionalInfo />
@@ -158,6 +163,9 @@ export function ExperiencePage() {
             <BookingSidebar booking={data.booking} />
           </aside>
         </div>
+
+        <PdpCompareSimilarExperiences />
+        <PdpCustomersAlsoBought />
       </div>
 
       <SecretUnlock onToggleUnlock={toggleSecretUnlock} />
@@ -198,7 +206,7 @@ function WhatToExpectIntroBlock({
       )}
       <button
         type="button"
-        className="group mt-3 inline-flex items-center gap-1.5 text-base font-medium text-[#0d0d0d] underline [text-decoration-skip-ink:none] decoration-[#0d0d0d] underline-offset-2 transition hover:text-black hover:decoration-black"
+        className="group mt-3 inline-flex cursor-pointer items-center gap-1.5 text-base font-medium text-[#0d0d0d] underline [text-decoration-skip-ink:none] decoration-[#0d0d0d] underline-offset-2 transition hover:text-black hover:decoration-black"
         onClick={() => setReadMore((r) => !r)}
       >
         {readMore ? 'Read less' : 'Read more'}
