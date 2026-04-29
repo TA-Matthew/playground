@@ -1,4 +1,4 @@
-import type { Stop, VariantId } from '../../data/variants'
+import { isVariantBLayout, type Stop, type VariantId } from '../../data/variants'
 
 /**
  * 1-based POI sequence for timeline/map (skips variant B meeting + end, and `passby` legs).
@@ -10,7 +10,7 @@ export function getPoiOrderForStopIndex(
 ): number | null {
   const stop = stops[index]
   if (!stop) return null
-  if (variantId === 'b' && (stop.kind === 'meeting' || stop.kind === 'end')) {
+  if (isVariantBLayout(variantId) && (stop.kind === 'meeting' || stop.kind === 'end')) {
     return null
   }
   if (stop.kind === 'passby') {

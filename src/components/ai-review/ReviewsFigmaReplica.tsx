@@ -1,8 +1,12 @@
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import type { VariantId } from '../../data/variants'
 import { figma } from './figmaAssets'
 import './ai-review-animations.css'
+
+/** AI review URL/query variant — matches {@link VariantId} (`a` chips, `b`/`c` matrix). */
+export type AiSummaryLayoutVariant = VariantId
 
 /** Per-review theme mention sentiment (used with theme + list filters) */
 export type ThemeSentimentKind = 'positive' | 'negative'
@@ -250,6 +254,7 @@ function MatrixItem({
   isActive,
   mentionCount,
   onThemeClick,
+  truncatePreview = true,
 }: {
   themeId: ThemeId
   column: 'pos' | 'neg'
@@ -258,6 +263,8 @@ function MatrixItem({
   isActive: boolean
   mentionCount: number
   onThemeClick: (id: ThemeId, column: 'pos' | 'neg') => void
+  /** When false, full body is always shown (no three-line “… more” fit). */
+  truncatePreview?: boolean
 }) {
   const [expanded, setExpanded] = useState(false)
   const countDisplay = mentionCount.toLocaleString()
@@ -285,6 +292,10 @@ function MatrixItem({
   }, [])
 
   useLayoutEffect(() => {
+    if (!truncatePreview) {
+      setCollapsedPreview({ kind: 'fits', words: bodyWords })
+      return
+    }
     if (expanded) return
     const container = containerRef.current
     const measureEl = measureRef.current
@@ -326,7 +337,7 @@ function MatrixItem({
       words: bodyWords,
       replaceAt: best > 0 ? best : 1,
     })
-  }, [expanded, headingTitle, countDisplay, bodyWords, resizeTick])
+  }, [expanded, headingTitle, countDisplay, bodyWords, resizeTick, truncatePreview])
 
   const matrixToggleBaseStyles =
     'inline cursor-pointer whitespace-nowrap border-0 bg-transparent p-0 align-baseline font-normal text-[#4D4D4D] no-underline decoration-solid [text-decoration-skip-ink:none] transition hover:text-[#333] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600'
@@ -409,9 +420,7 @@ function MatrixItem({
   )
 }
 
-/** A = conic border + long summary + theme chips; B = two-column +/− matrix (no theme chips in card). */
-export type AiSummaryLayoutVariant = 'a' | 'b'
-
+/** A = conic border + long summary + theme chips; B/C = two-column +/− matrix (no theme chips in card). */
 /** Variant B matrix copy + {@link ThemeId} for filtering (prototype mapping; some ids repeat across rows). */
 type VariantBMatrixCell = { themeId: ThemeId; title: string; body: string }
 
@@ -461,6 +470,73 @@ const VARIANT_B_MATRIX_ROWS: ReadonlyArray<{ pos: VariantBMatrixCell; neg?: Vari
     },
   },
 ]
+
+/** Variant C: same matrix layout as B, ~15–20 word summaries — full text shown (no “… more” truncation). */
+const VARIANT_C_MATRIX_ROWS: ReadonlyArray<{ pos: VariantBMatrixCell; neg?: VariantBMatrixCell }> = [
+  {
+    pos: {
+      themeId: 'sistine-chapel',
+      title: 'Point of Interest',
+      body:
+        'Vatican Museums and the Sistine Chapel earn praise for art and architecture; many enjoy exploring at their own pace.',
+    },
+  },
+  {
+    pos: {
+      themeId: 'expert-guide',
+      title: 'Tour Guide',
+      body:
+        'Guides add historical context and storytelling; some visitors cite rudeness, confusion, or uneven support.',
+    },
+  },
+  {
+    pos: {
+      themeId: 'expert-guide',
+      title: 'Communication',
+      body:
+        'Early instructions help, but directions and staff responsiveness vary once you are inside the venue.',
+    },
+    neg: {
+      themeId: 'skip-the-line',
+      title: 'Tour Planning',
+      body:
+        'Ticket desks feel organized at first; crowd lines and guided-tour expectations still frustrate many guests.',
+    },
+  },
+  {
+    pos: {
+      themeId: 'good-value',
+      title: 'Value for Money',
+      body:
+        'Skip-the-line access convinces most travelers the fare is fair, though some still call it pricey.',
+    },
+    neg: {
+      themeId: 'audio-headsets',
+      title: 'Audio Guide',
+      body:
+        'Self-guided audio suits some; others fight flaky apps, shallow narration, and confusing routing.',
+    },
+  },
+]
+
+const VARIANT_MATRIX_ROW_SOURCES = [VARIANT_B_MATRIX_ROWS, VARIANT_C_MATRIX_ROWS]
+
+/**
+ * Copy for the mention breakdown line — first matching matrix heading for that {@link ThemeId};
+ * otherwise the chip label.
+ */
+function getThemeBreakdownLabel(themeId: ThemeId): string {
+  for (const rows of VARIANT_MATRIX_ROW_SOURCES) {
+    for (const row of rows) {
+      const cells: VariantBMatrixCell[] =
+        row.neg != null ? [row.pos, row.neg] : [row.pos]
+      for (const cell of cells) {
+        if (cell.themeId === themeId) return cell.title
+      }
+    }
+  }
+  return THEME_CHIPS.find((c) => c.id === themeId)?.label ?? themeId
+}
 
 /** Variant B matrix: how many theme rows show before tap-to-expand on narrow screens. */
 const AI_SUMMARY_MOBILE_MATRIX_PREVIEW_COUNT = 3
@@ -544,10 +620,15 @@ function AiReviewSummaryFigmaBlock({
   activeTheme,
   onMatrixThemeClick,
   themeMentions,
+  matrixRows = VARIANT_B_MATRIX_ROWS,
+  truncateMatrixBody = true,
 }: {
   activeTheme: ThemeId | null
   onMatrixThemeClick: (id: ThemeId, column: 'pos' | 'neg') => void
   themeMentions: Readonly<Record<ThemeId, { count: number }>>
+  matrixRows?: ReadonlyArray<{ pos: VariantBMatrixCell; neg?: VariantBMatrixCell }>
+  /** When false (variant C), matrix blurbs are short and always shown in full — no “… more”. */
+  truncateMatrixBody?: boolean
 }) {
   const [isMaxSm, setIsMaxSm] = useState(false)
   const [mobileSummaryExpanded, setMobileSummaryExpanded] = useState(false)
@@ -567,7 +648,7 @@ function AiReviewSummaryFigmaBlock({
   const reduceMotion = useReducedMotion() === true
 
   const matrixSlotsSorted = useMemo(() => {
-    const slots = VARIANT_B_MATRIX_ROWS.flatMap((row) => {
+    const slots = matrixRows.flatMap((row) => {
       const posCell = {
         column: 'pos' as const,
         themeId: row.pos.themeId,
@@ -587,7 +668,7 @@ function AiReviewSummaryFigmaBlock({
     })
     slots.sort((a, b) => getMatrixThemeTier(a.themeId) - getMatrixThemeTier(b.themeId))
     return slots
-  }, [])
+  }, [matrixRows])
 
   const previewSlots = useMemo(
     () => matrixSlotsSorted.slice(0, AI_SUMMARY_MOBILE_MATRIX_PREVIEW_COUNT),
@@ -608,7 +689,7 @@ function AiReviewSummaryFigmaBlock({
 
   return (
     <AiSummaryBorderAnimatedFrame innerClassName="flex w-full flex-col gap-4 p-4 shadow-sm sm:gap-6 sm:rounded-[23px]">
-      <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+      <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex w-full min-w-0 flex-col gap-1 pr-24 sm:flex-row sm:items-center sm:gap-2 sm:pr-0">
           <div className="flex min-w-0 items-center gap-2">
             <span
@@ -646,6 +727,7 @@ function AiReviewSummaryFigmaBlock({
                 isActive={activeTheme === slot.themeId}
                 mentionCount={themeMentions[slot.themeId]?.count ?? 0}
                 onThemeClick={onMatrixThemeClick}
+                truncatePreview={truncateMatrixBody}
               />
             </Fragment>
           ))}
@@ -661,6 +743,7 @@ function AiReviewSummaryFigmaBlock({
                   isActive={activeTheme === slot.themeId}
                   mentionCount={themeMentions[slot.themeId]?.count ?? 0}
                   onThemeClick={onMatrixThemeClick}
+                  truncatePreview={truncateMatrixBody}
                 />
               )
               if (animateOverflowReveal && !reduceMotion) {
@@ -698,7 +781,7 @@ function AiReviewSummaryFigmaBlock({
                 setMobileSummaryExpanded(true)
               }}
             >
-              <span className="text-xs font-medium text-[#4D4D4D] underline decoration-solid decoration-[currentColor] [text-decoration-skip-ink:none]">
+              <span className="text-sm font-medium leading-5 text-[#4D4D4D] underline decoration-solid decoration-[currentColor] [text-decoration-skip-ink:none]">
                 Show more
               </span>
             </motion.button>
@@ -883,11 +966,10 @@ function ThemeMentionBreakdown({
   onClear?: () => void
 }) {
   if (activeTheme == null) return null
-  const ch = THEME_CHIPS.find((c) => c.id === activeTheme)
-  if (!ch) return null
   const m = themeMentions[activeTheme]
   if (!m) return null
-  const t = { label: ch.label, ...m }
+  const breakdownLabel = getThemeBreakdownLabel(activeTheme)
+  const t = { ...m }
 
   return (
     <div className="flex w-full min-w-0 max-w-full flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
@@ -898,7 +980,7 @@ function ThemeMentionBreakdown({
           <span className="block sm:inline">
             {t.count.toLocaleString()} travelers mention{' '}
             <span className="inline-flex items-center gap-1">
-              <span className="whitespace-nowrap font-medium">‘{t.label}’</span>
+              <span className="whitespace-nowrap font-medium">‘{breakdownLabel}’</span>
             </span>
           </span>
         <span
@@ -1875,7 +1957,7 @@ export function ReviewsFigmaReplica({ summaryLayout = 'a' }: ReviewsFigmaReplica
         <section className="space-y-6" aria-labelledby="traveler-photos-h">
           <h2
             id="traveler-photos-h"
-            className="text-2xl font-bold leading-tight tracking-tight text-black"
+            className="inline-flex items-center gap-1.5 text-[28px] font-medium leading-[1.2] tracking-[0.2px] text-black"
           >
             Traveler Photos
           </h2>
@@ -1947,7 +2029,7 @@ export function ReviewsFigmaReplica({ summaryLayout = 'a' }: ReviewsFigmaReplica
           >
             <h2
               id="reviews-section-h"
-              className="text-2xl font-bold leading-tight text-black"
+              className="inline-flex items-center gap-1.5 text-[28px] font-medium leading-[1.2] tracking-[0.2px] text-black"
             >
               Reviews
             </h2>
@@ -1993,18 +2075,20 @@ export function ReviewsFigmaReplica({ summaryLayout = 'a' }: ReviewsFigmaReplica
 
           {/* AI review summary + filters + list */}
           <div className="space-y-8">
-            {summaryLayout === 'b' ? (
-              <AiReviewSummaryFigmaBlock
-                activeTheme={activeTheme}
-                onMatrixThemeClick={onMatrixThemeClick}
-                themeMentions={THEME_MENTIONS}
-              />
-            ) : (
+            {summaryLayout === 'a' ? (
               <AiReviewSummaryBlock
                 activeTheme={activeTheme}
                 onSelectTheme={onSelectTheme}
                 onClear={clearReviewFilters}
                 themeMentions={THEME_MENTIONS}
+              />
+            ) : (
+              <AiReviewSummaryFigmaBlock
+                activeTheme={activeTheme}
+                onMatrixThemeClick={onMatrixThemeClick}
+                themeMentions={THEME_MENTIONS}
+                matrixRows={summaryLayout === 'c' ? VARIANT_C_MATRIX_ROWS : VARIANT_B_MATRIX_ROWS}
+                truncateMatrixBody={summaryLayout !== 'c'}
               />
             )}
 

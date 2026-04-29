@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Stop, VariantId } from '../../data/variants'
+import { isVariantBLayout, type Stop, type VariantId } from '../../data/variants'
 import { getPoiOrderForStopIndex } from './poiOrder'
 import { viatorMeetingMarkSvgHtml } from './viatorMeetingMark'
 import { logisticsPassbyPinButtonClass, logisticsPinButtonClass } from './logisticsPinButtonClass'
@@ -30,7 +30,7 @@ export function Timeline({
   onRowHeaderClick,
   onSelectStop,
 }: Props) {
-  const logisticsB = variantId === 'b'
+  const logisticsB = isVariantBLayout(variantId)
 
   return (
     <div className="flex flex-col gap-4">

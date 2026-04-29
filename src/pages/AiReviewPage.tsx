@@ -10,7 +10,7 @@ import { parseVariant } from '../uxr/urlState'
 
 export function AiReviewPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  /** Same `variant` query as logistics (`a` = default, omit; `b` = explicit). */
+  /** `variant` query: `a` default (omit), `b` / `c` matrix layouts. */
   const summaryLayout: VariantId = parseVariant(searchParams)
   const setSummaryLayout = useCallback(
     (v: AiSummaryLayoutVariant) => {
@@ -20,7 +20,7 @@ export function AiReviewPage() {
           if (v === 'a') {
             next.delete('variant')
           } else {
-            next.set('variant', 'b')
+            next.set('variant', v)
           }
           return next
         },
@@ -60,7 +60,7 @@ export function AiReviewPage() {
             <span className="text-[11px] font-medium uppercase tracking-widest text-amber-900/90">
               UXR — Variations
             </span>
-            <div className="inline-flex rounded-xl border border-amber-200/90 bg-white/90 p-1 shadow-sm">
+            <div className="inline-flex flex-wrap gap-1 rounded-xl border border-amber-200/90 bg-white/90 p-1 shadow-sm">
               <button
                 type="button"
                 className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
@@ -80,6 +80,16 @@ export function AiReviewPage() {
                 aria-pressed={summaryLayout === 'b'}
               >
                 Variant B
+              </button>
+              <button
+                type="button"
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                  summaryLayout === 'c' ? 'bg-amber-600 text-white shadow-sm' : 'text-amber-950 hover:bg-amber-50'
+                }`}
+                onClick={() => setSummaryLayout('c')}
+                aria-pressed={summaryLayout === 'c'}
+              >
+                Variant C
               </button>
             </div>
           </div>

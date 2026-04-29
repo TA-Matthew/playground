@@ -37,8 +37,8 @@ function ratingToPattern(value: number): StarKind[] {
   return p
 }
 
-export function FigmaRatingRow({ value }: { value: number }) {
-  return <FigmaStarRow pattern={ratingToPattern(value)} size={24} />
+export function FigmaRatingRow({ value, size = 24 }: { value: number; size?: 16 | 24 }) {
+  return <FigmaStarRow pattern={ratingToPattern(value)} size={size} />
 }
 
 export function FigmaReviewsSummarySection({
@@ -78,7 +78,7 @@ export function FigmaReviewsSummarySection({
     >
       <h2
         id="pdp-figma-reviews-section-h"
-        className="text-2xl font-bold leading-[1.2] tracking-[0.2px] text-black"
+        className="inline-flex items-center gap-1.5 text-[28px] font-medium leading-[1.2] tracking-[0.2px] text-black"
       >
         Reviews
       </h2>

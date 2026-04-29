@@ -26,7 +26,9 @@ export function parseHideUi(searchParams: URLSearchParams): boolean {
 
 export function parseVariant(searchParams: URLSearchParams): VariantId {
   const v = searchParams.get('variant')
-  return v === 'b' ? 'b' : 'a'
+  if (v === 'b') return 'b'
+  if (v === 'c') return 'c'
+  return 'a'
 }
 
 /** Whether facilitator chrome (variant switcher, etc.) should show for this URL + session. */

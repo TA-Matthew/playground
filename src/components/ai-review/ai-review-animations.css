@@ -30,7 +30,7 @@
   }
 }
 
-/* Conic: 6 brand stops at 60°; sky → gold is one 300–360° segment (extra mid stops looked like 2 “breaks”). */
+/* Conic: brand hues + one ~30° white segment (blue→sky zone) for a subtle highlight wedge. */
 @keyframes ai-rotor-fade-exit {
   from {
     opacity: 0.97;
@@ -65,7 +65,9 @@
     var(--ai-grad-3) 120deg,
     var(--ai-grad-4) 180deg,
     var(--ai-grad-5) 240deg,
-    var(--ai-grad-6) 300deg,
+    #ffffff 270deg,
+    #ffffff 300deg,
+    var(--ai-grad-6) 330deg,
     var(--ai-grad-1) 360deg
   );
   filter: blur(0.35px) saturate(1.1);

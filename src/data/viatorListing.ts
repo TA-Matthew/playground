@@ -42,7 +42,8 @@ export type PromotedExperienceItem = {
   reviewCount: number | null
   price: number
   priceWas: number | null
-  specialOffer: boolean
+  /** Top-left ribbon on the card image — matches Viator PDP product cards research. */
+  ribbon?: 'special-offer' | 'sell-out'
 }
 
 export const viatorListing = {
@@ -153,10 +154,6 @@ export const viatorListing = {
 
   /** “Why travelers loved this” — spotlight strip (before full reviews / logistics) */
   whyTravelersLoved: {
-    socialProof: {
-      /** e.g. “two” in “Popular choice among two people” */
-      groupWord: 'two' as const,
-    },
     /** First chip is “All”, rest are theme tags */
     filterTagLabels: [
       'All',
@@ -191,42 +188,39 @@ export const viatorListing = {
     items: [
       {
         id: 'p1',
-        title: 'Day Trip to Florence and Pisa from Rome',
-        image:
-          'https://images.unsplash.com/photo-1529154168445-62f0bc7a8ace?w=800&q=80&auto=format&fit=crop',
-        imageAlt: 'View of Florence cathedral and city skyline',
+        title: "Vatican City St Peter's Basilica Fun Tour (small group)",
+        image: '/promoted/vatican-basilica-dome.png',
+        imageAlt: 'Interior of St Peter’s Basilica dome and ornate architecture',
         location: 'Rome, Italy',
-        rating: 1.0,
-        reviewCount: 1,
-        price: 116,
-        priceWas: 145,
-        specialOffer: true,
+        rating: 4.9,
+        reviewCount: 79,
+        price: 39,
+        priceWas: 49,
+        ribbon: 'special-offer',
       },
       {
         id: 'p2',
-        title: 'Rome: Guided Tour of the Colosseum',
-        image:
-          'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1a/56/95/0d/caption.jpg?w=600&h=400&s=1',
-        imageAlt: 'The Colosseum in Rome',
+        title: 'Explore Night Life Photos in Rome with A Vintage Car Fiat 500',
+        image: '/promoted/fiat-500-colosseum-night.png',
+        imageAlt: 'Vintage Fiat near the Colosseum at night',
         location: 'Rome, Italy',
-        rating: 4.0,
-        reviewCount: 80,
-        price: 82,
-        priceWas: null,
-        specialOffer: false,
+        rating: 5.0,
+        reviewCount: 4,
+        price: 90,
+        priceWas: 101,
+        ribbon: 'special-offer',
       },
       {
         id: 'p3',
-        title: 'Private Rome Walking Tour with Authentic Food Tasting',
-        image:
-          'https://images.unsplash.com/photo-1513635269971-596e14418a7f?w=800&q=80&auto=format&fit=crop',
-        imageAlt: 'Interior of the Pantheon dome in Rome',
+        title: 'Colosseum Arena & Roman Forum Guided Tour',
+        image: '/promoted/colosseum-arena-interior.png',
+        imageAlt: 'Interior view into the arena of the Roman Colosseum',
         location: 'Rome, Italy',
-        rating: null,
-        reviewCount: null,
-        price: 442,
+        rating: 4.1,
+        reviewCount: 58,
+        price: 72,
         priceWas: null,
-        specialOffer: false,
+        ribbon: 'sell-out',
       },
     ] as const satisfies readonly PromotedExperienceItem[],
   },

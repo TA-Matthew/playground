@@ -1,22 +1,36 @@
 export function AdditionalInfo() {
   return (
-    <div className="mt-1 grid gap-8 md:grid-cols-2 md:gap-10">
-      <ul className="list-disc space-y-3 pl-5 text-base leading-[1.5] text-[#333] marker:text-[#b3b3b3]">
-        <li>Confirmation will be received at time of booking, unless booked within 1 day of travel.</li>
-        <li>Not wheelchair accessible</li>
-        <li>Near public transportation</li>
-      </ul>
-      <div className="space-y-4 text-base leading-[1.5] text-[#333]">
-        <p>
-          Please note that there is no hotel pickup/drop off available for this tour. All visitors
-          must pass through airport-style security. During high season the wait at security may be
-          up to 30 minutes.
-        </p>
-        <p>
-          St Peter’s Basilica and/or the Sistine Chapel may be subject to last-minute closures for
-          religious ceremonies. When this occurs, an extended itinerary within the Museums will be
-          offered in place of time spent inside the Chapel or Basilica.
-        </p>
+    <div className="mt-1">
+      <div className="grid gap-8 md:grid-cols-2 md:gap-10">
+        <ul className="pdp-tour-summary-body list-disc space-y-3 pl-5 marker:text-black">
+          <li>Confirmation will be received at time of booking</li>
+          <li>Not wheelchair accessible</li>
+          <li>Stroller accessible</li>
+        </ul>
+        <ul className="pdp-tour-summary-body list-disc space-y-4 pl-5 marker:text-black">
+          <li>
+            Unforeseen events: The Vatican is its own country and therefore the Pope can decide also
+            last minute to close St. Peter&apos;s Basilica for ad hoc events. It is a very rare event
+            during the year but it is possible and we will do our best to inform you. If it is too
+            late to inform you, our guide will extend the tour in the Vatican. Not to worry that the
+            incredible collection of Vatican Museums and the masterpiece of Michelangelo in the
+            Sistine Chapel will still be included.
+          </li>
+          <li>
+            Most of our tours include the Vatican Museums, Sistine Chapel, and St. Peter&apos;s
+            Basilica. However, there are two specific options with different inclusions. You will find
+            below:
+          </li>
+          <li>
+            Museums & SISTINE CHAPEL Tour – Includes the Vatican Museums and Sistine Chapel but does
+            NOT include St. Peter&apos;s Basilica.
+          </li>
+        </ul>
+      </div>
+      <div className="mt-6 flex justify-start md:mt-8">
+        <button type="button" className="pdp-neutral-outline-btn-md">
+          Show 4 more
+        </button>
       </div>
     </div>
   )

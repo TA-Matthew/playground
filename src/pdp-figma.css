@@ -12,4 +12,60 @@
     font-family: var(--font-sans);
     color: var(--pdp-ink);
   }
+
+  /** Promoted carousel disclaimer — global/body small (neutral/40). */
+  .pdp-figma .pdp-disclaimer-label {
+    font-family: var(--font-sans);
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 150%;
+    letter-spacing: var(--viator-typeface-letter-spacing-none);
+    color: #707070;
+  }
+
+  /** Overview / tour summary — global/body (#tour.summary) */
+  .pdp-figma .pdp-tour-summary-body {
+    font-family: var(--font-sans);
+    font-style: normal;
+    font-weight: 400;
+    font-feature-settings: 'liga' 0, 'clig' 0;
+    font-size: 16px;
+    line-height: 150%;
+    color: var(--pdp-ink);
+  }
+
+  /** Meeting & pickup primary address/placename lines (#000 · global/body rhythm). */
+  .pdp-figma .pdp-meeting-detail-text {
+    font-family: var(--font-sans);
+    font-style: normal;
+    font-weight: 400;
+    font-feature-settings: 'liga' 0, 'clig' 0;
+    font-size: 16px;
+    line-height: 150%;
+    color: var(--pdp-ink);
+  }
+
+  /** Meeting / pickup instruction — global/body small, neutral/30. */
+  .pdp-figma .pdp-location-instruction {
+    margin-top: 1rem;
+    margin-bottom: 0;
+    word-break: break-word;
+    font-family: var(--font-sans);
+    font-style: normal;
+    font-weight: 400;
+    font-feature-settings: 'liga' 0, 'clig' 0;
+    font-size: 14px;
+    line-height: 150%;
+    color: var(--pdp-muted);
+  }
+
+  /**
+   * DS: neutral + outline + md (global/body medium on label).
+   * Figma: ButtonColorVariant.neutral, ButtonDisplayVariant.outline, displaySize md.
+   */
+  .pdp-figma .pdp-neutral-outline-btn-md {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-white px-6 py-[10px] font-sans text-base font-medium leading-6 tracking-[0.05px] text-[#0d0d0d] transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2;
+    border: 1.5px solid #000;
+  }
 }

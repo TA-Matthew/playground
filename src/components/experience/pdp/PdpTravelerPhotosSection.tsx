@@ -9,17 +9,17 @@ export function PdpTravelerPhotosSection() {
 
   return (
     <section
-      className="border-t border-[#d9d9d9] py-10"
+      className="border-t border-[#d9d9d9] pt-6 pb-10"
       aria-labelledby="pdp-traveler-photos-main-h"
     >
       <h2
         id="pdp-traveler-photos-main-h"
-        className="text-2xl font-bold leading-[1.2] tracking-[0.2px] text-black"
+        className="inline-flex items-center gap-1.5 text-[28px] font-medium leading-[1.2] tracking-[0.2px] text-black"
       >
         Traveler Photos
       </h2>
-      <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:gap-2">
-        <div className="relative h-52 w-full min-w-0 flex-[1.1] overflow-hidden rounded-lg sm:h-72 sm:min-h-0 md:h-80">
+      <div className="mt-5 flex flex-col gap-2 sm:h-[320px] sm:flex-row sm:items-center sm:gap-2">
+        <div className="relative h-52 w-full shrink-0 overflow-hidden rounded-lg sm:h-[320px] sm:w-[428px]">
           <img
             alt={hero.alt}
             src={hero.src}
@@ -30,13 +30,13 @@ export function PdpTravelerPhotosSection() {
             decoding="async"
           />
         </div>
-        <div className="grid min-w-0 flex-1 grid-cols-2 gap-2">
+        <div className="grid min-h-0 min-w-0 flex-1 grid-cols-2 gap-2 sm:grid-rows-[171px_140px]">
           {[a, b, c].map(
             (img) =>
               img && (
                 <div
                   key={img.src}
-                  className="relative aspect-[4/3] min-h-0 w-full overflow-hidden rounded-lg"
+                  className="relative aspect-[4/3] min-h-0 w-full overflow-hidden rounded-lg sm:aspect-auto sm:h-full"
                 >
                   <img
                     alt={img.alt}
@@ -48,7 +48,7 @@ export function PdpTravelerPhotosSection() {
               ),
           )}
           {d ? (
-            <div className="relative aspect-[4/3] min-h-0 w-full overflow-hidden rounded-lg">
+            <div className="relative aspect-[4/3] min-h-0 w-full overflow-hidden rounded-lg sm:aspect-auto sm:h-full">
               <img alt={d.alt} className="h-full w-full object-cover" src={d.src} loading="lazy" />
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/55 text-white">
                 <span

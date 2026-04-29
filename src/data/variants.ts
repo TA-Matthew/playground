@@ -1,6 +1,6 @@
 import { viatorListing } from './viatorListing'
 
-export type VariantId = 'a' | 'b'
+export type VariantId = 'a' | 'b' | 'c'
 
 export interface Stop {
   id: string
@@ -17,13 +17,15 @@ export interface Stop {
 }
 
 export interface BookingContent {
-  dealEndsLabel: string
-  discountPct: string
-  priceDisplay: string
-  wasPrice: string
+  /** Large bold headline: currency + amount only (with “From · per person” in UI). */
+  priceAmount: string
+  badgeExceptionalDeal: string
+  badgeKidsDiscount: string
   dateLabel: string
   travellers: number
-  bookAheadNote: string
+  /** Sidebar “book ahead” callout — headline (14px medium) + micro body (13px). */
+  bookAheadTitle: string
+  bookAheadSubtitle: string
 }
 
 /** Variant A — “Meeting and Pickup” card above itinerary (desktop: two columns; mobile: stacked). */
@@ -216,13 +218,13 @@ export const variants: Record<VariantId, ExperienceVariant> = {
     stops: STOPS_A,
     routeLngLat: VATICAN_ROUTE,
     booking: {
-      dealEndsLabel: 'Ends May 24',
-      discountPct: '-6%',
-      priceDisplay: '$101.49 per person',
-      wasPrice: '€124.00',
-      dateLabel: 'Mon 18 Jan',
+      priceAmount: '$40.56',
+      badgeExceptionalDeal: 'Exceptional deal',
+      badgeKidsDiscount: 'Discounted rates for kids',
+      dateLabel: 'Wed, Apr 29',
       travellers: 2,
-      bookAheadNote: 'Book ahead! On average, booked 8 days in advance.',
+      bookAheadTitle: 'Book ahead!',
+      bookAheadSubtitle: 'On average, booked 8 days in advance.',
     },
   },
   b: {
@@ -233,13 +235,30 @@ export const variants: Record<VariantId, ExperienceVariant> = {
     stops: STOPS_B,
     routeLngLat: ROUTE_LNG_LAT_B,
     booking: {
-      dealEndsLabel: 'Ends May 24',
-      discountPct: '-6%',
-      priceDisplay: '$101.49 per person',
-      wasPrice: '€124.00',
-      dateLabel: 'Mon 18 Jan',
+      priceAmount: '$40.56',
+      badgeExceptionalDeal: 'Exceptional deal',
+      badgeKidsDiscount: 'Discounted rates for kids',
+      dateLabel: 'Wed, Apr 29',
       travellers: 2,
-      bookAheadNote: 'Book ahead! On average, booked 8 days in advance.',
+      bookAheadTitle: 'Book ahead!',
+      bookAheadSubtitle: 'On average, booked 8 days in advance.',
+    },
+  },
+  c: {
+    id: 'c',
+    label: 'Variant C',
+    tourTitle: viatorListing.tourTitle,
+    ratingLine: viatorListing.ratingLine,
+    stops: STOPS_B,
+    routeLngLat: ROUTE_LNG_LAT_B,
+    booking: {
+      priceAmount: '$40.56',
+      badgeExceptionalDeal: 'Exceptional deal',
+      badgeKidsDiscount: 'Discounted rates for kids',
+      dateLabel: 'Wed, Apr 29',
+      travellers: 2,
+      bookAheadTitle: 'Book ahead!',
+      bookAheadSubtitle: 'On average, booked 8 days in advance.',
     },
   },
 }
@@ -248,5 +267,11 @@ export const DEFAULT_VARIANT: VariantId = 'a'
 
 export function getVariant(id: string | null | undefined): VariantId {
   if (id === 'b') return 'b'
+  if (id === 'c') return 'c'
   return 'a'
+}
+
+/** Variant B and C share the same itinerary / map behavior (meeting + end stops, B-route offset). */
+export function isVariantBLayout(variantId: VariantId): boolean {
+  return variantId === 'b' || variantId === 'c'
 }

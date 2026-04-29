@@ -7,11 +7,13 @@ import { MeetingAndPickupCard } from '../components/experience/MeetingAndPickupC
 import { PdpCancellationQuestionsSection } from '../components/experience/pdp/PdpCancellationQuestionsSection'
 import { PdpTravelerPhotosSection } from '../components/experience/pdp/PdpTravelerPhotosSection'
 import { PdpViatorDeepReviewsBlock } from '../components/experience/pdp/PdpViatorDeepReviewsBlock'
+import { PdpViatorTitleMeta } from '../components/experience/pdp/PdpViatorTitleMeta'
 import { ViatorPdpBlock } from '../components/experience/pdp/ViatorPdpBlock'
 import { LogisticsBlock } from '../components/logistics/LogisticsBlock'
 import { FacilitatorBar } from '../components/uxr/FacilitatorBar'
 import { SecretUnlock } from '../components/uxr/SecretUnlock'
-import { variants, type VariantId } from '../data/variants'
+import { viatorListing } from '../data/viatorListing'
+import { isVariantBLayout, variants, type VariantId } from '../data/variants'
 import {
   buildParticipantUrl,
   parseHideUi,
@@ -102,6 +104,15 @@ export function ExperiencePage() {
           />
         ) : null}
 
+        <div className="mb-5 w-full min-w-0">
+          <PdpViatorTitleMeta
+            title={viatorListing.tourTitle}
+            averageRating={viatorListing.averageRating}
+            reviewCount={viatorListing.reviewCount}
+            locationLine={viatorListing.locationLine}
+          />
+        </div>
+
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start lg:gap-6 xl:gap-6">
           <main className="pdp-figma w-full min-w-0 max-w-[864px] lg:order-1">
             <ViatorPdpBlock />
@@ -112,7 +123,7 @@ export function ExperiencePage() {
             ) : null}
 
             <CollapsibleSection
-              title={variant === 'b' ? 'Itinerary & Meeting point' : 'Itinerary'}
+              title={isVariantBLayout(variant) ? 'Itinerary & Meeting point' : 'Itinerary'}
               defaultOpen
             >
               {data.whatToExpectIntro || data.whatToExpectExtra ? (

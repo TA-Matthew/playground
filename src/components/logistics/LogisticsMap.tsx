@@ -2,7 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { AnimatePresence, motion } from 'framer-motion'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import type { Stop, VariantId } from '../../data/variants'
+import { isVariantBLayout, type Stop, type VariantId } from '../../data/variants'
 import type { SelectSource } from './Timeline'
 import { getPoiOrderForStopIndex } from './poiOrder'
 import { viatorMeetingMarkSvgHtml } from './viatorMeetingMark'
@@ -146,8 +146,8 @@ function isMapTeardropPin(
 ): boolean {
   if (overlapCompact) return false
   if (!active) return false
-  if (variantId === 'b' && stop?.kind === 'meeting') return true
-  if (variantId === 'b' && stop?.kind === 'end') return true
+  if (isVariantBLayout(variantId) && stop?.kind === 'meeting') return true
+  if (isVariantBLayout(variantId) && stop?.kind === 'end') return true
   if (stop?.kind === 'passby') return true
   return poiOrder != null
 }
@@ -158,11 +158,11 @@ function markerSvgForStop(
   poiOrder: number | null,
   overlapCompact: boolean,
 ): string {
-  if (variantId === 'b' && stop?.kind === 'meeting') {
+  if (isVariantBLayout(variantId) && stop?.kind === 'meeting') {
     if (overlapCompact) return MAP_PASSBY_DOT_HTML
     return MAP_MEETING_VIATOR_SVG
   }
-  if (variantId === 'b' && stop?.kind === 'end') {
+  if (isVariantBLayout(variantId) && stop?.kind === 'end') {
     if (overlapCompact) return MAP_PASSBY_DOT_HTML
     return MAP_FLAG_SVG
   }
@@ -176,7 +176,7 @@ function markerSvgForStop(
 }
 
 function isVariantBMeetingOrEnd(variantId: VariantId, stop: Stop | undefined): boolean {
-  return variantId === 'b' && (stop?.kind === 'meeting' || stop?.kind === 'end')
+  return isVariantBLayout(variantId) && (stop?.kind === 'meeting' || stop?.kind === 'end')
 }
 
 /**
@@ -273,7 +273,7 @@ function mapMarkerWrapperClass(
 ): string {
   if (isMapTeardropPin(active, stop, variantId, poiOrder, overlapCompact)) {
     const focusRing =
-      variantId === 'b' && (stop?.kind === 'meeting' || stop?.kind === 'end')
+      isVariantBLayout(variantId) && (stop?.kind === 'meeting' || stop?.kind === 'end')
         ? 'focus-visible:ring-emerald-600'
         : 'focus-visible:ring-black'
     return `flex h-[54px] w-10 cursor-pointer items-center justify-center border-0 bg-transparent p-0 shadow-none outline-none ring-0 focus-visible:outline focus-visible:ring-2 focus-visible:ring-offset-0 ${focusRing}`
@@ -584,7 +584,7 @@ function openPoiPopup(
 
   const html = `<div class="flex max-h-[min(50svh,320px)] min-w-0 flex-col overflow-hidden rounded-2xl bg-white shadow-xl shadow-stone-900/12 ring-1 ring-stone-200/90">
     <div class="shrink-0 bg-gradient-to-br from-stone-50 via-white to-stone-50/80 px-4 pb-3 pt-4">
-      <h3 class="text-[15px] font-semibold leading-snug tracking-tight text-stone-900">${escapeHtml(title)}</h3>
+      <h3 class="text-[15px] font-medium leading-snug tracking-tight text-stone-900">${escapeHtml(title)}</h3>
     </div>
     <div class="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain">
     ${rows}
@@ -1627,7 +1627,7 @@ export function LogisticsMap({
               <div className="flex shrink-0 items-center justify-between gap-3 border-b border-stone-200/90 px-4 py-3">
                 <h2
                   id="poi-desc-sheet-title"
-                  className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-stone-900"
+                  className="min-w-0 flex-1 text-base font-medium leading-snug tracking-tight text-stone-900"
                 >
                   {poiDescriptionSheet.title}
                 </h2>
