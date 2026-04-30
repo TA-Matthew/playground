@@ -88,7 +88,7 @@ const MAP_PASSBY_DOT_HTML = `<svg class="pointer-events-none block h-[18px] w-[1
 /** White number on POI marker disc (same slot as former pin icon). */
 function markerPoiNumberHtml(n: number): string {
   const fs = n >= 10 ? 10 : 12
-  return `<span class="pointer-events-none flex h-[18px] min-w-[18px] items-center justify-center font-semibold leading-none text-white tabular-nums" style="font-size:${fs}px;line-height:1" aria-hidden="true">${n}</span>`
+  return `<span class="pointer-events-none flex h-[18px] min-w-[18px] items-center justify-center font-medium leading-none tracking-normal text-white tabular-nums" style="font-family:var(--font-sans);font-size:${fs}px;line-height:1" aria-hidden="true">${n}</span>`
 }
 
 /** Quadratic route bulge: control point offset as a fraction of segment length. Higher = deeper arch. */
@@ -988,8 +988,8 @@ type Props = {
   /** Itinerary list row hover — map pin uses full teardrop + image like the selected stop. */
   timelineHoverStopId?: string | null
   /**
-   * Open timeline accordion row id (if any). When set on mobile+list, the selected teardrop still
-   * shows for the expanded POI; without it we keep pins neutral to avoid list-driven map chrome.
+   * Open timeline accordion row id (if any). On mobile with list-originated selection, the map shows
+   * the selected teardrop only while a row is expanded (or when selection came from the map/modal).
    */
   expandedStopId?: string | null
 }
@@ -1120,15 +1120,12 @@ export function LogisticsMap({
     const hoverIdx = hoverMeetingId
       ? stopsLocal.findIndex((s) => s.id === hoverMeetingId)
       : -1
-    /** Mobile inline preview only: pins stay neutral. Desktop + mobile modal use teardrop when selected. */
-    const mapInPageEmbed =
-      isMobileRef.current && !mobileSheetOpenRef.current
     const timelineHoverId = timelineHoverStopIdRef.current
     const timelineHoverIdx = timelineHoverId
       ? stopsLocal.findIndex((s) => s.id === timelineHoverId)
       : -1
     const timelineHoverActive =
-      !mapInPageEmbed && timelineHoverIdx >= 0 && timelineHoverId != null
+      timelineHoverIdx >= 0 && timelineHoverId != null
     const mobileListSelection =
       isMobileRef.current && lastSelectSourceRef.current === 'list'
     /**
@@ -1137,7 +1134,6 @@ export function LogisticsMap({
      * collapsed list browsing does not light up the map; list hover can still take over below.
      */
     const showMapPinSelected =
-      !mapInPageEmbed &&
       highlightSelectedPinRef.current &&
       (!mobileListSelection || expandedStopIdRef.current != null)
     const selectionActiveIdx =
@@ -1150,11 +1146,11 @@ export function LogisticsMap({
       const timelineHoverPinActive =
         timelineHoverActive && i === timelineHoverIdx
       const b2MeetingHoverPinActive =
-        !mapInPageEmbed && hoverIdx >= 0 && i === hoverIdx
+        hoverIdx >= 0 && i === hoverIdx
       const active =
         selectedPinActive || timelineHoverPinActive || b2MeetingHoverPinActive
       const poiOrder = getPoiOrderForStopIndex(stopsLocal, vid, i)
-      const oc = mapInPageEmbed ? true : (overlap[i] ?? false)
+      const oc = overlap[i] ?? false
       const isTimelineRowHoverPin = timelineHoverPinActive
       /** Map overlap uses compact dots for clustered pins; the active pin always renders full teardrop+photo. */
       const ocForMarker = active ? false : oc
@@ -1208,7 +1204,6 @@ export function LogisticsMap({
     previousB2HoverMeetingIdForTeardropAnimRef.current = hoverMeetingIdForAnim
 
     if (
-      !mapInPageEmbed &&
       !timelineHoverActive &&
       hoverIdx >= 0 &&
       hoverMeetingAnimChanged &&
@@ -1237,7 +1232,6 @@ export function LogisticsMap({
 
     if (
       hoverTeardropAnimPrimedRef.current &&
-      !mapInPageEmbed &&
       timelineHoverIdx >= 0 &&
       timelineHoverAnimChanged &&
       stopsLocal[timelineHoverIdx] &&
@@ -1268,7 +1262,7 @@ export function LogisticsMap({
       stopsLocal[selIdx]
     ) {
       const poiOrderSel = getPoiOrderForStopIndex(stopsLocal, vid, selIdx)
-      const ocSel = mapInPageEmbed ? true : (overlap[selIdx] ?? false)
+      const ocSel = overlap[selIdx] ?? false
       const activeEl = markerElsRef.current[selIdx]
       const teardropSel = isMapTeardropPin(
         true,

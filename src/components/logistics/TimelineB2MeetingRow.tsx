@@ -82,7 +82,16 @@ export function TimelineB2MeetingRow({
 
   /** Whenever a pickup is committed, title reads “Meet at — …” (also while row collapsed or list is fading). */
   const meetAtHeadingActive = pickupId != null && idx >= 0
-  const showMeetingList = isOpen && (!meetingListDismissed || listFadeOut)
+  /**
+   * Picker list: show while choosing (`pickupId == null`) or during fade-out after a choice (`listFadeOut`).
+   * Once a pickup exists and we’re not fading the list away, hide it — avoids stacking list + long description.
+   */
+  const showMeetingList =
+    isOpen &&
+    (pickupId == null || listFadeOut) &&
+    (!meetingListDismissed || listFadeOut)
+  /** Don’t mount meeting copy until the picker is gone — prevents huge height while list still fades. */
+  const revealPickupDetails = pickupId != null && !showMeetingList
 
   /** Replay AI-summary-style entrance when switching between “3 meeting…” and “Meet at — …”. */
   const prevMeetAtHeadingRef = useRef(meetAtHeadingActive)
@@ -125,7 +134,7 @@ export function TimelineB2MeetingRow({
   return (
     <div
       id={`poi-${B2_MEETING_TIMELINE_ROW_ID}`}
-      className={`flex w-full gap-4 rounded-lg py-2 text-left transition hover:bg-stone-50/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-0 ${
+      className={`flex w-full cursor-pointer gap-4 rounded-lg py-2 text-left transition hover:bg-stone-50/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-0 ${
         rowSelected ? 'bg-white' : ''
       }`}
       tabIndex={0}
@@ -252,7 +261,7 @@ export function TimelineB2MeetingRow({
               <p className="mt-1.5 text-[13px] leading-snug text-stone-500">
                 {pickupId != null && activeMeeting
                   ? activeMeeting.durationLine
-                  : 'Choose a meeting point.'}
+                  : 'Choose a meeting point'}
               </p>
             )}
           </div>
@@ -271,8 +280,8 @@ export function TimelineB2MeetingRow({
                 onClick={(e) => e.stopPropagation()}
                 onPointerDown={(e) => e.stopPropagation()}
               >
-                <MeetingBody meeting={activeMeeting ?? meetings[0]} pickupChosen={pickupId != null} />
-                {isOpen && meetAtHeadingActive ? (
+                <MeetingBody meeting={activeMeeting ?? meetings[0]} pickupChosen={revealPickupDetails} />
+                {isOpen && meetAtHeadingActive && revealPickupDetails ? (
                   <button
                     type="button"
                     className="mt-4 inline-flex w-full items-center gap-1.5 text-left text-[13px] leading-snug text-stone-500 underline decoration-stone-300 underline-offset-4 transition hover:text-stone-600 hover:decoration-stone-400 sm:w-auto"

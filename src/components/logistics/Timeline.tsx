@@ -143,7 +143,7 @@ function TimelineComponent({
                     </svg>
                   ) : poiOrder != null ? (
                     <span
-                      className="min-w-[1.1rem] text-center text-[13px] font-semibold leading-none text-white tabular-nums sm:text-[14px]"
+                      className="min-w-[1.1rem] text-center text-[13px] font-medium leading-none tracking-normal text-white tabular-nums [font-family:var(--font-sans)] sm:text-[14px]"
                       aria-hidden
                     >
                       {poiOrder}

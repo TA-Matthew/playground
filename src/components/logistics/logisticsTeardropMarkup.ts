@@ -108,7 +108,7 @@ export function mapPoiSelectedTeardropHtml(n: number): string {
   const w = MAP_POI_SELECTED_PIN_WIDTH_PX
   const h = MAP_POI_SELECTED_PIN_HEIGHT_PX
   const d = MAP_POI_TEARDROP_PATH_D
-  return `<svg class="${TEARDROP_SVG_CLASS}" width="${w}" height="${h}" viewBox="${MAP_POI_TEARDROP_VIEWBOX}" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path fill="#0a0a0a" stroke="#ffffff" stroke-width="${sw}" stroke-linejoin="round" d="${d}"/><text x="13.5" y="13.5" dominant-baseline="central" text-anchor="middle" fill="#fff" font-size="${fs}" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">${n}</text></svg>`
+  return `<svg class="${TEARDROP_SVG_CLASS}" width="${w}" height="${h}" viewBox="${MAP_POI_TEARDROP_VIEWBOX}" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path fill="#0a0a0a" stroke="#ffffff" stroke-width="${sw}" stroke-linejoin="round" d="${d}"/><text x="13.5" y="13.5" dominant-baseline="central" text-anchor="middle" fill="#fff" font-size="${fs}" font-weight="600" font-family="Aeonik, system-ui, sans-serif">${n}</text></svg>`
 }
 
 export function mapPassbySelectedTeardropHtml(): string {
