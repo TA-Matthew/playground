@@ -28,7 +28,7 @@ type Props = {
   expandedId: string | null
   /** List row title click: toggles expand; closing clears selection in parent. */
   onRowHeaderClick: (id: string) => void
-  /** B2: pickup chosen in dropdown (`null` until chosen — itinerary line stays hidden). */
+  /** B2: pickup chosen in dropdown (`null` until chosen). */
   b2PickupId?: string | null
   onB2PickupChange?: (meetingStopId: string | null) => void
   /** B2: hover preview on map while pointing at a dropdown option */

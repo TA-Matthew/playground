@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
+import { usePreloadMapPinImages } from '../hooks/usePreloadMapPinImages'
 import { Link, useSearchParams } from 'react-router-dom'
 import { AdditionalInfo } from '../components/additional/AdditionalInfo'
 import { BookingSidebar } from '../components/booking/BookingSidebar'
@@ -33,6 +34,8 @@ export function ExperiencePage() {
   const hideUi = parseHideUi(searchParams)
   const variant: VariantId = parseVariant(searchParams)
   const data = variants[variant]
+
+  usePreloadMapPinImages(data.stops)
 
   const meetingAndPickupSection = data.meetingAndPickup ? (
     <CollapsibleSection title="Meeting and Pickup" defaultOpen={!isVariantBLayout(variant)}>

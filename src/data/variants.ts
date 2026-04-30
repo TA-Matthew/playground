@@ -60,7 +60,7 @@ export interface ExperienceVariant {
   /** GeoJSON order: [lng, lat][] — must match stops order */
   routeLngLat: [number, number][]
   /**
-   * Dashed itinerary path (when shown). B2: core POI path only — meetings/end use `routeLngLat` for pins.
+   * Dashed itinerary path (when shown). B2: POI 1 through end; meetings use `routeLngLat` for pins.
    */
   routePolylineLngLat?: [number, number][]
   booking: BookingContent
@@ -141,7 +141,7 @@ const STOPS_A: Stop[] = [
   {
     id: 'poi-borgo',
     title: 'Borgo',
-    durationLine: '40 minutes • Admission Ticket Free',
+    durationLine: '40 minutes • Free entry',
     popupImageSrc: BORGO_POI_IMAGE_SRC,
     popupImageAlt: BORGO_POI_IMAGE_ALT,
     description: `Meet your tour guide at our office, located in the oldest neighbourhoods of the Vatican, Borgo Pio. Following a self introduction by your guide, you will walk through the charming shops of the Borgo, as he/she shares some local tips for eating and site seeing in Rome, including off the beaten track sites that you must visit during your holiday!
@@ -161,7 +161,7 @@ Some background will also be provided on the history of the Sistine Chapel (we d
   {
     id: 'poi-st-peters-square',
     title: 'St. Peter\'s Square',
-    durationLine: '20 minutes • Admission Ticket Free',
+    durationLine: '20 minutes • Free entry',
     popupImageSrc: ST_PETERS_SQUARE_IMAGE_SRC,
     popupImageAlt: ST_PETERS_SQUARE_IMAGE_ALT,
     description: `We arrive at St. Peter's Square, which is marked by a towering Egyptian obelisk and enveloped by columns and statues of saints. Hear about the history of the square and the legendary artist Bernini who designed it.
@@ -171,7 +171,7 @@ Fun fact — the Pope addresses crowds from his apartment window overlooking St.
   {
     id: 'poi-citta-vaticano',
     title: 'Città del Vaticano',
-    durationLine: '15 minutes • Admission Ticket Free',
+    durationLine: '15 minutes • Free entry',
     popupImageSrc: CITTA_VATICANO_IMAGE_SRC,
     popupImageAlt: CITTA_VATICANO_IMAGE_ALT,
     description: `En route to the museum, you will get to see and hear about how residents of the smallest city in the world go about their day to day life (including getting their mail!) Snap a pic of the Swiss guards — the pontifical bodyguards in their distinctly Renaissance uniforms.
@@ -183,7 +183,7 @@ Then, slowly head towards the museum's entrance, where you will be led to a spec
   {
     id: 'poi-vatican-museums',
     title: 'Vatican Museums',
-    durationLine: '45 minutes • Admission Ticket Included',
+    durationLine: '45 minutes • Ticket included',
     popupImageSrc: VATICAN_MUSEUMS_IMAGE_SRC,
     popupImageAlt: VATICAN_MUSEUMS_IMAGE_ALT,
     description:
@@ -192,7 +192,7 @@ Then, slowly head towards the museum's entrance, where you will be led to a spec
   {
     id: 'poi-sistine',
     title: 'Sistine Chapel',
-    durationLine: '15 minutes • Admission Ticket Included',
+    durationLine: '15 minutes • Ticket included',
     popupImageSrc: SISTINE_IMAGE_SRC,
     popupImageAlt: SISTINE_IMAGE_ALT,
     description: `Admire Michelangelo's famous works, including the Creation of Adam and the Last Judgement. This spectacular fresco evokes lifelike images within the mind, vividly portraying stories of mankind in the biblical era.
@@ -202,7 +202,7 @@ Note that the museum requires visitors to observe silence and a dress code (knee
   {
     id: 'poi-st-peters-basilica',
     title: 'St. Peter\'s Basilica',
-    durationLine: '15 minutes • Admission Ticket Free',
+    durationLine: '15 minutes • Free entry',
     popupImageSrc: ST_PETERS_BASILICA_IMAGE_SRC,
     popupImageAlt: ST_PETERS_BASILICA_IMAGE_ALT,
     description:
@@ -302,8 +302,8 @@ const STOPS_B2: Stop[] = [...B2_MEETING_STOPS, ...STOPS_B_CORE, STOP_B_END]
 
 const ROUTE_LNG_LAT_B2: [number, number][] = [...B2_MEETING_LNG_LAT, ...VATICAN_ROUTE_B, END_LNG_LAT_B]
 
-/** Main tour walking path (POIs 1–6 legs incl. pass-by) — no meeting/end vertices */
-const ROUTE_POLYLINE_B2_CORE: [number, number][] = [...VATICAN_ROUTE_B]
+/** B2 dashed line: POI 1 (Borgo) through the core path to the end pin (meetings are separate; not on this line until one is chosen). */
+const ROUTE_POLYLINE_B2_CORE: [number, number][] = [...VATICAN_ROUTE_B, END_LNG_LAT_B]
 
 const MEETING_AND_PICKUP_A: MeetingAndPickupContent = {
   meeting: {

@@ -58,7 +58,6 @@ export function LogisticsBlock({
   const expandedIdRef = useRef<string | null>(null)
   expandedIdRef.current = expandedId
 
-  /** B2: dashed route hidden until a pickup is chosen in the timeline dropdown. */
   const [b2PickupId, setB2PickupId] = useState<string | null>(null)
   /** B2: dropdown hover previews that meeting pin on the map (selected styling). */
   const [b2HoverMeetingId, setB2HoverMeetingId] = useState<string | null>(null)
@@ -183,7 +182,6 @@ export function LogisticsBlock({
           variantId={variantId}
           routeLngLat={routeLngLat}
           routePolylineLngLat={routePolylineLngLat}
-          showItineraryPolyline={variantId !== 'b2' || b2PickupId != null}
           mapKey={mapKey}
           stops={stops}
           landingDefaultExpandedStopId={landingDefaultExpandedStopId}

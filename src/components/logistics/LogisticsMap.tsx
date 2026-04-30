@@ -142,6 +142,29 @@ function isVariantBMeetingOrEnd(variantId: VariantId, stop: Stop | undefined): b
 }
 
 /**
+ * B2: once a meeting pickup is chosen, the dashed itinerary should begin at that meeting pin and
+ * connect into the core POI polyline (first vertex = Borgo / POI 1).
+ */
+function dashedItineraryLineCoords(
+  variantId: VariantId,
+  routeLngLat: [number, number][],
+  routePolylineLngLat: [number, number][] | undefined,
+  stops: readonly Stop[],
+  b2CommittedPickupId: string | null,
+): [number, number][] {
+  const core = routePolylineLngLat ?? routeLngLat
+  if (variantId !== 'b2' || b2CommittedPickupId == null || core.length < 1) {
+    return core
+  }
+  const idx = stops.findIndex((s) => s.id === b2CommittedPickupId)
+  if (idx < 0 || idx > 2) return core
+  if (stops[idx]?.kind !== 'meeting') return core
+  const meetingVertex = routeLngLat[idx]
+  if (!meetingVertex) return core
+  return [meetingVertex, ...core]
+}
+
+/**
  * Smooth curved path through ordered stops (quadratic Bézier per edge, alternating lateral offset).
  * Renders as a dotted connector on the map similar to illustrated itinerary lines in design.
  */
@@ -960,9 +983,9 @@ function runMobileModalPoiFocus(
 type Props = {
   variantId: VariantId
   routeLngLat: [number, number][]
-  /** When set, dashed line uses these coords (else `routeLngLat`). B2: core POI path only. */
+  /** When set, dashed line uses these coords (else `routeLngLat`). B2: Borgo → … → end pin (meetings prepended when chosen). */
   routePolylineLngLat?: [number, number][]
-  /** B2: hide dashed itinerary until a pickup is chosen (`false`). */
+  /** When `false`, dashed itinerary is hidden (default: visible). */
   showItineraryPolyline?: boolean
   mapKey: string
   stops: Stop[]
@@ -1816,20 +1839,25 @@ export function LogisticsMap({
       setShowRecentre(false)
     }
   /**
-   * Do not depend on `showItineraryPolyline` here — B2 flips it when the first meeting is chosen, and
-   * re-running this effect would `map.remove()` the instance (flash) and cancel in-flight re-centre fits.
-   * Visibility + GeoJSON are updated in the effect below.
+   * Do not depend on `showItineraryPolyline` on this effect — visibility + GeoJSON are updated in the
+   * following effect so toggling the dashed line does not `map.remove()` (flash).
    */
   }, [mapKey, routeLngLat, routePolylineLngLat, variantId])
 
-  /** Toggle dashed route when B2 reveals itinerary after pickup selection. */
+  /** Dashed itinerary GeoJSON (B2 prepends chosen meeting → POI 1 when a pickup is committed). */
   useEffect(() => {
     const map = mapRef.current
     if (!map || !mapReady) return
     const safeKey = mapKey.replace(/[^a-zA-Z0-9_-]/g, '')
     const idLine = `route-line-${safeKey}`
     if (!map.getLayer(idLine)) return
-    const baseCoords = routePolylineLngLat ?? routeLngLat
+    const baseCoords = dashedItineraryLineCoords(
+      variantId,
+      routeLngLat,
+      routePolylineLngLat,
+      stops,
+      b2CommittedPickupId,
+    )
     const curved =
       baseCoords.length >= 2 ? buildCurvedRouteLngLat(baseCoords) : []
     const visible = showItineraryPolyline !== false && curved.length >= 2
@@ -1846,7 +1874,16 @@ export function LogisticsMap({
         },
       })
     }
-  }, [mapReady, mapKey, routeLngLat, routePolylineLngLat, showItineraryPolyline])
+  }, [
+    mapReady,
+    mapKey,
+    routeLngLat,
+    routePolylineLngLat,
+    showItineraryPolyline,
+    variantId,
+    stops,
+    b2CommittedPickupId,
+  ])
 
   useLayoutEffect(() => {
     const map = mapRef.current
