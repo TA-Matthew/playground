@@ -2,6 +2,7 @@ import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, use
 import type { ReactNode } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import type { VariantId } from '../../data/variants'
+import { FigmaStarRow, type StarKind } from '../experience/pdp/figmaListingUi'
 import { figma } from './figmaAssets'
 import './ai-review-animations.css'
 
@@ -26,24 +27,6 @@ const RATING_TOTAL = Object.values(RATING_COUNTS).reduce((a, b) => a + b, 0)
 
 /** Nearest-1k floor for “NN,000+ reviews” badges (aligned with {@link RATING_TOTAL}). */
 const RATING_TOTAL_K_PLUS = Math.floor(RATING_TOTAL / 1000) * 1000
-
-type StarKind = 'solid' | 'half' | 'outline'
-
-function StarRowMedium({ pattern, size = 16 }: { pattern: StarKind[]; size?: 16 | 24 }) {
-  const h = size
-  const solid = size === 24 ? figma.starSolidLg : figma.starSolid
-  return (
-    <div className="flex items-center gap-0.5" role="img" aria-label="Star rating">
-      {pattern.map((k, i) => (
-        <div key={i} className="shrink-0" style={{ width: h, height: h }}>
-          {k === 'solid' && <img alt="" className="block size-full" src={solid} />}
-          {k === 'half' && <img alt="" className="block size-full" src={figma.starHalf} />}
-          {k === 'outline' && <img alt="" className="block size-full" src={figma.starOutline} />}
-        </div>
-      ))}
-    </div>
-  )
-}
 
 function ChevronDown({ className }: { className?: string }) {
   return (
@@ -185,7 +168,7 @@ function MatrixSentimentIcon({ themeId }: { themeId: ThemeId }) {
 
   return (
     <div className="flex size-4 shrink-0 items-center justify-center" aria-hidden>
-      <img alt="" className="size-[12px] shrink-0" width={12} height={12} decoding="async" src={src} />
+      <img alt="" className="size-4 shrink-0" width={16} height={16} decoding="async" src={src} />
     </div>
   )
 }
@@ -541,7 +524,7 @@ function getThemeBreakdownLabel(themeId: ThemeId): string {
 /** Variant B matrix: how many theme rows show before tap-to-expand on narrow screens. */
 const AI_SUMMARY_MOBILE_MATRIX_PREVIEW_COUNT = 3
 
-/** 16px thumb; 44×44 tap target on mobile, 32×32 from sm. */
+/** 20px thumb icons; 44×44 tap target on mobile, 32×32 from sm. */
 const helpfulFeedbackBtn =
   'flex h-11 w-11 cursor-pointer items-center justify-center rounded-full p-0 [-webkit-tap-highlight-color:transparent] transition-colors sm:h-8 sm:w-8 sm:hover:bg-[#e8e8e8] sm:active:bg-[#dedede] max-sm:active:bg-[#dedede] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-emerald-600'
 
@@ -580,32 +563,30 @@ function AiReviewSummarySourceFooter({ className }: { className?: string }) {
             >
               <img
                 alt=""
-                className="h-4 w-4"
+                className="h-5 w-5"
                 src={figma.upvoteShape}
-                width={16}
-                height={16}
+                width={20}
+                height={20}
                 decoding="async"
               />
             </button>
-            <div className="-scale-y-100">
-              <button
-                type="button"
-                className={helpfulFeedbackBtn}
-                aria-label="No, this summary was not helpful"
-                onClick={() => {
-                  setFeedbackThanks(true)
-                }}
-              >
-                <img
-                  alt=""
-                  className="h-4 w-4"
-                  src={figma.upvoteShape}
-                  width={16}
-                  height={16}
-                  decoding="async"
-                />
-              </button>
-            </div>
+            <button
+              type="button"
+              className={helpfulFeedbackBtn}
+              aria-label="No, this summary was not helpful"
+              onClick={() => {
+                setFeedbackThanks(true)
+              }}
+            >
+              <img
+                alt=""
+                className="h-5 w-5"
+                src={figma.thumbDownShape}
+                width={20}
+                height={20}
+                decoding="async"
+              />
+            </button>
           </div>
         </div>
       )}
@@ -917,10 +898,10 @@ function ThemeChip(props: ThemeChipProps) {
   const { id, label, count, endIcon, isSelected, onSelect } = props
   const start =
     endIcon === 'remove' ? (
-      <img alt="" className="size-3 shrink-0" src={figma.filterChipRemove} />
+      <img alt="" className="size-4 shrink-0" src={figma.filterChipRemove} width={16} height={16} />
     ) : (
-      <div className="size-3 shrink-0 overflow-hidden">
-        <img alt="" className="size-full" src={endIcon === 'up' ? figma.filterChipUp : figma.filterChipDown} />
+      <div className="size-4 shrink-0 overflow-hidden">
+        <img alt="" className="size-full" src={endIcon === 'up' ? figma.filterChipUp : figma.filterChipDown} width={16} height={16} />
       </div>
     )
   return (
@@ -1799,7 +1780,7 @@ function ReviewBlock({ r }: { r: Review }) {
         <div>
           <div className="space-y-2">
             <div className="space-y-2">
-              <StarRowMedium pattern={pat} size={16} />
+              <FigmaStarRow pattern={pat} size={16} />
               <p
                 className="text-base font-bold leading-[1.4] text-black"
                 style={{ fontFeatureSettings: "'lnum' 1, 'tnum' 1" }}
@@ -1962,24 +1943,36 @@ export function ReviewsFigmaReplica({ summaryLayout = 'a' }: ReviewsFigmaReplica
             Traveler Photos
           </h2>
           <div className="flex flex-col gap-2 sm:flex-row sm:gap-2">
-            <div className="relative h-[200px] min-h-[200px] flex-1 overflow-hidden sm:h-[320px] sm:min-h-[320px]">
+            <div className="relative h-[200px] min-h-[200px] flex-1 overflow-hidden rounded-lg sm:h-[320px] sm:min-h-[320px]">
               <img
                 alt=""
-                className="h-full w-full object-cover"
+                className="absolute inset-0 size-full object-cover"
                 src={figma.travelPhotoHero}
               />
             </div>
             <div className="flex min-h-0 flex-1 flex-col gap-2">
-              <div className="grid flex-1 grid-cols-2 gap-2">
-                <div className="relative min-h-[100px] overflow-hidden rounded-lg sm:min-h-[140px]">
-                  <img alt="" className="h-full w-full object-cover" src={figma.travelPhoto1} />
+              {/*
+                Fixed row heights so intrinsic photo dimensions cannot stretch the grid (was min-h only).
+                sm top row: 320 − gap-2 − bottom row = 320 − 8 − 140 = 172px.
+              */}
+              <div className="grid h-[100px] grid-cols-2 gap-2 sm:h-[172px]">
+                <div className="relative h-full min-h-0 overflow-hidden rounded-lg">
+                  <img
+                    alt=""
+                    className="absolute inset-0 size-full object-cover"
+                    src={figma.travelPhoto1}
+                  />
                 </div>
                 {/*
                   Mobile: hero + this row only (3 photos); "See more" + scrim on the bottom-right
                   tile. sm+: plain second thumb; third row has photo 4 + separate See more tile.
                 */}
-                <div className="relative min-h-[100px] overflow-hidden rounded-lg sm:min-h-[140px]">
-                  <img alt="" className="h-full w-full object-cover" src={figma.travelPhoto2} />
+                <div className="relative h-full min-h-0 overflow-hidden rounded-lg">
+                  <img
+                    alt=""
+                    className="absolute inset-0 size-full object-cover"
+                    src={figma.travelPhoto2}
+                  />
                   <div className="absolute inset-0 rounded-lg bg-black/60 sm:hidden" aria-hidden />
                   <div className="absolute inset-0 z-10 flex items-center justify-center sm:hidden">
                     <div className="flex flex-col items-center gap-3 text-white">
@@ -1993,14 +1986,15 @@ export function ReviewsFigmaReplica({ summaryLayout = 'a' }: ReviewsFigmaReplica
                   </div>
                 </div>
               </div>
-              <div className="hidden grid-cols-2 gap-2 sm:grid">
-                <div className="relative h-[100px] overflow-hidden sm:h-[140px]">
-                  <img alt="" className="h-full w-full object-cover" src={figma.travelPhoto3} />
+              <div className="hidden h-[100px] grid-cols-2 gap-2 sm:grid sm:h-[140px]">
+                <div className="relative h-full min-h-0 overflow-hidden rounded-lg">
+                  <img
+                    alt=""
+                    className="absolute inset-0 size-full object-cover"
+                    src={figma.travelPhoto3}
+                  />
                 </div>
-                <div
-                  className="relative flex h-[100px] items-center justify-center overflow-hidden rounded-lg sm:h-[140px]"
-                  style={{ minHeight: 100 }}
-                >
+                <div className="relative flex h-full min-h-0 items-center justify-center overflow-hidden rounded-lg">
                   <img
                     alt=""
                     className="absolute inset-0 size-full object-cover"
@@ -2041,7 +2035,7 @@ export function ReviewsFigmaReplica({ summaryLayout = 'a' }: ReviewsFigmaReplica
                 >
                   4.7
                 </p>
-                <StarRowMedium
+                <FigmaStarRow
                   size={24}
                   pattern={['solid', 'solid', 'solid', 'solid', 'half']}
                 />
@@ -2104,10 +2098,16 @@ export function ReviewsFigmaReplica({ summaryLayout = 'a' }: ReviewsFigmaReplica
                 >
                   <button
                     type="button"
-                    className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-[1.5px] border-[#d9d9d9] bg-white"
+                    className="inline-flex h-10 w-12 shrink-0 items-center justify-center border-0 bg-transparent p-0"
                     aria-label="Search reviews"
                   >
-                    <img alt="" className="size-4" src={figma.searchIcon} />
+                    <img
+                      alt=""
+                      className="pointer-events-none block h-10 w-12 select-none"
+                      src={figma.searchIcon}
+                      width={48}
+                      height={40}
+                    />
                   </button>
                   <div
                     className="hidden h-0 w-px self-stretch bg-[#d9d9d9] sm:block"

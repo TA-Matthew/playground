@@ -311,7 +311,10 @@ export function PdpViatorHeroGallery() {
   const strip = (t.length >= 4 ? t.slice(0, 4) : t) as MediaItem[]
   const seeMoreBg = t[3] ?? t[0] ?? hero
 
-  const basePool = useMemo(() => [hero, ...t] as MediaItem[], [hero, t])
+  /** Desktop hero carousel — same order as thumbnail rail so index 0 matches the first thumb. */
+  const slides = strip
+
+  const basePool = useMemo(() => (t.length > 0 ? [...t] : [hero]) as MediaItem[], [hero, t])
   const mobileGalleryImages = useMemo(
     () =>
       Array.from({ length: MOBILE_GALLERY_IMAGE_COUNT }, (_, i) => basePool[i % basePool.length]),
@@ -355,19 +358,20 @@ export function PdpViatorHeroGallery() {
     return () => ro.disconnect()
   }, [])
 
-  /** Slides: [hero, …first four thumbs] for prev/next and thumb sync */
-  const slides = useMemo<MediaItem[]>(() => {
-    const rest = t.slice(0, 4)
-    return [hero, ...rest]
-  }, [hero, t])
   const [idx, setIdx] = useState(0)
   const mainSrc = slides[idx] ?? hero
 
   const goPrev = useCallback(() => {
-    setIdx((i) => (i - 1 + slides.length) % slides.length)
+    setIdx((i) => {
+      const n = slides.length
+      return n ? (i - 1 + n) % n : 0
+    })
   }, [slides.length])
   const goNext = useCallback(() => {
-    setIdx((i) => (i + 1) % slides.length)
+    setIdx((i) => {
+      const n = slides.length
+      return n ? (i + 1) % n : 0
+    })
   }, [slides.length])
 
   /** Mouse drag-to-scroll; touch keeps native horizontal pan (pointerType !== mouse). */
@@ -458,13 +462,12 @@ export function PdpViatorHeroGallery() {
           aria-label="Image thumbnails"
         >
           {strip.map((img, i) => {
-            const slideIndex = i + 1
-            const isActive = idx === slideIndex
+            const isActive = idx === i
             return (
               <button
                 key={img.src}
                 type="button"
-                onClick={() => setIdx(slideIndex)}
+                onClick={() => setIdx(i)}
                 className={`group relative aspect-[150/98] w-full shrink-0 overflow-hidden rounded-lg border-2 outline-none ring-offset-0 transition-[border-color] focus-visible:ring-2 focus-visible:ring-black/35 sm:w-full sm:max-w-full md:aspect-[150/98] md:min-h-0 md:min-w-0 md:max-w-none md:flex-1 ${
                   isActive ? 'border-black' : 'border-transparent'
                 }`}

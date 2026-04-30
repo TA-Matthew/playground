@@ -84,16 +84,66 @@ const VATICAN_ROUTE_B: [number, number][] = VATICAN_ROUTE.map(
   ([lng, lat]) => [lng + 0.0006, lat - 0.00025] as [number, number],
 )
 
-const PDP_MEDIA = viatorListing.media
-const PDP_THUMB = PDP_MEDIA.thumbnails
+/** Borgo first POI (variant A) — map pin + popup (`/public/figma-assets/poi-borgo-street.png`). */
+const BORGO_POI_IMAGE_SRC = `${import.meta.env.BASE_URL}figma-assets/poi-borgo-street.png`
+const BORGO_POI_IMAGE_ALT = 'Narrow cobblestone street in the Borgo, Rome'
+
+/** Via Plauto 17 / Borgo Pio check-in — meeting-point pin (`/public/figma-assets/meeting-via-plauto-17.png`). */
+const MEETING_VIA_PLAUTO_IMAGE_SRC = `${import.meta.env.BASE_URL}figma-assets/meeting-via-plauto-17.png`
+const MEETING_VIA_PLAUTO_IMAGE_ALT =
+  'Street at Via Plauto: parked scooters, orange wall, and historic buildings, Rome'
+
+/** Ottaviano metro (Line A) — B2 meeting `b2-meeting-b` (`/public/figma-assets/meeting-ottaviano-metro.png`). */
+const MEETING_OTTAVIANO_IMAGE_SRC = `${import.meta.env.BASE_URL}figma-assets/meeting-ottaviano-metro.png`
+const MEETING_OTTAVIANO_IMAGE_ALT =
+  'Ottaviano metro station entrance, Line A signage and street corner, Rome'
+
+/** Piazza del Risorgimento / north Prati — B2 meeting `b2-meeting-a` (`/public/figma-assets/meeting-piazza-risorgimento.png`). */
+const MEETING_RISORGIMENTO_IMAGE_SRC = `${import.meta.env.BASE_URL}figma-assets/meeting-piazza-risorgimento.png`
+const MEETING_RISORGIMENTO_IMAGE_ALT =
+  'Piazza del Risorgimento with café umbrellas, equestrian statue, and surrounding buildings, Rome'
+
+/** Via della Conciliazione pass-by — St. Peter’s Square (`/public/figma-assets/poi-conciliazione-pass-by.png`). */
+const CONCILIAZIONE_PASSBY_IMAGE_SRC = `${import.meta.env.BASE_URL}figma-assets/poi-conciliazione-pass-by.png`
+const CONCILIAZIONE_PASSBY_IMAGE_ALT = "St. Peter’s Square, colonnade and basilica, Vatican"
+
+/** St. Peter’s Square — aerial over piazza and Via della Conciliazione (`/public/figma-assets/poi-st-peters-square.png`). */
+const ST_PETERS_SQUARE_IMAGE_SRC = `${import.meta.env.BASE_URL}figma-assets/poi-st-peters-square.png`
+const ST_PETERS_SQUARE_IMAGE_ALT =
+  "Aerial view of St. Peter’s Square, obelisk, colonnades, and Via della Conciliazione toward Rome"
+
+/** Città del Vaticano — Governorate, gardens, Vatican City (`/public/figma-assets/poi-citta-vaticano.png`). */
+const CITTA_VATICANO_IMAGE_SRC = `${import.meta.env.BASE_URL}figma-assets/poi-citta-vaticano.png`
+const CITTA_VATICANO_IMAGE_ALT =
+  "Aerial view of the Palace of the Governorate, Vatican Gardens, and Rome beyond"
+
+/** Vatican Museums — gilded coffered hall (`/public/figma-assets/poi-vatican-museums.png`). */
+const VATICAN_MUSEUMS_IMAGE_SRC = `${import.meta.env.BASE_URL}figma-assets/poi-vatican-museums.png`
+const VATICAN_MUSEUMS_IMAGE_ALT =
+  "Gilded coffered ceiling and arched windows in a Vatican Museums gallery hall"
+
+/** Sistine Chapel stop — map/popup (`/public/figma-assets/poi-sistine.png`). */
+const SISTINE_IMAGE_SRC = `${import.meta.env.BASE_URL}figma-assets/poi-sistine.png`
+const SISTINE_IMAGE_ALT =
+  "Frescoed barrel vault, pillars, and checkered marble floor in an ornate Vatican hall"
+
+/** St. Peter’s Basilica — dome interior (`/public/figma-assets/poi-st-peters-basilica.png`). */
+const ST_PETERS_BASILICA_IMAGE_SRC = `${import.meta.env.BASE_URL}figma-assets/poi-st-peters-basilica.png`
+const ST_PETERS_BASILICA_IMAGE_ALT =
+  "Interior of St. Peter’s dome, mosaics, Latin frieze, and pendentive roundels, Vatican"
+
+/** Tour end pin — façade and dome from Via della Conciliazione (`/public/figma-assets/poi-tour-end-st-peters.png`). */
+const TOUR_END_POINT_IMAGE_SRC = `${import.meta.env.BASE_URL}figma-assets/poi-tour-end-st-peters.png`
+const TOUR_END_POINT_IMAGE_ALT =
+  "St. Peter’s Basilica façade and dome along Via della Conciliazione toward Piazza San Pietro"
 
 const STOPS_A: Stop[] = [
   {
     id: 'poi-borgo',
     title: 'Borgo',
     durationLine: '40 minutes • Admission Ticket Free',
-    popupImageSrc: PDP_THUMB[3]?.src,
-    popupImageAlt: PDP_THUMB[3]?.alt,
+    popupImageSrc: BORGO_POI_IMAGE_SRC,
+    popupImageAlt: BORGO_POI_IMAGE_ALT,
     description: `Meet your tour guide at our office, located in the oldest neighbourhoods of the Vatican, Borgo Pio. Following a self introduction by your guide, you will walk through the charming shops of the Borgo, as he/she shares some local tips for eating and site seeing in Rome, including off the beaten track sites that you must visit during your holiday!
 
 Some background will also be provided on the history of the Sistine Chapel (we do it here as the chapel forbids noise and travellers are expected to observe silence once entering).`,
@@ -103,8 +153,8 @@ Some background will also be provided on the history of the Sistine Chapel (we d
     kind: 'passby',
     title: 'Via Della Conciliazione (Pass By)',
     durationLine: 'Pass by',
-    popupImageSrc: PDP_THUMB[1]?.src,
-    popupImageAlt: PDP_THUMB[1]?.alt,
+    popupImageSrc: CONCILIAZIONE_PASSBY_IMAGE_SRC,
+    popupImageAlt: CONCILIAZIONE_PASSBY_IMAGE_ALT,
     description:
       'Admire the flags and surrounding embassies as you walk through this street, which serve as the primary access point to St. Peter\'s Square, and by extension, to the Vatican City itself.',
   },
@@ -112,8 +162,8 @@ Some background will also be provided on the history of the Sistine Chapel (we d
     id: 'poi-st-peters-square',
     title: 'St. Peter\'s Square',
     durationLine: '20 minutes • Admission Ticket Free',
-    popupImageSrc: PDP_THUMB[1]?.src,
-    popupImageAlt: PDP_THUMB[1]?.alt,
+    popupImageSrc: ST_PETERS_SQUARE_IMAGE_SRC,
+    popupImageAlt: ST_PETERS_SQUARE_IMAGE_ALT,
     description: `We arrive at St. Peter's Square, which is marked by a towering Egyptian obelisk and enveloped by columns and statues of saints. Hear about the history of the square and the legendary artist Bernini who designed it.
 
 Fun fact — the Pope addresses crowds from his apartment window overlooking St. Peter's Square, during the Papal audience held every Wednesday and Sunday morning.`,
@@ -122,8 +172,8 @@ Fun fact — the Pope addresses crowds from his apartment window overlooking St.
     id: 'poi-citta-vaticano',
     title: 'Città del Vaticano',
     durationLine: '15 minutes • Admission Ticket Free',
-    popupImageSrc: PDP_THUMB[2]?.src,
-    popupImageAlt: PDP_THUMB[2]?.alt,
+    popupImageSrc: CITTA_VATICANO_IMAGE_SRC,
+    popupImageAlt: CITTA_VATICANO_IMAGE_ALT,
     description: `En route to the museum, you will get to see and hear about how residents of the smallest city in the world go about their day to day life (including getting their mail!) Snap a pic of the Swiss guards — the pontifical bodyguards in their distinctly Renaissance uniforms.
 
 Our tip: send yourself a postcard after the tour. The post office sells a variety of memorabilia, including stamps with Pope Francis's face!
@@ -134,8 +184,8 @@ Then, slowly head towards the museum's entrance, where you will be led to a spec
     id: 'poi-vatican-museums',
     title: 'Vatican Museums',
     durationLine: '45 minutes • Admission Ticket Included',
-    popupImageSrc: PDP_THUMB[0]?.src,
-    popupImageAlt: PDP_THUMB[0]?.alt,
+    popupImageSrc: VATICAN_MUSEUMS_IMAGE_SRC,
+    popupImageAlt: VATICAN_MUSEUMS_IMAGE_ALT,
     description:
       'Be prepared to hear stories as your guide walks you through an astonishing collection of Roman and Greek statues, the gallery of tapestries, and a gallery of maps depicting 16th century Italy.',
   },
@@ -143,8 +193,8 @@ Then, slowly head towards the museum's entrance, where you will be led to a spec
     id: 'poi-sistine',
     title: 'Sistine Chapel',
     durationLine: '15 minutes • Admission Ticket Included',
-    popupImageSrc: PDP_MEDIA.hero.src,
-    popupImageAlt: PDP_MEDIA.hero.alt,
+    popupImageSrc: SISTINE_IMAGE_SRC,
+    popupImageAlt: SISTINE_IMAGE_ALT,
     description: `Admire Michelangelo's famous works, including the Creation of Adam and the Last Judgement. This spectacular fresco evokes lifelike images within the mind, vividly portraying stories of mankind in the biblical era.
 
 Note that the museum requires visitors to observe silence and a dress code (knees and shoulders covered).`,
@@ -153,8 +203,8 @@ Note that the museum requires visitors to observe silence and a dress code (knee
     id: 'poi-st-peters-basilica',
     title: 'St. Peter\'s Basilica',
     durationLine: '15 minutes • Admission Ticket Free',
-    popupImageSrc: PDP_THUMB[2]?.src,
-    popupImageAlt: PDP_THUMB[2]?.alt,
+    popupImageSrc: ST_PETERS_BASILICA_IMAGE_SRC,
+    popupImageAlt: ST_PETERS_BASILICA_IMAGE_ALT,
     description:
       'You will be brought in front of St. Peter\'s Church, where a special entrance will allow you to enter directly from the museum and bypass the long queue out in the square. Got questions? Ask your guide before parting ways!',
   },
@@ -187,8 +237,8 @@ const STOP_B_MEETING: Stop = {
   kind: 'meeting',
   title: 'Meeting point',
   durationLine: 'Via Plauto, 17, 00193 Roma RM, Italy',
-  popupImageSrc: PDP_THUMB[3]?.src,
-  popupImageAlt: PDP_THUMB[3]?.alt,
+  popupImageSrc: MEETING_VIA_PLAUTO_IMAGE_SRC,
+  popupImageAlt: MEETING_VIA_PLAUTO_IMAGE_ALT,
   description:
     "The meeting point is located in Borgo Pio, near St. Peter's square. The exact address is Via Plauto 17/A. IMPORTANT: Please check your booking for the start time of the Vatican ENGLISH tour. Arrive 20 minutes before at the meeting point (Via Plauto 17A) for check-in. Thank you!",
 }
@@ -198,8 +248,8 @@ const STOP_B_END: Stop = {
   kind: 'end',
   title: 'End point',
   durationLine: 'Saint Peter’s Basilica',
-  popupImageSrc: PDP_THUMB[1]?.src,
-  popupImageAlt: PDP_THUMB[1]?.alt,
+  popupImageSrc: TOUR_END_POINT_IMAGE_SRC,
+  popupImageAlt: TOUR_END_POINT_IMAGE_ALT,
   description: 'Piazza San Pietro, 00120 Città del Vaticano, Vatican City',
 }
 
@@ -221,8 +271,8 @@ const B2_MEETING_STOPS: Stop[] = [
     kind: 'meeting',
     title: 'Meeting point',
     durationLine: 'Piazza del Risorgimento, 00192 Roma RM, Italy',
-    popupImageSrc: PDP_THUMB[3]?.src,
-    popupImageAlt: PDP_THUMB[3]?.alt,
+    popupImageSrc: MEETING_RISORGIMENTO_IMAGE_SRC,
+    popupImageAlt: MEETING_RISORGIMENTO_IMAGE_ALT,
     description:
       'North Prati pickup, outside the Vatican walls. Arrive 20 minutes before departure — check your voucher for the exact corner.',
   },
@@ -231,8 +281,8 @@ const B2_MEETING_STOPS: Stop[] = [
     kind: 'meeting',
     title: 'Meeting point',
     durationLine: 'Via Ottaviano, 00192 Roma RM, Italy',
-    popupImageSrc: PDP_THUMB[1]?.src,
-    popupImageAlt: PDP_THUMB[1]?.alt,
+    popupImageSrc: MEETING_OTTAVIANO_IMAGE_SRC,
+    popupImageAlt: MEETING_OTTAVIANO_IMAGE_ALT,
     description:
       'Near Ottaviano metro, Rome side. Meet where noted on your voucher — arrive 20 minutes early.',
   },
@@ -241,8 +291,8 @@ const B2_MEETING_STOPS: Stop[] = [
     kind: 'meeting',
     title: 'Meeting point',
     durationLine: 'Via Plauto, 17, 00193 Roma RM, Italy',
-    popupImageSrc: PDP_THUMB[3]?.src,
-    popupImageAlt: PDP_THUMB[3]?.alt,
+    popupImageSrc: MEETING_VIA_PLAUTO_IMAGE_SRC,
+    popupImageAlt: MEETING_VIA_PLAUTO_IMAGE_ALT,
     description:
       "Borgo Pio pickup near St. Peter's square — same corner as the classic Via Plauto meeting. Arrive 20 minutes before departure; confirm details on your voucher.",
   },

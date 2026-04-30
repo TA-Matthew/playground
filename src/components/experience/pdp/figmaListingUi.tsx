@@ -1,23 +1,72 @@
+import { useId } from 'react'
 import { figma } from '../../ai-review/figmaAssets'
 import { getStarBarPercent } from '../../../data/viatorListing'
 import type { PdpReview } from '../../../data/viatorListing'
+import {
+  VIATOR_BRAND_STAR_FILL,
+  VIATOR_BRAND_STAR_OUTLINE_FILL,
+  VIATOR_BRAND_STAR_OUTLINE_PATH_16,
+  VIATOR_BRAND_STAR_PATH,
+} from './ViatorSpotlightFiveStars'
 
 export type StarKind = 'solid' | 'half' | 'outline'
 
+const STAR_VIEW_BOX = '0 0 12 12'
+const STAR_OUTLINE_VIEW_BOX = '0 0 16 16'
+
 /**
- * Figma (Q2 Decide) star row — use listing assets, not system SVGs.
- * @see ReviewsFigmaReplica
+ * Figma (Q2 Decide) star row — solid/half use 12×12 brand star; empty stars use Figma outline art (`viewBox` 16×16) in brand green.
  */
 export function FigmaStarRow({ pattern, size = 16 }: { pattern: StarKind[]; size?: 16 | 24 }) {
   const h = size
-  const solid = size === 24 ? figma.starSolidLg : figma.starSolid
+  const clipPrefix = useId().replace(/:/g, '')
   return (
     <div className="flex items-center gap-0.5" role="img" aria-label="Star rating">
       {pattern.map((k, i) => (
         <div key={i} className="shrink-0" style={{ width: h, height: h }}>
-          {k === 'solid' && <img alt="" className="block size-full" src={solid} />}
-          {k === 'half' && <img alt="" className="block size-full" src={figma.starHalf} />}
-          {k === 'outline' && <img alt="" className="block size-full" src={figma.starOutline} />}
+          {k === 'solid' ? (
+            <svg width={h} height={h} viewBox={STAR_VIEW_BOX} className="block size-full" aria-hidden>
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                fill={VIATOR_BRAND_STAR_FILL}
+                d={VIATOR_BRAND_STAR_PATH}
+              />
+            </svg>
+          ) : null}
+          {k === 'outline' ? (
+            <svg width={h} height={h} viewBox={STAR_OUTLINE_VIEW_BOX} className="block size-full" aria-hidden>
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                fill={VIATOR_BRAND_STAR_FILL}
+                d={VIATOR_BRAND_STAR_OUTLINE_PATH_16}
+              />
+            </svg>
+          ) : null}
+          {k === 'half' ? (
+            <svg width={h} height={h} viewBox={STAR_VIEW_BOX} className="block size-full" aria-hidden>
+              <defs>
+                <clipPath id={`${clipPrefix}-h${i}`}>
+                  <rect x="0" y="0" width="6" height="12" />
+                </clipPath>
+              </defs>
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                fill={VIATOR_BRAND_STAR_OUTLINE_FILL}
+                d={VIATOR_BRAND_STAR_PATH}
+              />
+              <g clipPath={`url(#${clipPrefix}-h${i})`}>
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  fill={VIATOR_BRAND_STAR_FILL}
+                  d={VIATOR_BRAND_STAR_PATH}
+                />
+              </g>
+            </svg>
+          ) : null}
         </div>
       ))}
     </div>
