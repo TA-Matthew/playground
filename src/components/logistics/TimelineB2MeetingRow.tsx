@@ -311,10 +311,22 @@ export function TimelineB2MeetingRow({
                 type="button"
                 className="mt-1.5 flex min-h-[44px] w-full cursor-pointer items-center text-left text-[14px] leading-snug text-stone-900 underline decoration-stone-900 underline-offset-[3px] transition hover:decoration-stone-900 md:min-h-0 md:items-start md:text-[13px] md:text-stone-500 md:decoration-stone-300 md:underline-offset-2 md:hover:text-stone-600 md:hover:decoration-stone-400"
                 onClick={(e) => {
+                  e.preventDefault()
                   e.stopPropagation()
-                  onOpenMobileMap()
+                  if (isMw) {
+                    onOpenMobileMap()
+                    return
+                  }
+                  /** Desktop: MW modal doesn’t exist — expand this row so the inline meeting list appears (don’t rely on event bubbling). */
+                  if (!isOpen) {
+                    onRowHeaderClick(B2_MEETING_TIMELINE_ROW_ID)
+                  }
                 }}
-                aria-label="Open map to choose a meeting point"
+                aria-label={
+                  isMw
+                    ? 'Open map to choose a meeting point'
+                    : 'Expand to choose a meeting point'
+                }
               >
                 Choose a meeting point
               </button>

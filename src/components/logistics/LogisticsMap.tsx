@@ -426,10 +426,21 @@ function mapMarkerWrapperClass(
 }
 
 /** HTML markers share one layer; selected pin + popup stack above other pins. */
-const MAP_MARKER_Z_INACTIVE = '1'
 const MAP_MARKER_Z_SELECTED = '50'
 /** Itinerary row hover preview — above other selected-style pins when stacked. */
 const MAP_MARKER_Z_TIMELINE_HOVER = '55'
+/**
+ * Inactive pins: earlier itinerary legs stack **above** later legs (stop 0 on top of stop 1 …).
+ * Band stays below {@link MAP_MARKER_Z_SELECTED} so selection/hover still wins.
+ */
+const MAP_MARKER_Z_CHRONO_BASE = 5
+
+function mapMarkerInactiveChronoZIndex(markerIndex: number, stopCount: number): string {
+  if (stopCount <= 0) return String(MAP_MARKER_Z_CHRONO_BASE)
+  const clampedIdx = Math.min(Math.max(markerIndex, 0), stopCount - 1)
+  const z = MAP_MARKER_Z_CHRONO_BASE + (stopCount - 1 - clampedIdx)
+  return String(z)
+}
 
 /**
  * First time the user list-hovers a POI, wait before teardrop intro replays; after that,
@@ -468,6 +479,8 @@ function applyMarkerSelectedState(
   b2CommittedPickupId: string | null,
   showMapPinPhotoHead: boolean,
   isTimelineRowHoverPin = false,
+  markerIndex = 0,
+  stopCount = 1,
 ) {
   /** MapLibre adds `maplibregl-marker` (position:absolute;inset 0) and anchor classes. Replacing
    * `className` wholesale removes them and breaks alignment with the GL route line. */
@@ -546,7 +559,7 @@ function applyMarkerSelectedState(
     ? isTimelineRowHoverPin
       ? MAP_MARKER_Z_TIMELINE_HOVER
       : MAP_MARKER_Z_SELECTED
-    : MAP_MARKER_Z_INACTIVE
+    : mapMarkerInactiveChronoZIndex(markerIndex, stopCount)
 }
 
 const POI_FOCUS_DURATION_MS = 900
@@ -1793,6 +1806,8 @@ export function LogisticsMap({
         b2CommittedPickupIdRef.current,
         showMapPinPhotoHead,
         isTimelineRowHoverPin,
+        i,
+        stopsLocal.length,
       )
       const teardrop = isMapTeardropPin(active, stopsLocal[i], vid, poiOrder, ocForMarker)
       const collapsed = el.dataset.mapPinHeadCollapsed === '1'
@@ -2137,7 +2152,11 @@ export function LogisticsMap({
       return
     }
     if (b2OpenMeetingModalSignal <= lastB2ModalOpenSignalHandledRef.current) return
-    if (!isMobile) return
+    if (!isMobile) {
+      /** Desktop: signal is a no-op here — consume so the effect doesn’t re-fire stale increments. */
+      lastB2ModalOpenSignalHandledRef.current = b2OpenMeetingModalSignal
+      return
+    }
     if (!isVariantB2TripleMeeting(variantId, stops)) {
       lastB2ModalOpenSignalHandledRef.current = b2OpenMeetingModalSignal
       return
@@ -2463,7 +2482,10 @@ export function LogisticsMap({
           `pl:${variantId}:${stopAtI?.id ?? ''}:${poiOrder ?? ''}:f${initialB2DiscChk ? ':b2chk' : ''}`,
         )
         markerEl.dataset.mapPinActive = '0'
-        markerEl.style.zIndex = MAP_MARKER_Z_INACTIVE
+        markerEl.style.zIndex = mapMarkerInactiveChronoZIndex(
+          i,
+          routeLngLat.length,
+        )
         const stopTitle = stopsRef.current[i]?.title
         markerEl.setAttribute(
           'aria-label',
@@ -2879,6 +2901,12 @@ export function LogisticsMap({
     let debounceTimer: ReturnType<typeof setTimeout> | undefined
 
     const fitMeasuredModalOverview = () => {
+      /**
+       * `runMobileModalPoiFocus` / list selection set `overviewModeRef` to `false`. Refitting the full route here
+       * (on panel `ResizeObserver`) was fighting the POI camera — zoom in → sheet reflow → overview fit (zoom out)
+       * → overlap chain (zoom in), felt like a stutter.
+       */
+      if (!overviewModeRef.current) return
       const m = mapRef.current
       const host = sheetMapHostRef.current
       if (!m || !host) return
