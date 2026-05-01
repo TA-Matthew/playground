@@ -24,7 +24,7 @@ export function PdpCustomersAlsoBought() {
       </h2>
       <div className="relative isolate mt-5 -mx-4 overflow-visible sm:mx-0">
         <div
-          className="flex min-w-0 touch-pan-x gap-3 overflow-x-auto px-4 pb-1 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:hidden"
+          className="flex min-w-0 gap-3 overflow-x-auto px-4 pb-1 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [touch-action:pan-x_pan-y] [&::-webkit-scrollbar]:hidden sm:hidden"
           aria-label={alsoBoughtShelf.title}
         >
           {alsoBoughtShelf.items.map((card) => (

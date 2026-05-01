@@ -29,6 +29,13 @@ function landingDefaultExpandedStopIdForVariant(stops: Stop[], variantId: Varian
   return stops[0]?.id ?? ''
 }
 
+/** True for legs that show as numbered POI pins — Re-centre must only refit the camera, not clear selection. */
+function isNumberedItineraryPoiStop(s: Stop | undefined): boolean {
+  if (!s) return false
+  if (s.kind === 'meeting' || s.kind === 'end' || s.kind === 'passby') return false
+  return true
+}
+
 type Props = {
   variantId: VariantId
   stops: Stop[]
@@ -59,6 +66,8 @@ export function LogisticsBlock({
   expandedIdRef.current = expandedId
 
   const [b2PickupId, setB2PickupId] = useState<string | null>(null)
+  /** B2 MW: increment so `LogisticsMap` opens full-screen map + meeting picker (timeline “Choose a meeting point”). */
+  const [b2OpenMeetingModalNonce, setB2OpenMeetingModalNonce] = useState(0)
   /** B2: dropdown hover previews that meeting pin on the map (selected styling). */
   const [b2HoverMeetingId, setB2HoverMeetingId] = useState<string | null>(null)
   /** Itinerary row hover — map pin shows full teardrop + image like the selected stop. */
@@ -95,6 +104,10 @@ export function LogisticsBlock({
     setB2HoverMeetingId(id)
   }, [])
 
+  const bumpOpenB2MeetingMobileMap = useCallback(() => {
+    setB2OpenMeetingModalNonce((n) => n + 1)
+  }, [])
+
   /** Expand/collapse POI row: collapsing clears map + list selection. */
   const handleRowHeaderClick = useCallback(
     (id: string) => {
@@ -118,12 +131,15 @@ export function LogisticsBlock({
 
   const handleSelectStop = useCallback(
     (id: string, source: SelectSource) => {
-      /** B2: map / mobile sheet map taps do not set the meeting point (timeline dropdown only). */
+      /**
+       * B2: embedded map taps on the triple-meeting row do not move list selection (pickup stays timeline-driven).
+       * Full-screen MW map modal uses `mapModal` — allow those taps so the bottom card matches the selected pin.
+       */
       if (
         variantId === 'b2' &&
         stops.length >= 3 &&
         stops.slice(0, 3).some((s) => s.id === id) &&
-        (source === 'map' || source === 'mapModal')
+        source === 'map'
       ) {
         return
       }
@@ -150,19 +166,41 @@ export function LogisticsBlock({
   const handleRecentre = useCallback(() => {
     setTimelineHoverStopId(null)
     setB2HoverMeetingId(null)
-    setLastSelectSource('list')
-    /** B2: keep committed pickup + timeline focus — Re-centre only reframes the map. */
+
+    const sel = stops.find((s) => s.id === selectedStopId)
+    if (selectedStopId !== '' && isNumberedItineraryPoiStop(sel)) {
+      return
+    }
+
+    /** B2: snap timeline to meeting row when focus isn’t on a numbered POI — Re-centre only reframes the map. */
     if (variantId === 'b2' && b2PickupId != null) {
+      setLastSelectSource('list')
       setSelectedStopId(b2PickupId)
       setExpandedId(B2_MEETING_TIMELINE_ROW_ID)
       return
     }
+
+    /** MW map modal: keep meeting / end / pass-by selection when the pin came from the map. */
+    if (lastSelectSource === 'mapModal' && selectedStopId !== '') {
+      return
+    }
+
+    setLastSelectSource('list')
     setSelectedStopId('')
     setExpandedId(null)
-  }, [variantId, b2PickupId])
+  }, [variantId, b2PickupId, lastSelectSource, selectedStopId, stops])
+
+  /** MW full-screen map: chevron on POI card — collapse timeline selection + clear selected pin state. */
+  const handleDismissMobileMapStopPanel = useCallback(() => {
+    setTimelineHoverStopId(null)
+    setB2HoverMeetingId(null)
+    setSelectedStopId('')
+    setExpandedId(null)
+    setLastSelectSource('list')
+  }, [])
 
   return (
-    <div className="mt-8 flex flex-col gap-8 md:grid md:grid-cols-[minmax(0,1fr)_minmax(280px,1fr)] md:items-start md:gap-6">
+    <div className="mt-8 flex flex-col gap-2 md:grid md:grid-cols-[minmax(0,1fr)_minmax(280px,1fr)] md:items-start md:gap-6">
       {/* Mobile: map first, then timeline; md+: timeline (left) | map (right) */}
       <div className="order-2 min-w-0 md:order-1">
         <Timeline
@@ -175,6 +213,9 @@ export function LogisticsBlock({
           onB2PickupChange={handleB2PickupChange}
           onB2MeetingHover={variantId === 'b2' ? handleB2MeetingHover : noopMeetingHover}
           onTimelineRowHover={handleTimelineRowHover}
+          onOpenB2MeetingMobileMap={
+            variantId === 'b2' ? bumpOpenB2MeetingMobileMap : undefined
+          }
         />
       </div>
       <div className="order-1 min-h-0 min-w-0 w-full md:order-2 md:sticky md:top-8 md:z-[1] md:self-start">
@@ -197,11 +238,17 @@ export function LogisticsBlock({
           }
           b2HoverMeetingId={variantId === 'b2' ? b2HoverMeetingId : null}
           b2CommittedPickupId={variantId === 'b2' ? b2PickupId : null}
+          onB2PickupChange={variantId === 'b2' ? handleB2PickupChange : undefined}
+          onB2MeetingHover={variantId === 'b2' ? handleB2MeetingHover : undefined}
           timelineHoverStopId={timelineHoverStopId}
           expandedStopId={expandedId}
           onSelectStop={handleSelectStop}
           onRecentre={handleRecentre}
+          onDismissMobileMapStopPanel={handleDismissMobileMapStopPanel}
           poiPopupContent={poiPopupContent}
+          b2OpenMeetingModalSignal={
+            variantId === 'b2' ? b2OpenMeetingModalNonce : 0
+          }
         />
       </div>
     </div>

@@ -102,7 +102,7 @@ export function PdpWhyTravelersLoved() {
 
       <div className="relative isolate mt-6 -mx-1 w-full min-w-0 max-w-full overflow-visible">
         <div
-          className="flex w-full min-w-0 max-w-full touch-pan-x gap-2 overflow-x-auto overflow-y-hidden pb-1 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [touch-action:pan-x_pan-y] px-1 whitespace-nowrap [&::-webkit-scrollbar]:hidden"
+          className="flex w-full min-w-0 max-w-full gap-2 overflow-x-auto overflow-y-hidden pb-1 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [touch-action:pan-x_pan-y] px-1 whitespace-nowrap [&::-webkit-scrollbar]:hidden"
           aria-label="Review themes"
         >
           {w.filterTagLabels.map((label, i) => (
@@ -130,7 +130,7 @@ export function PdpWhyTravelersLoved() {
       <div className="relative isolate mt-6 -mx-4 overflow-visible sm:-mx-6 lg:-mx-8 xl:mx-0">
         <div
           ref={spotlightScrollRef}
-          className="flex touch-pan-x gap-4 overflow-x-auto px-4 pb-1 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] sm:gap-6 sm:px-6 lg:px-8 lg:touch-auto xl:px-0 [&::-webkit-scrollbar]:hidden"
+          className="flex gap-4 overflow-x-auto px-4 pb-1 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [touch-action:pan-x_pan-y] sm:gap-6 sm:px-6 lg:px-8 lg:touch-auto xl:px-0 [&::-webkit-scrollbar]:hidden"
           aria-label="Spotlight reviews"
         >
           {w.spotlightReviews.map((r) => (

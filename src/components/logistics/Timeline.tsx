@@ -35,6 +35,8 @@ type Props = {
   onB2MeetingHover?: (meetingStopId: string | null) => void
   /** List row hover — map pin matches selected teardrop + image */
   onTimelineRowHover?: (stopId: string | null) => void
+  /** B2: open MW full-screen map meeting picker from timeline helper (“Choose a meeting point”). */
+  onOpenB2MeetingMobileMap?: () => void
 }
 
 /** Reference UI: dark rail + charcoal disc with white pin; meta in muted gray; chevron for expand. */
@@ -48,6 +50,7 @@ function TimelineComponent({
   onB2PickupChange = noop,
   onB2MeetingHover = noop,
   onTimelineRowHover = noop,
+  onOpenB2MeetingMobileMap,
 }: Props) {
   const logisticsB = isVariantBLayout(variantId)
   const b2Triple = isVariantB2TripleMeeting(variantId, stops)
@@ -68,6 +71,7 @@ function TimelineComponent({
           expandedId={expandedId}
           onRowHeaderClick={onRowHeaderClick}
           onMeetingHover={onB2MeetingHover}
+          onOpenMobileMap={onOpenB2MeetingMobileMap}
         />
       ) : null}
       {listStops.map((stop, i) => {
@@ -190,7 +194,7 @@ function TimelineComponent({
                         onClick={(e) => e.stopPropagation()}
                         onPointerDown={(e) => e.stopPropagation()}
                       >
-                        <DescriptionBlock text={stop.description} />
+                        <TimelineStopDescription text={stop.description} clampLines={3} />
                       </div>
                   </div>
                 </div>
@@ -215,15 +219,31 @@ function FlagGlyph({ className }: { className?: string }) {
   )
 }
 
-function DescriptionBlock({ text }: { text: string }) {
+/** Shared with map modal POI overlay — inline read more/less (220-char preview by default, or `clampLines` CSS ellipsis). */
+export function TimelineStopDescription({
+  text,
+  clampLines,
+}: {
+  text: string
+  /** MW map modal: truncate visually with `line-clamp-*` instead of character slice. */
+  clampLines?: 3
+}) {
   const [readOpen, setReadOpen] = useState(false)
-  const needsToggle = text.length > PREVIEW_CHARS
+  const needsToggle = clampLines
+    ? text.trim().length > 96
+    : text.length > PREVIEW_CHARS
   const shown =
-    readOpen || !needsToggle ? text : `${text.slice(0, PREVIEW_CHARS).trim()}…`
+    clampLines || readOpen || !needsToggle
+      ? text
+      : `${text.slice(0, PREVIEW_CHARS).trim()}…`
 
   return (
     <div className="text-[14px] leading-relaxed text-stone-600">
-      <p className="whitespace-pre-wrap">{shown}</p>
+      <p
+        className={`whitespace-pre-wrap ${clampLines && !readOpen ? 'line-clamp-3' : ''}`}
+      >
+        {shown}
+      </p>
       {needsToggle ? (
         <button
           type="button"

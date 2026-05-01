@@ -18,7 +18,7 @@ export function PdpPromotedExperiences() {
       </h2>
       <div className="relative isolate mt-5 -mx-4 overflow-visible sm:mx-0">
         <div
-          className="flex min-w-0 touch-pan-x gap-3 overflow-x-auto px-4 pb-1 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] sm:w-full sm:flex-row sm:items-stretch sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden"
+          className="flex min-w-0 gap-3 overflow-x-auto px-4 pb-1 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [touch-action:pan-x_pan-y] sm:w-full sm:flex-row sm:items-stretch sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden"
         >
           {p.items.map((card) => (
             <ProductCard key={card.id} card={card} mobileRail />

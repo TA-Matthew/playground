@@ -21,8 +21,20 @@ export const MAP_MAP_SELECTED_STACK_HEIGHT_PX =
   MAP_POI_SELECTED_PIN_HEIGHT_PX -
   MAP_PIN_HEAD_TEARDROP_OVERLAP_PX
 
+/**
+ * Mobile inline PDP map: selected teardrop without photo head (`pt-8` bounce slot + teardrop only).
+ * Keep `LogisticsMap` `min-h-[…]` + `MAP_MAP_TEARDROP_ONLY_OFFSET_Y` aligned.
+ */
+export const MAP_MAP_TEARDROP_ONLY_STACK_HEIGHT_PX =
+  MAP_PIN_HEAD_TOP_OFFSET_PX + MAP_POI_SELECTED_PIN_HEIGHT_PX
+
 /** Center-anchored marker vertical offset (photo + teardrop stack). */
 export const MAP_POI_SELECTED_PIN_OFFSET_Y = -Math.round(MAP_MAP_SELECTED_STACK_HEIGHT_PX / 2)
+
+/** Inline map selected pin — teardrop + motion only (no square image). */
+export const MAP_MAP_TEARDROP_ONLY_OFFSET_Y = -Math.round(
+  MAP_MAP_TEARDROP_ONLY_STACK_HEIGHT_PX / 2,
+)
 
 /** After the photo head dismisses — teardrop-only height (`MAP_POI_SELECTED_PIN_HEIGHT_PX`). */
 export const MAP_MAP_PIN_COLLAPSED_OFFSET_Y = -Math.round(MAP_POI_SELECTED_PIN_HEIGHT_PX / 2)
@@ -96,7 +108,13 @@ export function mapSelectedTeardropMarkerHtml(
         : stop.kind === 'end'
           ? mapEndSelectedTeardropHtml()
           : mapPoiSelectedTeardropHtml(poiOrder ?? 1)
+  const omitPhoto = options?.omitPhotoHead === true
   /** Single motion wrapper: one bounce for photo + teardrop (`pt-8` = 32px drop above photo). */
+  if (omitPhoto) {
+    return mapSelectedPinStackWrap(
+      `<div class="logistics-map-pin-motion-wrap flex flex-col items-center shrink-0 pt-8"><span class="logistics-map-pin-teardrop-slot inline-flex shrink-0">${teardropPart}</span></div>`,
+    )
+  }
   return mapSelectedPinStackWrap(
     `<div class="logistics-map-pin-motion-wrap flex flex-col items-center shrink-0 pt-8">${mapPinPhotoHeadHtml(stop)}<span class="logistics-map-pin-teardrop-slot -mt-4 inline-flex shrink-0">${teardropPart}</span></div>`,
   )
@@ -145,6 +163,10 @@ function wrapMeetingTeardropWithOptionalB2Check(innerSvg: string, showCommittedC
 export type MapSelectedTeardropOptions = {
   /** B2 only: show check on teardrop when this pin is the committed pickup (caller gates with `active`). */
   b2ShowCommittedCheck?: boolean
+  /**
+   * Mobile inline map: teardrop only (no hero image above pin). Full-screen map modal + desktop still pass `false` / omit.
+   */
+  omitPhotoHead?: boolean
 }
 
 export function mapEndSelectedTeardropHtml(): string {

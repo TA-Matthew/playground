@@ -17,6 +17,9 @@ const MEETING_LIST_FADE_MS = 300
 
 const PICKUP_LABELS = ['Prati north', 'Ottaviano', 'Via Plauto'] as const
 
+/** Align with `LogisticsBlock` / map mobile sheet breakpoint. */
+const MW_MAX_WIDTH_PX = 768
+
 type Props = {
   variantId: VariantId
   stops: Stop[]
@@ -30,6 +33,8 @@ type Props = {
   onRowHeaderClick: (id: string) => void
   /** Highlight matching map pin while pointer is over a menu option */
   onMeetingHover: (meetingStopId: string | null) => void
+  /** MW: open full-screen map with meeting picker (collapsed row, no pickup yet). */
+  onOpenMobileMap?: () => void
 }
 
 /** One itinerary row (same chrome as variant B meeting) + inline meeting list; hover previews pins on the map. */
@@ -43,9 +48,29 @@ export function TimelineB2MeetingRow({
   expandedId,
   onRowHeaderClick,
   onMeetingHover,
+  onOpenMobileMap,
 }: Props) {
   const activeMeeting = pickupId ? meetings.find((m) => m.id === pickupId) : undefined
   const isOpen = expandedId === B2_MEETING_TIMELINE_ROW_ID
+
+  const [isMw, setIsMw] = useState(false)
+  useEffect(() => {
+    const mq = globalThis.matchMedia(`(max-width: ${MW_MAX_WIDTH_PX}px)`)
+    const sync = () => setIsMw(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+
+  /**
+   * MW + map-picker flow: collapsed with no pickup — don’t expand the row from the header/chevron;
+   * only “Choose a meeting point” opens the full-screen map.
+   */
+  const mwDisableHeaderExpand =
+    isMw &&
+    onOpenMobileMap != null &&
+    !isOpen &&
+    pickupId == null
 
   /** After choosing a pickup, list fades out and stays hidden until “Select a different…”. */
   const [meetingListDismissed, setMeetingListDismissed] = useState(false)
@@ -105,6 +130,11 @@ export function TimelineB2MeetingRow({
 
   const openPickerAgain = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
+    /** MW: open map modal only — keep committed pickup until user confirms a change in the modal. */
+    if (isMw && onOpenMobileMap) {
+      onOpenMobileMap()
+      return
+    }
     skipPickupNullRevealSyncRef.current = true
     onPickupChange(null)
     setMeetingListDismissed(false)
@@ -131,18 +161,28 @@ export function TimelineB2MeetingRow({
       ? buildTimelineSelectedTeardropHtml(activeMeeting, variantId, poiOrder)
       : null
 
+  const rowHeaderHint = mwDisableHeaderExpand
+    ? `${rowAriaTitle}. Use “Choose a meeting point” to open the map.`
+    : `${rowAriaTitle}. ${isOpen ? 'Collapse' : 'Expand'} details`
+
   return (
     <div
       id={`poi-${B2_MEETING_TIMELINE_ROW_ID}`}
-      className={`flex w-full cursor-pointer gap-4 rounded-lg py-2 text-left transition hover:bg-stone-50/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-0 ${
-        rowSelected ? 'bg-white' : ''
-      }`}
-      tabIndex={0}
+      className={`flex w-full gap-4 rounded-lg py-2 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-0 ${
+        mwDisableHeaderExpand
+          ? 'cursor-default hover:bg-transparent'
+          : 'cursor-pointer hover:bg-stone-50/90'
+      } ${rowSelected ? 'bg-white' : ''}`}
+      tabIndex={mwDisableHeaderExpand ? -1 : 0}
       aria-expanded={isOpen}
       aria-controls={`poi-details-${B2_MEETING_TIMELINE_ROW_ID}`}
-      aria-label={`${rowAriaTitle}. ${isOpen ? 'Collapse' : 'Expand'} details`}
-      onClick={() => onRowHeaderClick(B2_MEETING_TIMELINE_ROW_ID)}
+      aria-label={rowHeaderHint}
+      onClick={() => {
+        if (mwDisableHeaderExpand) return
+        onRowHeaderClick(B2_MEETING_TIMELINE_ROW_ID)
+      }}
       onKeyDown={(e) => {
+        if (mwDisableHeaderExpand) return
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
           onRowHeaderClick(B2_MEETING_TIMELINE_ROW_ID)
@@ -190,7 +230,12 @@ export function TimelineB2MeetingRow({
                   </h3>
                 )}
               </div>
-              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-stone-400" aria-hidden>
+              <span
+                className={`mt-0.5 h-8 w-8 shrink-0 items-center justify-center rounded-md text-stone-400 md:flex ${
+                  mwDisableHeaderExpand ? 'hidden' : 'flex'
+                }`}
+                aria-hidden
+              >
                 <ChevronRow up={isOpen} />
               </span>
             </div>
@@ -257,12 +302,24 @@ export function TimelineB2MeetingRow({
                   {activeMeeting?.durationLine ?? 'Hover to show on map'}
                 </p>
               </>
-            ) : (
+            ) : pickupId != null && activeMeeting ? (
               <p className="mt-1.5 text-[13px] leading-snug text-stone-500">
-                {pickupId != null && activeMeeting
-                  ? activeMeeting.durationLine
-                  : 'Choose a meeting point'}
+                {activeMeeting.durationLine}
               </p>
+            ) : onOpenMobileMap ? (
+              <button
+                type="button"
+                className="mt-1.5 flex min-h-[44px] w-full cursor-pointer items-center text-left text-[14px] leading-snug text-stone-900 underline decoration-stone-900 underline-offset-[3px] transition hover:decoration-stone-900 md:min-h-0 md:items-start md:text-[13px] md:text-stone-500 md:decoration-stone-300 md:underline-offset-2 md:hover:text-stone-600 md:hover:decoration-stone-400"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onOpenMobileMap()
+                }}
+                aria-label="Open map to choose a meeting point"
+              >
+                Choose a meeting point
+              </button>
+            ) : (
+              <p className="mt-1.5 text-[13px] leading-snug text-stone-500">Choose a meeting point</p>
             )}
           </div>
 
