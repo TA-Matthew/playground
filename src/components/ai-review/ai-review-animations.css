@@ -156,6 +156,10 @@
     opacity: 1 !important;
     transform: none !important;
   }
+  .theme-mention-text-sheen-overlay {
+    animation: none !important;
+    opacity: 0 !important;
+  }
 }
 
 /* Theme-selected AI summary: full text + entrance (replaces typewriter) */
@@ -175,4 +179,43 @@
   --ai-summary-t: 0.2s;
   --ai-summary-ease: cubic-bezier(0.4, 0, 0.2, 1);
   animation: ai-summary-body-fade-in var(--ai-summary-t) var(--ai-summary-ease) both;
+}
+
+/* Theme mention sheen: same gradient + shift as .ai-summary-title-animated; opacity envelope only here */
+/* Fade-out = final 10% of 3s timeline → 300ms (was 12% / 360ms when ending at 88%) */
+@keyframes theme-mention-opacity-envelope {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.theme-mention-text-sheen-overlay {
+  pointer-events: none;
+  /* Match `Review summary` heading — see .ai-summary-title-animated */
+  background-image: linear-gradient(
+    100deg,
+    var(--ai-grad-1) 0%,
+    var(--ai-grad-2) 20%,
+    var(--ai-grad-3) 40%,
+    var(--ai-grad-4) 50%,
+    var(--ai-grad-5) 65%,
+    var(--ai-grad-6) 80%,
+    var(--ai-grad-1) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation:
+    theme-mention-opacity-envelope 3s linear forwards,
+    ai-title-gradient-shift 3.5s ease-in-out infinite;
 }

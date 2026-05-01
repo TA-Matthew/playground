@@ -1,4 +1,13 @@
-import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import type { ReactNode } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import type { VariantId } from '../../data/variants'
@@ -504,11 +513,19 @@ const VARIANT_C_MATRIX_ROWS: ReadonlyArray<{ pos: VariantBMatrixCell; neg?: Vari
 
 const VARIANT_MATRIX_ROW_SOURCES = [VARIANT_B_MATRIX_ROWS, VARIANT_C_MATRIX_ROWS]
 
+function getThemeChipLabel(themeId: ThemeId): string {
+  return THEME_CHIPS.find((c) => c.id === themeId)?.label ?? themeId
+}
+
 /**
- * Copy for the mention breakdown line — first matching matrix heading for that {@link ThemeId};
- * otherwise the chip label.
+ * Copy for the mention breakdown line. Variant A uses {@link THEME_CHIPS} labels so they match
+ * the chips. B/C/B2 use the first matching matrix heading for that {@link ThemeId} (prototype
+ * mapping); otherwise the chip label.
  */
-function getThemeBreakdownLabel(themeId: ThemeId): string {
+function getThemeBreakdownLabel(themeId: ThemeId, summaryLayout: AiSummaryLayoutVariant): string {
+  if (summaryLayout === 'a') {
+    return getThemeChipLabel(themeId)
+  }
   for (const rows of VARIANT_MATRIX_ROW_SOURCES) {
     for (const row of rows) {
       const cells: VariantBMatrixCell[] =
@@ -518,7 +535,7 @@ function getThemeBreakdownLabel(themeId: ThemeId): string {
       }
     }
   }
-  return THEME_CHIPS.find((c) => c.id === themeId)?.label ?? themeId
+  return getThemeChipLabel(themeId)
 }
 
 /** Variant B matrix: how many theme rows show before tap-to-expand on narrow screens. */
@@ -790,7 +807,14 @@ function AiReviewSummaryFigmaBlock({
   )
 }
 
-function AiThemeSummaryParagraph({ activeTheme }: { activeTheme: ThemeId | null }) {
+function AiThemeSummaryParagraph({
+  activeTheme,
+  topSpacing = true,
+}: {
+  activeTheme: ThemeId | null
+  /** When false, omit top margin (e.g. paragraph follows a rule). */
+  topSpacing?: boolean
+}) {
   const reduceMotion = useReducedMotion() === true
   const [filterEngaged, setFilterEngaged] = useState(false)
   useEffect(() => {
@@ -814,7 +838,8 @@ function AiThemeSummaryParagraph({ activeTheme }: { activeTheme: ThemeId | null 
     <div
       key={activeTheme ?? 'all'}
       className={[
-        'mt-4 min-h-0 sm:min-h-0',
+        topSpacing ? 'mt-4' : '',
+        'min-h-0 sm:min-h-0',
         useFade ? 'ai-summary-body-fade-in' : '',
       ]
         .filter(Boolean)
@@ -933,41 +958,118 @@ function ThemeChip(props: ThemeChipProps) {
   )
 }
 
+/** 20px AI sparkle; static multi-stop gradient (same stops as :root --ai-grad-* in ai-review-animations.css). */
+function ThemeBreakdownAiStarIcon() {
+  const uid = useId().replaceAll(':', '')
+  const gradId = `theme-mention-ai-star-${uid}`
+  return (
+    <svg
+      width={20}
+      height={20}
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="shrink-0"
+      aria-hidden
+    >
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="20" y2="20" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#f5cd72" />
+          <stop offset="20%" stopColor="#fc5649" />
+          <stop offset="40%" stopColor="#f34474" />
+          <stop offset="50%" stopColor="#af65e2" />
+          <stop offset="65%" stopColor="#4587fc" />
+          <stop offset="80%" stopColor="#9acef3" />
+          <stop offset="100%" stopColor="#f5cd72" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M2.72897 10.795C1.85225 10.6399 1.85225 9.36009 2.72897 9.205C5.90515 8.64311 8.43138 6.18309 9.12078 2.98067L9.17363 2.73519C9.36331 1.8541 10.5971 1.84862 10.7943 2.72799L10.8585 3.01407C11.5734 6.20136 14.1003 8.64062 17.2677 9.20094C18.1488 9.35683 18.1488 10.6431 17.2677 10.799C14.1003 11.3593 11.5734 13.7986 10.8585 16.9858L10.7943 17.2719C10.5971 18.1513 9.36331 18.1458 9.17363 17.2648L9.12078 17.0193C8.43138 13.8169 5.90515 11.3569 2.72897 10.795Z"
+        fill={`url(#${gradId})`}
+        stroke={`url(#${gradId})`}
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+/** One-shot text gradient sheen when theme mention row first appears (see `.theme-mention-text-sheen-overlay`). */
+let themeMentionSheenSessionConsumed = false
+
 function ThemeMentionBreakdown({
   activeTheme,
   sentimentFilter,
   onSetSentiment,
   themeMentions,
   onClear,
+  summaryLayout,
 }: {
   activeTheme: ThemeId | null
   sentimentFilter: ThemeSentimentKind
   onSetSentiment: (next: ThemeSentimentKind) => void
   themeMentions: Readonly<Record<ThemeId, ThemeMention>>
   onClear?: () => void
+  summaryLayout: AiSummaryLayoutVariant
 }) {
+  const reduceMotion = useReducedMotion() === true
+  const [mentionSheenPlay, setMentionSheenPlay] = useState(false)
+
+  useEffect(() => {
+    if (activeTheme == null) return
+    if (themeMentionSheenSessionConsumed) return
+    if (reduceMotion) {
+      themeMentionSheenSessionConsumed = true
+      return
+    }
+    setMentionSheenPlay(true)
+    const id = globalThis.setTimeout(() => {
+      setMentionSheenPlay(false)
+      themeMentionSheenSessionConsumed = true
+    }, 3080)
+    return () => {
+      globalThis.clearTimeout(id)
+    }
+  }, [activeTheme, reduceMotion])
+
   if (activeTheme == null) return null
   const m = themeMentions[activeTheme]
   if (!m) return null
-  const breakdownLabel = getThemeBreakdownLabel(activeTheme)
+  const breakdownLabel = getThemeBreakdownLabel(activeTheme, summaryLayout)
   const t = { ...m }
 
+  const mentionLine = (
+    <>
+      {t.count.toLocaleString()} travelers mention{' '}
+      <span className="whitespace-nowrap font-medium">‘{breakdownLabel}’</span>
+    </>
+  )
+
   return (
-    <div className="flex w-full min-w-0 max-w-full flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+    <div className="flex w-full min-w-0 max-w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
       <p
-        className="min-w-0 text-base leading-6 text-[#333] [letter-spacing:0.05px] sm:flex sm:min-w-0 sm:flex-1 sm:flex-wrap sm:items-baseline sm:gap-x-4 sm:gap-y-1"
+        className="min-w-0 text-base leading-6 text-[#333] [letter-spacing:0.05px] sm:flex sm:min-w-0 sm:flex-1 sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-1"
         aria-live="polite"
       >
-          <span className="block sm:inline">
-            {t.count.toLocaleString()} travelers mention{' '}
-            <span className="inline-flex items-center gap-1">
-              <span className="whitespace-nowrap font-medium">‘{breakdownLabel}’</span>
+          <span className="relative inline-flex w-full max-w-full flex-wrap items-center justify-start gap-x-1.5 gap-y-1 text-left sm:w-auto">
+            <ThemeBreakdownAiStarIcon />
+            <span className="inline-grid min-w-0">
+              <span className="col-start-1 row-start-1 min-w-0 leading-6 text-[#333]">{mentionLine}</span>
+              {mentionSheenPlay ? (
+                <span
+                  className="theme-mention-text-sheen-overlay col-start-1 row-start-1 min-w-0 leading-6"
+                  aria-hidden
+                >
+                  {mentionLine}
+                </span>
+              ) : null}
             </span>
           </span>
         <span
-          className="mt-5 flex w-full min-w-0 items-baseline justify-between gap-2 sm:ml-0 sm:mt-0 sm:inline-flex sm:w-auto sm:justify-start sm:gap-2"
+          className="mt-5 flex w-full min-w-0 items-center justify-between gap-2 sm:ml-0 sm:mt-0 sm:inline-flex sm:w-auto sm:justify-start sm:gap-2"
         >
-          <span className="inline-flex min-w-0 flex-1 items-baseline gap-3 sm:flex-initial sm:flex-none">
+          <span className="inline-flex min-w-0 flex-1 items-center gap-3 sm:flex-initial sm:flex-none">
             <button
               type="button"
               disabled={t.positive === 0}
@@ -1177,9 +1279,7 @@ function AiReviewSummaryBlock({
           </p>
         </div>
       </div>
-      <AiThemeSummaryParagraph activeTheme={activeTheme} />
-      <hr className="my-4 border-0 border-t border-[#e8e8e8]" />
-      <div>
+      <div className="mt-4">
         <ThemeFiltersSectionHeading activeTheme={activeTheme} onClear={onClear} />
         <p id="theme-filter-desc" className="sr-only">
           Select a theme to filter the review list. Use Clear next to the scroll prompt, or select
@@ -1209,6 +1309,8 @@ function AiReviewSummaryBlock({
           })}
         </div>
       </div>
+      <hr className="my-4 border-0 border-t border-[#e8e8e8]" />
+      <AiThemeSummaryParagraph activeTheme={activeTheme} topSpacing={false} />
       <AiReviewSummarySourceFooter className="mt-4" />
     </AiSummaryBorderAnimatedFrame>
   )
@@ -2142,6 +2244,7 @@ export function ReviewsFigmaReplica({ summaryLayout = 'a' }: ReviewsFigmaReplica
                 onSetSentiment={setSentimentFilter}
                 themeMentions={THEME_MENTIONS}
                 onClear={clearReviewFilters}
+                summaryLayout={summaryLayout}
               />
             </div>
 
