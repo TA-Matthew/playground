@@ -1236,12 +1236,16 @@ function runMobileModalPoiFocus(
     padding: ZERO_PADDING,
     maxZoom,
   })
-  if (cam.center != null && cam.zoom != null) {
+  if (
+    cam != null &&
+    cam.center != null &&
+    cam.zoom !== undefined &&
+    Number.isFinite(cam.zoom)
+  ) {
     map.easeTo({
       center: cam.center,
       zoom: cam.zoom,
       bearing: cam.bearing ?? map.getBearing(),
-      pitch: cam.pitch ?? map.getPitch(),
       duration: initialDuration,
       essential: true,
     })
