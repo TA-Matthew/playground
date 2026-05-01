@@ -563,8 +563,39 @@ const POI_VIEW_PADDING: maplibregl.PaddingOptions = {
 }
 
 /**
+ * Places the POI focal point at the vertical midpoint between the **top of the map container** and the **top
+ * of the bottom overlay card** (stop details or B2 meeting sheet). Achieved with `top: 0` and
+ * `bottom = mapHeight - panelOffsetTop` so MapLibre’s padded inner band height equals the clear map strip above the card.
+ */
+function computeModalBandCenterPadding(
+  mapHostEl: HTMLElement,
+  panelEl: HTMLElement,
+): maplibregl.PaddingOptions | null {
+  const mapRect = mapHostEl.getBoundingClientRect()
+  const H = mapRect.height
+  if (!(H > 0)) return null
+
+  const panelRect = panelEl.getBoundingClientRect()
+  let panelTopFromMapTop = panelRect.top - mapRect.top
+  if (!Number.isFinite(panelTopFromMapTop)) return null
+  panelTopFromMapTop = Math.min(Math.max(0, panelTopFromMapTop), H)
+  /** Avoid degenerate fits when the panel hasn’t laid out yet or nearly covers the map. */
+  if (panelTopFromMapTop < 56) return null
+
+  const bottom = Math.round(H - panelTopFromMapTop)
+  return {
+    top: 0,
+    bottom,
+    left: POI_VIEW_PADDING.left ?? 16,
+    right: Math.max(POI_VIEW_PADDING.right ?? 0, 56),
+  }
+}
+
+/**
  * Full-screen mobile map modal: expand bottom (and slightly right) so `fitBounds` / `easeTo` frame the pin in
  * the visible band above the POI overlay (`min(42vh,320px)` card + GPS row + safe area).
+ *
+ * Fallback when the overlay can’t be measured (e.g. panel dismissed). Top inset clears the **Re-centre** chip.
  */
 function mobileModalPoiViewPadding(): maplibregl.PaddingOptions {
   const h =
@@ -578,8 +609,13 @@ function mobileModalPoiViewPadding(): maplibregl.PaddingOptions {
     POI_VIEW_PADDING.bottom ?? 0,
     Math.round(panelMax + gpsAndGap + safe),
   )
+  /** ~`max(3rem,safe)` row + pill (~36–40px) + gap — extra slack scales slightly with viewport height (notch islands). */
+  const topChrome = Math.round(
+    Math.max(48, Math.min(56, h * 0.075)) + 36 + 14 + Math.min(24, h * 0.028),
+  )
   return {
     ...POI_VIEW_PADDING,
+    top: Math.max(POI_VIEW_PADDING.top ?? 0, topChrome),
     bottom,
     right: Math.max(POI_VIEW_PADDING.right ?? 0, 56),
   }
@@ -1187,8 +1223,9 @@ function runMobileModalPoiFocus(
   routeCoords: [number, number][],
   focusIndex: number,
   initialDuration: number,
+  focusPadding?: maplibregl.PaddingOptions,
 ) {
-  const pad = mobileModalPoiViewPadding()
+  const pad = focusPadding ?? mobileModalPoiViewPadding()
 
   const onIdleChain = (step: number) => {
     map.once('idle', () => {
@@ -1522,6 +1559,26 @@ export function LogisticsMap({
     ],
   )
   showB2MeetingModalPanelRef.current = showB2MeetingModalPanel
+
+  const getMobileModalPoiFocusPaddingRef = useRef<() => maplibregl.PaddingOptions>(() => mobileModalPoiViewPadding())
+
+  const getMobileModalPoiFocusPadding = useCallback((): maplibregl.PaddingOptions => {
+    if (!isMobile || !mobileSheetOpen) return mobileModalPoiViewPadding()
+    const mapEl = sheetMapHostRef.current
+    if (!mapEl) return mobileModalPoiViewPadding()
+
+    const panelEl =
+      showB2MeetingModalPanel && mobileModalB2MeetingPanelMotionRef.current
+        ? mobileModalB2MeetingPanelMotionRef.current
+        : mobileModalStopPanelMotionRef.current
+
+    if (!panelEl) return mobileModalPoiViewPadding()
+
+    const measured = computeModalBandCenterPadding(mapEl, panelEl)
+    return measured ?? mobileModalPoiViewPadding()
+  }, [isMobile, mobileSheetOpen, showB2MeetingModalPanel])
+
+  getMobileModalPoiFocusPaddingRef.current = getMobileModalPoiFocusPadding
 
   const mobileModalDetailStop = useMemo(() => {
     if (!mobileModalEffectiveStop) return null
@@ -2440,7 +2497,14 @@ export function LogisticsMap({
               poiPopupRef.current = null
               requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
-                  runMobileModalPoiFocus(map, coord, routeCoordsRef.current, i, POI_FOCUS_DURATION_MS)
+                  runMobileModalPoiFocus(
+                    map,
+                    coord,
+                    routeCoordsRef.current,
+                    i,
+                    POI_FOCUS_DURATION_MS,
+                    getMobileModalPoiFocusPaddingRef.current(),
+                  )
                 })
               })
               return
@@ -3212,6 +3276,33 @@ export function LogisticsMap({
               −
             </button>
           </div>
+        ) : null}
+        {isMobile && !mobileSheetOpen ? (
+          <button
+            type="button"
+            className={`absolute right-2.5 top-2.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-stone-200/90 bg-white/95 text-stone-800 shadow-md shadow-stone-900/10 ring-1 ring-stone-200/80 backdrop-blur-sm transition hover:bg-stone-50 active:bg-stone-100 ${MAP_CHROME_ABOVE_MARKERS_CLASS}`}
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              setMobileSheetOpen(true)
+            }}
+            aria-label="Open full screen map"
+          >
+            <svg
+              width={20}
+              height={20}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.75}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="shrink-0"
+              aria-hidden
+            >
+              <path d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+            </svg>
+          </button>
         ) : null}
       </div>
 
