@@ -756,7 +756,7 @@ function MobileMapModalStopPanel({
 
   return (
     <div
-      className="rounded-2xl border border-stone-200/90 bg-white/95 px-4 py-3 shadow-xl shadow-stone-900/12 ring-1 ring-stone-200/80 backdrop-blur-md"
+      className="touch-none rounded-2xl border border-stone-200/90 bg-white/95 px-4 py-3 shadow-xl shadow-stone-900/12 ring-1 ring-stone-200/80 backdrop-blur-md"
       role="region"
       aria-live="polite"
       aria-label="Details for the selected map stop"
@@ -1943,12 +1943,45 @@ export function LogisticsMap({
     return () => globalThis.removeEventListener('keydown', onKey)
   }, [isMobile, mobileSheetOpen, poiDescriptionSheet, closeMobileSheet])
 
+  /**
+   * MW full-screen map: iOS still scrolls / rubber-bands the page behind the modal with `overflow: hidden` alone.
+   * Lock with `position: fixed` + restore `scrollY` (also used for the POI / meeting bottom sheets).
+   */
   useEffect(() => {
     if (!isMobile || !mobileSheetOpen) return
-    const prev = document.body.style.overflow
+    const scrollY = globalThis.scrollY
+    const prevBodyOverflow = document.body.style.overflow
+    const prevBodyPosition = document.body.style.position
+    const prevBodyTop = document.body.style.top
+    const prevBodyLeft = document.body.style.left
+    const prevBodyRight = document.body.style.right
+    const prevBodyWidth = document.body.style.width
+    const prevHtmlOverflow = document.documentElement.style.overflow
+
+    document.documentElement.style.overflow = 'hidden'
     document.body.style.overflow = 'hidden'
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${scrollY}px`
+    document.body.style.left = '0'
+    document.body.style.right = '0'
+    document.body.style.width = '100%'
+
     return () => {
-      document.body.style.overflow = prev
+      document.documentElement.style.overflow = prevHtmlOverflow
+      document.body.style.overflow = prevBodyOverflow
+      document.body.style.position = prevBodyPosition
+      document.body.style.top = prevBodyTop
+      document.body.style.left = prevBodyLeft
+      document.body.style.right = prevBodyRight
+      document.body.style.width = prevBodyWidth
+      /**
+       * `index.css` sets `html { scroll-behavior: smooth }` — two-arg `scrollTo(0, y)` animates from the top.
+       * Restore the pre-modal offset **instantly** so closing the map doesn’t look like a page scroll animation.
+       */
+      const y = Math.max(0, scrollY)
+      requestAnimationFrame(() => {
+        globalThis.scrollTo({ top: y, left: 0, behavior: 'instant' })
+      })
     }
   }, [isMobile, mobileSheetOpen])
 
@@ -3186,7 +3219,7 @@ export function LogisticsMap({
         {isMobile && mobileSheetOpen ? (
             <motion.div
               key="map-modal-sheet"
-              className="fixed inset-0 z-[101] flex min-h-0 flex-col bg-stone-50"
+              className="fixed inset-0 z-[101] flex min-h-0 flex-col overscroll-none bg-stone-50"
               style={{ height: '100dvh', maxHeight: '100dvh' }}
               role="dialog"
               aria-modal="true"
@@ -3241,7 +3274,7 @@ export function LogisticsMap({
                   </button>
                 </div>
               ) : null}
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[55] flex flex-col-reverse gap-2 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[55] flex flex-col-reverse gap-2 overscroll-none px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
                 {showB2MeetingModalPanel ? (
                   <motion.div
                     ref={mobileModalB2MeetingPanelMotionRef}
@@ -3277,15 +3310,13 @@ export function LogisticsMap({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.24, ease: [0.4, 0, 0.2, 1] }}
                   >
-                    <div className="max-h-[min(42vh,320px)] w-full overflow-y-auto overscroll-contain">
-                      <MobileMapModalStopPanel
-                        stop={mobileModalDetailStop}
-                        variantId={variantId}
-                        stops={stops}
-                        onDismiss={dismissMobileModalStopPanelAnimated}
-                        b2CommittedPickupId={b2CommittedPickupId}
-                      />
-                    </div>
+                    <MobileMapModalStopPanel
+                      stop={mobileModalDetailStop}
+                      variantId={variantId}
+                      stops={stops}
+                      onDismiss={dismissMobileModalStopPanelAnimated}
+                      b2CommittedPickupId={b2CommittedPickupId}
+                    />
                   </motion.div>
                 ) : null}
                 <div className="flex w-full shrink-0 justify-end">
