@@ -669,17 +669,48 @@ const OVERVIEW_FIT_PADDING_MOBILE_INLINE: maplibregl.PaddingOptions = {
   right: 14,
 }
 
+/** Keeps the southern-most pin / teardrop clearly above the measured sheet top (sub-pixel / scroll layouts). */
+const MODAL_OVERVIEW_BOTTOM_CUSHION_PX = 24
+
 /**
- * Full-screen mobile map modal only (`mobileInlinePreview: false`): extra bottom / right for the POI + GPS stack,
- * but **lighter than** {@link mobileModalPoiViewPadding} so route overview isn’t shoved to the top of the viewport.
+ * `fitBounds` padding for modal **route overview**: reserves pixels from the measured bottom overlay top edge
+ * (+ cushion). Fixes truncated southern meeting pins when the generic blend underestimated overlay height on short viewports.
+ */
+function computeModalOverviewFitPadding(
+  mapHostEl: HTMLElement,
+  panelEl: HTMLElement,
+): maplibregl.PaddingOptions | null {
+  const mapRect = mapHostEl.getBoundingClientRect()
+  const H = mapRect.height
+  if (!(H > 0)) return null
+
+  const panelRect = panelEl.getBoundingClientRect()
+  let panelTopFromMapTop = panelRect.top - mapRect.top
+  if (!Number.isFinite(panelTopFromMapTop)) return null
+  panelTopFromMapTop = Math.min(Math.max(0, panelTopFromMapTop), H)
+  if (panelTopFromMapTop < 40) return null
+
+  const base = OVERVIEW_FIT_PADDING_MOBILE
+  const bottom = Math.round(H - panelTopFromMapTop + MODAL_OVERVIEW_BOTTOM_CUSHION_PX)
+  return {
+    top: base.top ?? 26,
+    bottom,
+    left: base.left ?? 8,
+    right: Math.max(base.right ?? 0, 56),
+  }
+}
+
+/**
+ * Full-screen mobile map modal only (`mobileInlinePreview: false`): extra bottom / right for the POI + GPS stack.
+ * Uses **full** heuristic overlay clearance (see {@link mobileModalPoiViewPadding}) — the old ~40% blend left the
+ * route hull overlapping the bottom sheet on short viewports. Prefer {@link computeModalOverviewFitPadding} when DOM is available.
  */
 function overviewFitPaddingMobileModal(): maplibregl.PaddingOptions {
   const pinPad = mobileModalPoiViewPadding()
   const base = OVERVIEW_FIT_PADDING_MOBILE
   const b0 = base.bottom ?? 22
   const b1 = pinPad.bottom ?? b0
-  /** Blend toward overlay clearance (~40%) — tight POI zoom uses full `b1`; overview stays more vertically centred. */
-  const bottom = Math.round(b0 + (b1 - b0) * 0.4)
+  const bottom = Math.max(b0, b1)
   return {
     top: base.top,
     bottom,
@@ -1160,7 +1191,13 @@ function computeOverviewBounds(
 function fitRouteOverview(
   map: maplibregl.Map,
   coords: [number, number][],
-  options: { duration: number; isMobile?: boolean; mobileInlinePreview?: boolean },
+  options: {
+    duration: number
+    isMobile?: boolean
+    mobileInlinePreview?: boolean
+    /** DOM-measured bottom overlay — use in MW modal so `fitBounds` clears the real sheet height. */
+    paddingOverride?: maplibregl.PaddingOptions
+  },
   /** When set, incremented during programmatic `fitBounds` so `zoomend` handlers can ignore those moves. */
   programmaticCameraDepth?: MutableRefObject<number>,
 ) {
@@ -1178,12 +1215,20 @@ function fitRouteOverview(
     })
   }
 
+  const padMobileModal =
+    mobile && !inlinePreview && options.paddingOverride != null
+      ? options.paddingOverride
+      : mobile && !inlinePreview
+        ? overviewFitPaddingMobileModal()
+        : null
+
   map.fitBounds(bounds, {
-    padding: mobile
-      ? inlinePreview
+    padding:
+      mobile && inlinePreview
         ? OVERVIEW_FIT_PADDING_MOBILE_INLINE
-        : overviewFitPaddingMobileModal()
-      : OVERVIEW_FIT_PADDING,
+        : padMobileModal != null
+          ? padMobileModal
+          : OVERVIEW_FIT_PADDING,
     maxZoom: mobile ? OVERVIEW_MAX_ZOOM_MOBILE : OVERVIEW_MAX_ZOOM,
     duration: options.duration,
     essential: true,
@@ -2761,6 +2806,13 @@ export function LogisticsMap({
           stopsRef.current,
           b2CommittedPickupIdRef.current,
         )
+        const mapEl = sheetHost
+        const panelEl =
+          showB2MeetingModalPanelRef.current && mobileModalB2MeetingPanelMotionRef.current
+            ? mobileModalB2MeetingPanelMotionRef.current
+            : mobileModalStopPanelMotionRef.current
+        const measuredOverviewPad =
+          mapEl && panelEl ? computeModalOverviewFitPadding(mapEl, panelEl) : undefined
         fitRouteOverview(
           map,
           ovCoords,
@@ -2768,6 +2820,7 @@ export function LogisticsMap({
             duration: OVERVIEW_ZOOM_ANIM_MS_MOBILE,
             isMobile: true,
             mobileInlinePreview: false,
+            ...(measuredOverviewPad ? { paddingOverride: measuredOverviewPad } : {}),
           },
           programmaticOverviewCameraDepthRef,
         )
@@ -2813,6 +2866,73 @@ export function LogisticsMap({
     prevMobileSheetOpenRef.current = mobileSheetOpen
   }, [isMobile, mobileSheetOpen, mapReady])
 
+  /**
+   * Runs **after** the sheet-host swap effect above: refit overview when the bottom sheet resizes so B2 meeting
+   * pins stay above {@link MobileMapModalB2MeetingPanel} on short viewports.
+   */
+  useLayoutEffect(() => {
+    if (!mapReady || !isMobile || !mobileSheetOpen) return
+    const map = mapRef.current
+    const mapHost = sheetMapHostRef.current
+    if (!map || !mapHost) return
+
+    let debounceTimer: ReturnType<typeof setTimeout> | undefined
+
+    const fitMeasuredModalOverview = () => {
+      const m = mapRef.current
+      const host = sheetMapHostRef.current
+      if (!m || !host) return
+      const panelEl =
+        showB2MeetingModalPanelRef.current && mobileModalB2MeetingPanelMotionRef.current
+          ? mobileModalB2MeetingPanelMotionRef.current
+          : mobileModalStopPanelMotionRef.current
+      if (!panelEl) return
+      const pad = computeModalOverviewFitPadding(host, panelEl)
+      if (!pad) return
+      const ovCoords = routeCoordsForVariantOverview(
+        variantIdRef.current,
+        routeCoordsRef.current,
+        stopsRef.current,
+        b2CommittedPickupIdRef.current,
+      )
+      fitRouteOverview(
+        m,
+        ovCoords,
+        {
+          duration: OVERVIEW_ZOOM_ANIM_MS_MOBILE,
+          isMobile: true,
+          mobileInlinePreview: false,
+          paddingOverride: pad,
+        },
+        programmaticOverviewCameraDepthRef,
+      )
+    }
+
+    const panelEl =
+      showB2MeetingModalPanelRef.current && mobileModalB2MeetingPanelMotionRef.current
+        ? mobileModalB2MeetingPanelMotionRef.current
+        : mobileModalStopPanelMotionRef.current
+    if (!panelEl || typeof ResizeObserver === 'undefined') {
+      return () => {
+        if (debounceTimer) clearTimeout(debounceTimer)
+      }
+    }
+
+    const ro = new ResizeObserver(() => {
+      if (debounceTimer) clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(() => {
+        fitMeasuredModalOverview()
+        debounceTimer = undefined
+      }, 72)
+    })
+    ro.observe(panelEl)
+    queueMicrotask(fitMeasuredModalOverview)
+    return () => {
+      ro.disconnect()
+      if (debounceTimer) clearTimeout(debounceTimer)
+    }
+  }, [mapReady, isMobile, mobileSheetOpen, showB2MeetingModalPanel])
+
   useEffect(() => {
     const map = mapRef.current
     if (!mapReady || !map || !isMobile || mobileSheetOpen) return
@@ -2849,6 +2969,17 @@ export function LogisticsMap({
           stops,
           b2CommittedPickupId,
         )
+        let paddingOverride: maplibregl.PaddingOptions | undefined
+        if (fitIsMobile && mobileSheetOpenRef.current) {
+          const host = sheetMapHostRef.current
+          const panel =
+            showB2MeetingModalPanelRef.current && mobileModalB2MeetingPanelMotionRef.current
+              ? mobileModalB2MeetingPanelMotionRef.current
+              : mobileModalStopPanelMotionRef.current
+          if (host && panel) {
+            paddingOverride = computeModalOverviewFitPadding(host, panel) ?? undefined
+          }
+        }
         fitRouteOverview(
           m,
           ovCoords,
@@ -2856,6 +2987,7 @@ export function LogisticsMap({
             duration: 800,
             isMobile: fitIsMobile,
             mobileInlinePreview: fitIsMobile && !mobileSheetOpenRef.current,
+            ...(paddingOverride ? { paddingOverride } : {}),
           },
           programmaticOverviewCameraDepthRef,
         )
@@ -2899,6 +3031,13 @@ export function LogisticsMap({
       stops,
       null,
     )
+    const host = sheetMapHostRef.current
+    const panel =
+      showB2MeetingModalPanelRef.current && mobileModalB2MeetingPanelMotionRef.current
+        ? mobileModalB2MeetingPanelMotionRef.current
+        : mobileModalStopPanelMotionRef.current
+    const measuredPad =
+      host && panel ? computeModalOverviewFitPadding(host, panel) : undefined
     fitRouteOverview(
       map,
       ovCoords,
@@ -2906,6 +3045,7 @@ export function LogisticsMap({
         duration: 800,
         isMobile: true,
         mobileInlinePreview: false,
+        ...(measuredPad ? { paddingOverride: measuredPad } : {}),
       },
       programmaticOverviewCameraDepthRef,
     )
@@ -2955,6 +3095,13 @@ export function LogisticsMap({
             stops,
             null,
           )
+          const host = sheetMapHostRef.current
+          const panel =
+            showB2MeetingModalPanelRef.current && mobileModalB2MeetingPanelMotionRef.current
+              ? mobileModalB2MeetingPanelMotionRef.current
+              : mobileModalStopPanelMotionRef.current
+          const measuredPad =
+            host && panel ? computeModalOverviewFitPadding(host, panel) : undefined
           fitRouteOverview(
             map,
             ovCoords,
@@ -2962,6 +3109,7 @@ export function LogisticsMap({
               duration: 800,
               isMobile: true,
               mobileInlinePreview: false,
+              ...(measuredPad ? { paddingOverride: measuredPad } : {}),
             },
             programmaticOverviewCameraDepthRef,
           )
