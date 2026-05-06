@@ -11,6 +11,7 @@ import {
 import type { ReactNode } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import type { VariantId } from '../../data/variants'
+import { InfoCircleIcon } from '../experience/pdp/InfoCircleIcon'
 import { FigmaStarRow, type StarKind } from '../experience/pdp/figmaListingUi'
 import { figma } from './figmaAssets'
 import './ai-review-animations.css'
@@ -33,9 +34,6 @@ const RATING_COUNTS = {
 } as const
 
 const RATING_TOTAL = Object.values(RATING_COUNTS).reduce((a, b) => a + b, 0)
-
-/** Nearest-1k floor for “NN,000+ reviews” badges (aligned with {@link RATING_TOTAL}). */
-const RATING_TOTAL_K_PLUS = Math.floor(RATING_TOTAL / 1000) * 1000
 
 function ChevronDown({ className }: { className?: string }) {
   return (
@@ -607,9 +605,20 @@ function AiReviewSummarySourceFooter({ className }: { className?: string }) {
           </div>
         </div>
       )}
-      <p className="w-full shrink-0 text-left text-[10px] font-normal leading-[14px] text-[#808080] [letter-spacing:0.05px] sm:max-w-[50%] sm:whitespace-nowrap sm:text-right">
-        Real traveler reviews summarised by AI
-      </p>
+      <div className="flex w-full shrink-0 items-center justify-start gap-2 sm:max-w-[50%] sm:justify-end">
+        <p className="text-left text-[10px] font-normal leading-[14px] text-[#808080] [letter-spacing:0.05px] sm:whitespace-nowrap sm:text-right">
+          Real traveler reviews summarised by AI
+        </p>
+        <span
+          className="inline-flex shrink-0"
+          title="Summaries are generated from traveler-written reviews."
+        >
+          <InfoCircleIcon
+            className="size-4 shrink-0 [&_path]:fill-[#808080]"
+            aria-hidden
+          />
+        </span>
+      </div>
     </div>
   )
 }
@@ -706,7 +715,7 @@ function AiReviewSummaryFigmaBlock({
         </div>
         <div className="absolute top-0 right-0 w-fit rounded-md bg-[#f7eeff] px-1 py-0.5 sm:relative sm:top-auto sm:right-auto">
           <p className="whitespace-nowrap text-center text-xs font-medium leading-4 text-[#351560]">
-            {RATING_TOTAL_K_PLUS.toLocaleString()}+ reviews
+            From past 12 months
           </p>
         </div>
       </div>
@@ -995,7 +1004,7 @@ function ThemeBreakdownAiStarIcon() {
   )
 }
 
-/** One-shot text gradient sheen when theme mention row first appears (see `.theme-mention-text-sheen-overlay`). */
+/** First theme mention row appearance per page load — plays sheen once (see `.theme-mention-text-sheen-overlay`). */
 let themeMentionSheenSessionConsumed = false
 
 function ThemeMentionBreakdown({
@@ -1275,7 +1284,7 @@ function AiReviewSummaryBlock({
         </div>
         <div className="absolute top-0 right-0 w-fit shrink-0 rounded-md bg-[#f7eeff] px-1 py-0.5 sm:relative sm:top-auto sm:right-auto">
           <p className="whitespace-nowrap text-right text-xs font-medium leading-4 text-[#351560] sm:text-center">
-            {RATING_TOTAL_K_PLUS.toLocaleString()}+ reviews
+            From past 12 months
           </p>
         </div>
       </div>
