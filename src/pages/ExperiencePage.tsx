@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { usePreloadMapPinImages } from '../hooks/usePreloadMapPinImages'
 import { Link, useSearchParams } from 'react-router-dom'
 import { AdditionalInfo } from '../components/additional/AdditionalInfo'
@@ -35,11 +35,33 @@ export function ExperiencePage() {
   const variant: VariantId = parseVariant(searchParams)
   const data = variants[variant]
 
+  /** B2: shared with `LogisticsBlock` so Meeting & Pickup search stays synced with map/timeline. */
+  const [b2PickupId, setB2PickupId] = useState<string | null>(null)
+  const [b2HoverMeetingId, setB2HoverMeetingId] = useState<string | null>(null)
+  /** Same handler as timeline/map (`LogisticsBlock.handleB2PickupChange`). */
+  const b2PickupApplyRef = useRef<((id: string | null) => void) | null>(null)
+
+  useEffect(() => {
+    if (variant !== 'b2') {
+      setB2PickupId(null)
+      setB2HoverMeetingId(null)
+    }
+  }, [variant])
+
   usePreloadMapPinImages(data.stops)
 
   const meetingAndPickupSection = data.meetingAndPickup ? (
     <CollapsibleSection title="Meeting and Pickup" defaultOpen={!isVariantBLayout(variant)}>
-      <MeetingAndPickupCard content={data.meetingAndPickup} />
+      <MeetingAndPickupCard
+        content={data.meetingAndPickup}
+        variantId={variant}
+        meetings={variant === 'b2' ? data.stops.slice(0, 3) : undefined}
+        b2PickupId={variant === 'b2' ? b2PickupId : undefined}
+        onB2PickupChange={
+          variant === 'b2' ? (id) => b2PickupApplyRef.current?.(id) : undefined
+        }
+        onB2MeetingHover={variant === 'b2' ? setB2HoverMeetingId : undefined}
+      />
     </CollapsibleSection>
   ) : null
 
@@ -146,6 +168,17 @@ export function ExperiencePage() {
                 routePolylineLngLat={data.routePolylineLngLat}
                 mapKey={`logistics-${variant}`}
                 poiPopupContent="image-only"
+                controlledB2PickupId={variant === 'b2' ? b2PickupId : undefined}
+                onControlledB2PickupChange={variant === 'b2' ? setB2PickupId : undefined}
+                controlledB2HoverMeetingId={variant === 'b2' ? b2HoverMeetingId : undefined}
+                onControlledB2MeetingHover={variant === 'b2' ? setB2HoverMeetingId : undefined}
+                onExposeB2PickupApply={
+                  variant === 'b2'
+                    ? (fn) => {
+                        b2PickupApplyRef.current = fn
+                      }
+                    : undefined
+                }
               />
             </CollapsibleSection>
 

@@ -300,6 +300,9 @@ const B2_MEETING_STOPS: Stop[] = [
 
 const STOPS_B2: Stop[] = [...B2_MEETING_STOPS, ...STOPS_B_CORE, STOP_B_END]
 
+/** Labels for the three B2 meeting pickups — keep in sync with `TimelineB2MeetingRow` list options. */
+export const B2_MEETING_OPTION_LABELS = ['Prati north', 'Ottaviano', 'Via Plauto'] as const
+
 const ROUTE_LNG_LAT_B2: [number, number][] = [...B2_MEETING_LNG_LAT, ...VATICAN_ROUTE_B, END_LNG_LAT_B]
 
 /** B2 dashed line: POI 1 (Borgo) through the core path to the end pin (meetings are separate; not on this line until one is chosen). */

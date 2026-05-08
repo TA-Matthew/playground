@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type MouseEvent } from 'react'
 import '../ai-review/ai-review-animations.css'
 import {
+  B2_MEETING_OPTION_LABELS,
   B2_MEETING_TIMELINE_ROW_ID,
   type Stop,
   type VariantId,
@@ -14,8 +15,6 @@ const PREVIEW_CHARS = 220
 
 /** Same ms for list fade-out (pick option) and fade-in (“Select a different meeting point”). */
 const MEETING_LIST_FADE_MS = 300
-
-const PICKUP_LABELS = ['Prati north', 'Ottaviano', 'Via Plauto'] as const
 
 /** Align with `LogisticsBlock` / map mobile sheet breakpoint. */
 const MW_MAX_WIDTH_PX = 768
@@ -102,7 +101,7 @@ export function TimelineB2MeetingRow({
   const idx =
     activeMeeting != null ? meetings.findIndex((m) => m.id === activeMeeting.id) : -1
   const selectedPickupLabel =
-    pickupId != null && idx >= 0 ? PICKUP_LABELS[idx] ?? `Pickup ${idx + 1}` : ''
+    pickupId != null && idx >= 0 ? B2_MEETING_OPTION_LABELS[idx] ?? `Pickup ${idx + 1}` : ''
   const poiOrder = idx >= 0 ? getPoiOrderForStopIndex(stops, variantId, idx) : null
 
   /** Whenever a pickup is committed, title reads “Meet at — …” (also while row collapsed or list is fading). */
@@ -291,7 +290,7 @@ export function TimelineB2MeetingRow({
                               }
                             }}
                           >
-                            {PICKUP_LABELS[i] ?? `Pickup ${i + 1}`}
+                            {B2_MEETING_OPTION_LABELS[i] ?? `Pickup ${i + 1}`}
                           </button>
                         </li>
                       ))}

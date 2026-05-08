@@ -1457,6 +1457,8 @@ export function LogisticsMap({
   const trackRecentreHintRef = useRef(false)
   /** Ignore `moveend` until this time (ms) so programmatic `fitBounds` does not reveal Re-centre. */
   const ignoreMoveEndForRecentreUntilRef = useRef(0)
+  /** User panned/zoomed while `programmaticOverviewCameraDepthRef` was >0 — reveal after next idle once depth clears. */
+  const userGesturePendingRecentreRef = useRef(false)
 
   const variantIdRef = useRef(variantId)
   const selectedStopIdRef = useRef(selectedStopId)
@@ -2361,12 +2363,42 @@ export function LogisticsMap({
       )
     }
 
-    /** Same guards as moveend — show Re-centre as soon as the user pans/zooms, not only after gesture ends. */
-    const revealRecentreIfAllowed = () => {
+    /**
+     * Programmatic `fitBounds` emits `moveend`/`zoomstart` without `originalEvent`. Only treat DOM-backed
+     * events as user intent so landing fits don’t flash Re-centre; still reveal after idle if the user
+     * interacted while a programmatic camera animation held `programmaticOverviewCameraDepthRef` > 0.
+     */
+    const flushRecentreWhenCameraFree = () => {
+      if (cancelled) return
+      if (!userGesturePendingRecentreRef.current) return
+      if (!trackRecentreHintRef.current) {
+        userGesturePendingRecentreRef.current = false
+        return
+      }
+      if (Date.now() < ignoreMoveEndForRecentreUntilRef.current) {
+        map.once('idle', flushRecentreWhenCameraFree)
+        return
+      }
+      if (programmaticOverviewCameraDepthRef.current > 0) {
+        map.once('idle', flushRecentreWhenCameraFree)
+        return
+      }
+      userGesturePendingRecentreRef.current = false
+      setShowRecentre(true)
+    }
+
+    const revealRecentreIfAllowed = (e: maplibregl.MapLibreEvent) => {
       if (cancelled || !trackRecentreHintRef.current) return
       if (Date.now() < ignoreMoveEndForRecentreUntilRef.current) return
-      /** Programmatic `fitRouteOverview` / overview fits — don’t treat as “user moved map”. */
-      if (programmaticOverviewCameraDepthRef.current > 0) return
+
+      const userDriven = e.type === 'dragstart' || Boolean(e.originalEvent)
+      if (!userDriven) return
+
+      if (programmaticOverviewCameraDepthRef.current > 0) {
+        userGesturePendingRecentreRef.current = true
+        map.once('idle', flushRecentreWhenCameraFree)
+        return
+      }
       setShowRecentre(true)
     }
     map.on('moveend', revealRecentreIfAllowed)
@@ -2707,6 +2739,7 @@ export function LogisticsMap({
       window.clearTimeout(attributionFadeFallbackTimer)
       overviewModeRef.current = true
       trackRecentreHintRef.current = false
+      userGesturePendingRecentreRef.current = false
       map.off('moveend', revealRecentreIfAllowed)
       map.off('dragstart', revealRecentreIfAllowed)
       map.off('zoomstart', revealRecentreIfAllowed)
@@ -2917,11 +2950,12 @@ export function LogisticsMap({
       if (!panelEl) return
       const pad = computeModalOverviewFitPadding(host, panelEl)
       if (!pad) return
+      /** During B2 reselect, committed id must not tighten overview (matches reselect-camera `null`). */
       const ovCoords = routeCoordsForVariantOverview(
         variantIdRef.current,
         routeCoordsRef.current,
         stopsRef.current,
-        b2CommittedPickupIdRef.current,
+        mobileB2MeetingReselectPickerRef.current ? null : b2CommittedPickupIdRef.current,
       )
       fitRouteOverview(
         m,
@@ -2995,7 +3029,7 @@ export function LogisticsMap({
           variantId,
           routeLngLat,
           stops,
-          b2CommittedPickupId,
+          mobileB2MeetingReselectPickerRef.current ? null : b2CommittedPickupId,
         )
         let paddingOverride: maplibregl.PaddingOptions | undefined
         if (fitIsMobile && mobileSheetOpenRef.current) {

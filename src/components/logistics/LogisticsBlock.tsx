@@ -44,6 +44,16 @@ type Props = {
   mapKey: string
   /** Embedded PDP map: show image-only pin popup (no title / duration in the card). */
   poiPopupContent?: 'full' | 'image-only'
+  /**
+   * B2: when provided with `onControlledB2PickupChange`, pickup + hover are controlled by the parent
+   * (e.g. Meeting and Pickup card search) so map/timeline stay in sync.
+   */
+  controlledB2PickupId?: string | null
+  onControlledB2PickupChange?: (id: string | null) => void
+  controlledB2HoverMeetingId?: string | null
+  onControlledB2MeetingHover?: (id: string | null) => void
+  /** Registers `handleB2PickupChange` so Meeting & Pickup can call the same path as the timeline. */
+  onExposeB2PickupApply?: (handler: ((id: string | null) => void) | null) => void
 }
 
 export function LogisticsBlock({
@@ -53,6 +63,11 @@ export function LogisticsBlock({
   routePolylineLngLat,
   mapKey,
   poiPopupContent = 'full',
+  controlledB2PickupId,
+  onControlledB2PickupChange,
+  controlledB2HoverMeetingId,
+  onControlledB2MeetingHover,
+  onExposeB2PickupApply,
 }: Props) {
   /** First itinerary row expanded on load (A: Borgo; B/C: POI #1 Borgo — not the meeting row). Map overview zoom follows `LogisticsMap` landing rules. */
   const landingDefaultExpandedStopId = landingDefaultExpandedStopIdForVariant(stops, variantId)
@@ -65,19 +80,57 @@ export function LogisticsBlock({
   const expandedIdRef = useRef<string | null>(null)
   expandedIdRef.current = expandedId
 
-  const [b2PickupId, setB2PickupId] = useState<string | null>(null)
+  const [internalB2PickupId, setInternalB2PickupId] = useState<string | null>(null)
   /** B2 MW: increment so `LogisticsMap` opens full-screen map + meeting picker (timeline “Choose a meeting point”). */
   const [b2OpenMeetingModalNonce, setB2OpenMeetingModalNonce] = useState(0)
   /** B2: dropdown hover previews that meeting pin on the map (selected styling). */
-  const [b2HoverMeetingId, setB2HoverMeetingId] = useState<string | null>(null)
+  const [internalB2HoverMeetingId, setInternalB2HoverMeetingId] = useState<string | null>(null)
   /** Itinerary row hover — map pin shows full teardrop + image like the selected stop. */
   const [timelineHoverStopId, setTimelineHoverStopId] = useState<string | null>(null)
+
+  const b2PickupControlled =
+    variantId === 'b2' && onControlledB2PickupChange != null
+  const b2PickupId =
+    variantId === 'b2'
+      ? b2PickupControlled
+        ? controlledB2PickupId ?? null
+        : internalB2PickupId
+      : null
+  const b2HoverMeetingId =
+    variantId === 'b2'
+      ? b2PickupControlled
+        ? controlledB2HoverMeetingId ?? null
+        : internalB2HoverMeetingId
+      : null
+
+  const setB2PickupId = useCallback(
+    (id: string | null) => {
+      if (b2PickupControlled) {
+        onControlledB2PickupChange?.(id)
+      } else {
+        setInternalB2PickupId(id)
+      }
+    },
+    [b2PickupControlled, onControlledB2PickupChange],
+  )
+
+  const setB2HoverMeetingId = useCallback(
+    (id: string | null) => {
+      if (b2PickupControlled) {
+        onControlledB2MeetingHover?.(id)
+      } else {
+        setInternalB2HoverMeetingId(id)
+      }
+    },
+    [b2PickupControlled, onControlledB2MeetingHover],
+  )
+
   const b2PickupIdRef = useRef<string | null>(null)
   b2PickupIdRef.current = b2PickupId
   useEffect(() => {
     if (variantId !== 'b2') {
-      setB2PickupId(null)
-      setB2HoverMeetingId(null)
+      setInternalB2PickupId(null)
+      setInternalB2HoverMeetingId(null)
     }
     setTimelineHoverStopId(null)
   }, [variantId])
@@ -98,11 +151,17 @@ export function LogisticsBlock({
       setLastSelectSource('list')
       setSelectedStopId('')
     }
-  }, [])
+  }, [setB2PickupId, setB2HoverMeetingId])
+
+  useEffect(() => {
+    if (variantId !== 'b2' || !onExposeB2PickupApply) return
+    onExposeB2PickupApply(handleB2PickupChange)
+    return () => onExposeB2PickupApply(null)
+  }, [variantId, onExposeB2PickupApply, handleB2PickupChange])
 
   const handleB2MeetingHover = useCallback((id: string | null) => {
     setB2HoverMeetingId(id)
-  }, [])
+  }, [setB2HoverMeetingId])
 
   const bumpOpenB2MeetingMobileMap = useCallback(() => {
     setB2OpenMeetingModalNonce((n) => n + 1)
