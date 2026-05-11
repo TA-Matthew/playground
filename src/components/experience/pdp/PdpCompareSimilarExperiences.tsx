@@ -60,7 +60,12 @@ export function PdpCompareSimilarExperiences() {
           </div>
         </header>
 
-        <div className="flex w-full min-w-0 gap-6 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:overflow-visible [&::-webkit-scrollbar]:hidden">
+        <div
+          className="flex w-full min-w-0 gap-3 overflow-x-auto overscroll-x-contain pb-1 [-ms-overflow-style:none] [scrollbar-width:none] max-sm:snap-x max-sm:snap-mandatory sm:gap-6 sm:overflow-visible [&::-webkit-scrollbar]:hidden"
+          role="region"
+          aria-roledescription="carousel"
+          aria-label={`Similar tours — ${visible.length} shown; swipe horizontally on small screens`}
+        >
           {visible.map((card) => (
             <CompareShelfCard key={card.id} card={card} />
           ))}

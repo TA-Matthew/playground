@@ -67,6 +67,12 @@ export type CompareShelfCardItem = {
   cancellation: string
   /** Rendered verbatim, e.g. `From $101.49` */
   priceLabel: string
+  /** Compact card — location under title (MW reference). */
+  location?: string
+  /**
+   * Gray top bar label (e.g. Highest rated, Best value). When omitted, uses Current / ribbon-based copy.
+   */
+  topLabel?: string | null
 }
 
 export const viatorListing = {
@@ -353,6 +359,7 @@ export const viatorListing = {
         duration: '4 hours',
         cancellation: 'Free Cancellation',
         priceLabel: 'From $101.49',
+        location: 'Rome, Italy',
       },
       {
         id: 'cmp-2',
@@ -362,12 +369,14 @@ export const viatorListing = {
         imageSrc:
           'https://media-cdn.tripadvisor.com/media/attractions-splice-spp-674x446/07/0a/13/fb.jpg',
         imageAlt: 'Vatican Museums gallery corridor',
-        ribbon: 'sell-out',
+        ribbon: null,
         rating: 5,
         reviewCount: 1498,
         duration: '4 hours',
         cancellation: 'Free Cancellation',
         priceLabel: 'From $84.39',
+        location: 'Rome, Italy',
+        topLabel: 'Highest rated',
       },
       {
         id: 'cmp-3',
@@ -377,12 +386,14 @@ export const viatorListing = {
         imageSrc:
           'https://media-cdn.tripadvisor.com/media/attractions-splice-spp-674x446/07/09/fd/d4.jpg',
         imageAlt: "St. Peter's Square",
-        ribbon: 'sell-out',
+        ribbon: null,
         rating: 5,
         reviewCount: 962,
         duration: '4 hours',
         cancellation: 'Free Cancellation',
         priceLabel: 'From $228.07',
+        location: 'Rome, Italy',
+        topLabel: 'Best value',
       },
       {
         id: 'cmp-4',
@@ -398,6 +409,7 @@ export const viatorListing = {
         duration: '4 hours',
         cancellation: 'Free Cancellation',
         priceLabel: 'From $340.87',
+        location: 'Rome, Italy',
       },
       {
         id: 'cmp-5',
@@ -411,6 +423,7 @@ export const viatorListing = {
         duration: '3 hours 30 min',
         cancellation: 'Free Cancellation',
         priceLabel: 'From $129.00',
+        location: 'Rome, Italy',
       },
       {
         id: 'cmp-6',
@@ -425,6 +438,7 @@ export const viatorListing = {
         duration: '3 hours',
         cancellation: 'Free Cancellation',
         priceLabel: 'From $95.00',
+        location: 'Rome, Italy',
       },
       {
         id: 'cmp-7',
@@ -439,6 +453,7 @@ export const viatorListing = {
         duration: '4 hours 30 min',
         cancellation: 'Free Cancellation',
         priceLabel: 'From $189.99',
+        location: 'Rome, Italy',
       },
       {
         id: 'cmp-8',
@@ -452,6 +467,7 @@ export const viatorListing = {
         duration: '5 hours',
         cancellation: 'Free Cancellation',
         priceLabel: 'From $412.00',
+        location: 'Rome, Italy',
       },
     ] satisfies CompareShelfCardItem[],
   },
