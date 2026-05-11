@@ -125,7 +125,7 @@ export function MobileMapModalB2MeetingPanel({
 
   const showPickerList = pickupId == null || reselectPickerOpen
 
-  const regionAriaLabel = showPickerList ? 'Choose a meeting point' : 'Selected meeting point'
+  const regionAriaLabel = showPickerList ? 'Show meeting points on map' : 'Selected meeting point'
 
   const openPickerAgain = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()

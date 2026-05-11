@@ -1,6 +1,6 @@
 import { viatorListing } from './viatorListing'
 
-export type VariantId = 'a' | 'b' | 'b2' | 'c'
+export type VariantId = 'a' | 'a2' | 'b' | 'b2' | 'c'
 
 export interface Stop {
   id: string
@@ -298,6 +298,9 @@ const B2_MEETING_STOPS: Stop[] = [
   },
 ]
 
+/** Same three meeting options as B2 — for A2 “Meeting & Pickup” only (A2 map/timeline use {@link STOPS_A}). */
+export const TRIPLE_MEETING_STOPS: Stop[] = B2_MEETING_STOPS
+
 const STOPS_B2: Stop[] = [...B2_MEETING_STOPS, ...STOPS_B_CORE, STOP_B_END]
 
 /** Labels for the three B2 meeting pickups — keep in sync with `TimelineB2MeetingRow` list options. */
@@ -343,6 +346,27 @@ export const variants: Record<VariantId, ExperienceVariant> = {
     meetingAndPickup: MEETING_AND_PICKUP_A,
     whatToExpectIntro: ITINERARY_SECTION_INTRO,
     whatToExpectExtra: ITINERARY_SECTION_EXTRA,
+    stops: STOPS_A,
+    routeLngLat: VATICAN_ROUTE,
+    booking: {
+      priceAmount: '$40.56',
+      badgeExceptionalDeal: 'Exceptional deal',
+      badgeKidsDiscount: 'Discounted rates for kids',
+      dateLabel: 'Wed, Apr 29',
+      travellers: 2,
+      bookAheadTitle: 'Book ahead!',
+      bookAheadSubtitle: 'On average, booked 8 days in advance.',
+    },
+  },
+  a2: {
+    id: 'a2',
+    label: 'Variant A2 (multiple meeting)',
+    tourTitle: viatorListing.tourTitle,
+    ratingLine: viatorListing.ratingLine,
+    meetingAndPickup: MEETING_AND_PICKUP_A,
+    whatToExpectIntro: ITINERARY_SECTION_INTRO,
+    whatToExpectExtra: ITINERARY_SECTION_EXTRA,
+    /** Same POI path as A — meeting choice lives only in Meeting & Pickup (not map/timeline). */
     stops: STOPS_A,
     routeLngLat: VATICAN_ROUTE,
     booking: {
@@ -419,6 +443,7 @@ export const variants: Record<VariantId, ExperienceVariant> = {
 export const DEFAULT_VARIANT: VariantId = 'a'
 
 export function getVariant(id: string | null | undefined): VariantId {
+  if (id === 'a2') return 'a2'
   if (id === 'b') return 'b'
   if (id === 'b2') return 'b2'
   if (id === 'c') return 'c'

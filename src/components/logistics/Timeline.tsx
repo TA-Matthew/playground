@@ -35,7 +35,7 @@ type Props = {
   onB2MeetingHover?: (meetingStopId: string | null) => void
   /** List row hover — map pin matches selected teardrop + image */
   onTimelineRowHover?: (stopId: string | null) => void
-  /** B2: open MW full-screen map meeting picker from timeline helper (“Choose a meeting point”). */
+  /** B2: open MW full-screen map meeting picker from timeline helper (“Show meeting points on map”). */
   onOpenB2MeetingMobileMap?: () => void
 }
 

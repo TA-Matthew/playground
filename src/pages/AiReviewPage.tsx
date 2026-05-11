@@ -10,20 +10,33 @@ import { parseVariant } from '../uxr/urlState'
 
 export function AiReviewPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  /** `variant` query: `a` default (omit), `b` / `c` matrix layouts. B2 is logistics-only — never used here. */
+  /** `variant` query: `a` default (omit), `b` / `c` matrix layouts. B2 / A2 are logistics-only — map to B / A. */
   const rawVariant = parseVariant(searchParams)
-  const summaryLayout: VariantId = rawVariant === 'b2' ? 'b' : rawVariant
-  /** Normalize `?variant=b2` (e.g. shared logistics URL) to `b` so the query matches what we render. */
+  const summaryLayout: VariantId =
+    rawVariant === 'b2' ? 'b' : rawVariant === 'a2' ? 'a' : rawVariant
+  /** Normalize `?variant=b2` or `a2` (e.g. shared experience URL) to the review layouts we render. */
   useEffect(() => {
-    if (rawVariant !== 'b2') return
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev)
-        next.set('variant', 'b')
-        return next
-      },
-      { replace: true },
-    )
+    if (rawVariant === 'b2') {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          next.set('variant', 'b')
+          return next
+        },
+        { replace: true },
+      )
+      return
+    }
+    if (rawVariant === 'a2') {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          next.delete('variant')
+          return next
+        },
+        { replace: true },
+      )
+    }
   }, [rawVariant, setSearchParams])
   const setSummaryLayout = useCallback(
     (v: AiSummaryLayoutVariant) => {

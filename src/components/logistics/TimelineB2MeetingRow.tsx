@@ -63,7 +63,7 @@ export function TimelineB2MeetingRow({
 
   /**
    * MW + map-picker flow: collapsed with no pickup — don’t expand the row from the header/chevron;
-   * only “Choose a meeting point” opens the full-screen map.
+   * only “Show meeting points on map” opens the full-screen map.
    */
   const mwDisableHeaderExpand =
     isMw &&
@@ -161,7 +161,7 @@ export function TimelineB2MeetingRow({
       : null
 
   const rowHeaderHint = mwDisableHeaderExpand
-    ? `${rowAriaTitle}. Use “Choose a meeting point” to open the map.`
+    ? `${rowAriaTitle}. Use “Show meeting points on map” to open the map.`
     : `${rowAriaTitle}. ${isOpen ? 'Collapse' : 'Expand'} details`
 
   return (
@@ -323,14 +323,16 @@ export function TimelineB2MeetingRow({
                 }}
                 aria-label={
                   isMw
-                    ? 'Open map to choose a meeting point'
-                    : 'Expand to choose a meeting point'
+                    ? 'Open map to show meeting points on map'
+                    : 'Expand to show meeting points on map'
                 }
               >
-                Choose a meeting point
+                Show meeting points on map
               </button>
             ) : (
-              <p className="mt-1.5 text-[13px] leading-snug text-stone-500">Choose a meeting point</p>
+              <p className="mt-1.5 text-[13px] leading-snug text-stone-500">
+                Show meeting points on map
+              </p>
             )}
           </div>
 

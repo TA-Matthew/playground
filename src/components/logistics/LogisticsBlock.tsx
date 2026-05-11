@@ -14,10 +14,20 @@ const MOBILE_MAP_MAX_WIDTH_PX = 768
 /** Stable callback so `React.memo(Timeline)` skips re-render when only map hover state updates. */
 function noopMeetingHover() {}
 
-/** First expanded itinerary row on load: A = first stop; B/C = first numbered POI (skip meeting / pass-by legs). */
+/**
+ * Default expanded row id for map/timeline helpers: A = first stop; B = meeting row; B2 = synthetic meeting-row id
+ * (actual accordion expanded state on load is MW-aware in {@link LogisticsBlock}); C = first numbered POI.
+ */
 function landingDefaultExpandedStopIdForVariant(stops: Stop[], variantId: VariantId): string {
   if (!isVariantBLayout(variantId)) {
     return stops[0]?.id ?? ''
+  }
+  if (variantId === 'b2') {
+    return B2_MEETING_TIMELINE_ROW_ID
+  }
+  if (variantId === 'b') {
+    const meeting = stops.find((s) => s.kind === 'meeting')
+    if (meeting) return meeting.id
   }
   for (let i = 0; i < stops.length; i++) {
     const s = stops[i]
@@ -27,6 +37,18 @@ function landingDefaultExpandedStopIdForVariant(stops: Stop[], variantId: Varian
     return s.id
   }
   return stops[0]?.id ?? ''
+}
+
+/** First numbered itinerary leg (skips meetings, end, pass-by) — Borgo on B2. */
+function firstNumberedItineraryStopId(stops: Stop[]): string {
+  for (let i = 0; i < stops.length; i++) {
+    const s = stops[i]
+    if (!s) continue
+    if (s.kind === 'meeting' || s.kind === 'end') continue
+    if (s.kind === 'passby') continue
+    return s.id
+  }
+  return ''
 }
 
 /** True for legs that show as numbered POI pins — Re-centre must only refit the camera, not clear selection. */
@@ -69,19 +91,36 @@ export function LogisticsBlock({
   onControlledB2MeetingHover,
   onExposeB2PickupApply,
 }: Props) {
-  /** First itinerary row expanded on load (A: Borgo; B/C: POI #1 Borgo — not the meeting row). Map overview zoom follows `LogisticsMap` landing rules. */
   const landingDefaultExpandedStopId = landingDefaultExpandedStopIdForVariant(stops, variantId)
-  const [selectedStopId, setSelectedStopId] = useState(landingDefaultExpandedStopId)
-  const [expandedId, setExpandedId] = useState<string | null>(
-    landingDefaultExpandedStopId || null,
-  )
+  const [selectedStopId, setSelectedStopId] = useState(() => {
+    if (variantId !== 'b2') return landingDefaultExpandedStopId
+    if (typeof globalThis === 'undefined' || !globalThis.matchMedia) return ''
+    /** MW B2: select POI 1 (e.g. Borgo) on load; desktop keeps no POI until pickup/list interaction. */
+    return globalThis.matchMedia(`(max-width: ${MOBILE_MAP_MAX_WIDTH_PX}px)`).matches
+      ? firstNumberedItineraryStopId(stops)
+      : ''
+  })
+  const [expandedId, setExpandedId] = useState<string | null>(() => {
+    if (variantId !== 'b2') {
+      return landingDefaultExpandedStopId || null
+    }
+    if (typeof globalThis === 'undefined' || !globalThis.matchMedia) {
+      return B2_MEETING_TIMELINE_ROW_ID
+    }
+    if (globalThis.matchMedia(`(max-width: ${MOBILE_MAP_MAX_WIDTH_PX}px)`).matches) {
+      /** MW B2: meeting row collapsed; open first numbered POI accordion (same id as `selectedStopId`). */
+      const pid = firstNumberedItineraryStopId(stops)
+      return pid || null
+    }
+    return B2_MEETING_TIMELINE_ROW_ID
+  })
   /** Last interaction channel — used so mobile list/accordion selection does not drive map camera. */
   const [lastSelectSource, setLastSelectSource] = useState<SelectSource>('list')
   const expandedIdRef = useRef<string | null>(null)
   expandedIdRef.current = expandedId
 
   const [internalB2PickupId, setInternalB2PickupId] = useState<string | null>(null)
-  /** B2 MW: increment so `LogisticsMap` opens full-screen map + meeting picker (timeline “Choose a meeting point”). */
+  /** B2 MW: increment so `LogisticsMap` opens full-screen map + meeting picker (timeline “Show meeting points on map”). */
   const [b2OpenMeetingModalNonce, setB2OpenMeetingModalNonce] = useState(0)
   /** B2: dropdown hover previews that meeting pin on the map (selected styling). */
   const [internalB2HoverMeetingId, setInternalB2HoverMeetingId] = useState<string | null>(null)

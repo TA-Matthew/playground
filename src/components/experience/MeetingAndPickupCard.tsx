@@ -23,7 +23,7 @@ export function MeetingAndPickupCard({
   readonly onB2MeetingHover?: (id: string | null) => void
 }) {
   const showB2MeetingPicker =
-    variantId === 'b2' &&
+    (variantId === 'b2' || variantId === 'a2') &&
     meetings != null &&
     meetings.length >= 3 &&
     onB2PickupChange != null
@@ -48,7 +48,7 @@ export function MeetingAndPickupCard({
           <h3 className="text-[18px] font-medium leading-6 text-black">Meeting point</h3>
         </div>
         <p className="pdp-meeting-detail-text">{content.meeting.address}</p>
-        <span className="mt-3 inline-flex cursor-default items-center gap-1 text-[15px] font-medium text-stone-900 underline decoration-stone-300 underline-offset-[3px] pointer-events-none">
+        <span className="mt-3 inline-flex cursor-pointer select-none items-center gap-1 text-[15px] font-medium text-stone-900 underline decoration-stone-300 underline-offset-[3px] transition hover:text-stone-700 hover:decoration-stone-500">
           Open in Google Maps
           <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
         </span>
@@ -62,7 +62,7 @@ export function MeetingAndPickupCard({
         </div>
         <p className="pdp-meeting-detail-text">{content.end.placeName}</p>
         <p className="pdp-meeting-detail-text mt-1">{content.end.address}</p>
-        <span className="mt-3 inline-flex cursor-default items-center gap-1 text-[15px] font-medium text-stone-900 underline decoration-stone-300 underline-offset-[3px] pointer-events-none">
+        <span className="mt-3 inline-flex cursor-pointer select-none items-center gap-1 text-[15px] font-medium text-stone-900 underline decoration-stone-300 underline-offset-[3px] transition hover:text-stone-700 hover:decoration-stone-500">
           Open in Google Maps
           <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
         </span>
@@ -124,9 +124,6 @@ function MeetingPickupCardB2Layout({
       if (blurHideTimerRef.current) clearTimeout(blurHideTimerRef.current)
     }
   }, [])
-
-  const mapsUrl = (queryStr: string) =>
-    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryStr)}`
 
   const clearBlurHide = () => {
     if (blurHideTimerRef.current) {
@@ -267,15 +264,10 @@ function MeetingPickupCardB2Layout({
         </div>
         <p className="pdp-meeting-detail-text">{content.end.placeName}</p>
         <p className="pdp-meeting-detail-text mt-1">{content.end.address}</p>
-        <a
-          href={mapsUrl(content.end.mapsQuery)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-3 inline-flex items-center gap-1 text-[15px] font-medium text-stone-900 underline decoration-stone-300 underline-offset-[3px] transition hover:decoration-stone-500"
-        >
+        <span className="mt-3 inline-flex cursor-pointer select-none items-center gap-1 text-[15px] font-medium text-stone-900 underline decoration-stone-300 underline-offset-[3px] transition hover:text-stone-700 hover:decoration-stone-500">
           Open in Google Maps
           <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
-        </a>
+        </span>
       </div>
     </div>
   )

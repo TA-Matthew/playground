@@ -26,6 +26,7 @@ export function parseHideUi(searchParams: URLSearchParams): boolean {
 
 export function parseVariant(searchParams: URLSearchParams): VariantId {
   const v = searchParams.get('variant')
+  if (v === 'a2') return 'a2'
   if (v === 'b') return 'b'
   if (v === 'b2') return 'b2'
   if (v === 'c') return 'c'

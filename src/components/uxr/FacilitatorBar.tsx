@@ -38,6 +38,18 @@ export function FacilitatorBar({
             </button>
             <button
               type="button"
+              title="A2 (multiple meeting — pickup card only)"
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                variant === 'a2'
+                  ? 'bg-amber-600 text-white shadow-sm'
+                  : 'text-amber-950 hover:bg-amber-50'
+              }`}
+              onClick={() => onVariantChange('a2')}
+            >
+              A2 (multiple meeting)
+            </button>
+            <button
+              type="button"
               className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
                 variant === 'b'
                   ? 'bg-amber-600 text-white shadow-sm'

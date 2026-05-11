@@ -16,7 +16,12 @@ import { LogisticsBlock } from '../components/logistics/LogisticsBlock'
 import { FacilitatorBar } from '../components/uxr/FacilitatorBar'
 import { SecretUnlock } from '../components/uxr/SecretUnlock'
 import { viatorListing } from '../data/viatorListing'
-import { isVariantBLayout, variants, type VariantId } from '../data/variants'
+import {
+  isVariantBLayout,
+  TRIPLE_MEETING_STOPS,
+  variants,
+  type VariantId,
+} from '../data/variants'
 import {
   buildParticipantUrl,
   parseHideUi,
@@ -38,6 +43,8 @@ export function ExperiencePage() {
   /** B2: shared with `LogisticsBlock` so Meeting & Pickup search stays synced with map/timeline. */
   const [b2PickupId, setB2PickupId] = useState<string | null>(null)
   const [b2HoverMeetingId, setB2HoverMeetingId] = useState<string | null>(null)
+  /** A2: meeting pick is card-only — not wired to map/timeline. */
+  const [a2PickupId, setA2PickupId] = useState<string | null>(null)
   /** Same handler as timeline/map (`LogisticsBlock.handleB2PickupChange`). */
   const b2PickupApplyRef = useRef<((id: string | null) => void) | null>(null)
 
@@ -45,6 +52,9 @@ export function ExperiencePage() {
     if (variant !== 'b2') {
       setB2PickupId(null)
       setB2HoverMeetingId(null)
+    }
+    if (variant !== 'a2') {
+      setA2PickupId(null)
     }
   }, [variant])
 
@@ -55,10 +65,22 @@ export function ExperiencePage() {
       <MeetingAndPickupCard
         content={data.meetingAndPickup}
         variantId={variant}
-        meetings={variant === 'b2' ? data.stops.slice(0, 3) : undefined}
-        b2PickupId={variant === 'b2' ? b2PickupId : undefined}
+        meetings={
+          variant === 'b2'
+            ? data.stops.slice(0, 3)
+            : variant === 'a2'
+              ? TRIPLE_MEETING_STOPS
+              : undefined
+        }
+        b2PickupId={
+          variant === 'b2' ? b2PickupId : variant === 'a2' ? a2PickupId : undefined
+        }
         onB2PickupChange={
-          variant === 'b2' ? (id) => b2PickupApplyRef.current?.(id) : undefined
+          variant === 'b2'
+            ? (id) => b2PickupApplyRef.current?.(id)
+            : variant === 'a2'
+              ? setA2PickupId
+              : undefined
         }
         onB2MeetingHover={variant === 'b2' ? setB2HoverMeetingId : undefined}
       />
