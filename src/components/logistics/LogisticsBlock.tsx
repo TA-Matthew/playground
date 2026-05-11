@@ -14,20 +14,10 @@ const MOBILE_MAP_MAX_WIDTH_PX = 768
 /** Stable callback so `React.memo(Timeline)` skips re-render when only map hover state updates. */
 function noopMeetingHover() {}
 
-/**
- * Default expanded row id for map/timeline helpers: A = first stop; B = meeting row; B2 = synthetic meeting-row id
- * (actual accordion expanded state on load is MW-aware in {@link LogisticsBlock}); C = first numbered POI.
- */
+/** First expanded itinerary row on load: A = first stop; B/C = first numbered POI (skip meeting / pass-by legs). */
 function landingDefaultExpandedStopIdForVariant(stops: Stop[], variantId: VariantId): string {
   if (!isVariantBLayout(variantId)) {
     return stops[0]?.id ?? ''
-  }
-  if (variantId === 'b2') {
-    return B2_MEETING_TIMELINE_ROW_ID
-  }
-  if (variantId === 'b') {
-    const meeting = stops.find((s) => s.kind === 'meeting')
-    if (meeting) return meeting.id
   }
   for (let i = 0; i < stops.length; i++) {
     const s = stops[i]
@@ -39,16 +29,50 @@ function landingDefaultExpandedStopIdForVariant(stops: Stop[], variantId: Varian
   return stops[0]?.id ?? ''
 }
 
-/** First numbered itinerary leg (skips meetings, end, pass-by) — Borgo on B2. */
-function firstNumberedItineraryStopId(stops: Stop[]): string {
-  for (let i = 0; i < stops.length; i++) {
-    const s = stops[i]
-    if (!s) continue
-    if (s.kind === 'meeting' || s.kind === 'end') continue
-    if (s.kind === 'passby') continue
-    return s.id
+/** Desktop (≥769px): B / B2 open the meeting row first; MW keeps first POI expanded. */
+function getLandingStateForBlock(
+  stops: Stop[],
+  variantId: VariantId,
+  controlledB2PickupId: string | null | undefined,
+): {
+  landingDefaultExpandedStopId: string
+  selectedStopId: string
+  expandedId: string | null
+} {
+  const poiDefault = landingDefaultExpandedStopIdForVariant(stops, variantId)
+  const desktop =
+    typeof globalThis !== 'undefined' &&
+    typeof globalThis.matchMedia === 'function' &&
+    globalThis.matchMedia(`(min-width: ${MOBILE_MAP_MAX_WIDTH_PX + 1}px)`).matches
+
+  if (!desktop || (variantId !== 'b' && variantId !== 'b2')) {
+    return {
+      landingDefaultExpandedStopId: poiDefault,
+      selectedStopId: poiDefault,
+      expandedId: poiDefault || null,
+    }
   }
-  return ''
+
+  if (variantId === 'b') {
+    const meeting = stops.find((s) => s.kind === 'meeting')
+    const mid = meeting?.id ?? poiDefault
+    return {
+      landingDefaultExpandedStopId: mid,
+      selectedStopId: mid,
+      expandedId: mid,
+    }
+  }
+
+  const pick =
+    controlledB2PickupId !== undefined && controlledB2PickupId !== null
+      ? controlledB2PickupId
+      : null
+  const sid = pick ?? ''
+  return {
+    landingDefaultExpandedStopId: sid,
+    selectedStopId: sid,
+    expandedId: B2_MEETING_TIMELINE_ROW_ID,
+  }
 }
 
 /** True for legs that show as numbered POI pins — Re-centre must only refit the camera, not clear selection. */
@@ -91,29 +115,15 @@ export function LogisticsBlock({
   onControlledB2MeetingHover,
   onExposeB2PickupApply,
 }: Props) {
-  const landingDefaultExpandedStopId = landingDefaultExpandedStopIdForVariant(stops, variantId)
-  const [selectedStopId, setSelectedStopId] = useState(() => {
-    if (variantId !== 'b2') return landingDefaultExpandedStopId
-    if (typeof globalThis === 'undefined' || !globalThis.matchMedia) return ''
-    /** MW B2: select POI 1 (e.g. Borgo) on load; desktop keeps no POI until pickup/list interaction. */
-    return globalThis.matchMedia(`(max-width: ${MOBILE_MAP_MAX_WIDTH_PX}px)`).matches
-      ? firstNumberedItineraryStopId(stops)
-      : ''
-  })
-  const [expandedId, setExpandedId] = useState<string | null>(() => {
-    if (variantId !== 'b2') {
-      return landingDefaultExpandedStopId || null
-    }
-    if (typeof globalThis === 'undefined' || !globalThis.matchMedia) {
-      return B2_MEETING_TIMELINE_ROW_ID
-    }
-    if (globalThis.matchMedia(`(max-width: ${MOBILE_MAP_MAX_WIDTH_PX}px)`).matches) {
-      /** MW B2: meeting row collapsed; open first numbered POI accordion (same id as `selectedStopId`). */
-      const pid = firstNumberedItineraryStopId(stops)
-      return pid || null
-    }
-    return B2_MEETING_TIMELINE_ROW_ID
-  })
+  const [landingDefaultExpandedStopId] = useState(() =>
+    getLandingStateForBlock(stops, variantId, controlledB2PickupId).landingDefaultExpandedStopId,
+  )
+  const [selectedStopId, setSelectedStopId] = useState(() =>
+    getLandingStateForBlock(stops, variantId, controlledB2PickupId).selectedStopId,
+  )
+  const [expandedId, setExpandedId] = useState<string | null>(() =>
+    getLandingStateForBlock(stops, variantId, controlledB2PickupId).expandedId,
+  )
   /** Last interaction channel — used so mobile list/accordion selection does not drive map camera. */
   const [lastSelectSource, setLastSelectSource] = useState<SelectSource>('list')
   const expandedIdRef = useRef<string | null>(null)

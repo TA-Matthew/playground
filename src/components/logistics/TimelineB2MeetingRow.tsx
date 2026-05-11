@@ -323,7 +323,7 @@ export function TimelineB2MeetingRow({
                 }}
                 aria-label={
                   isMw
-                    ? 'Open map to show meeting points on map'
+                    ? 'Open map to show meeting points'
                     : 'Expand to show meeting points on map'
                 }
               >

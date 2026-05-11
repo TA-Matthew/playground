@@ -1564,10 +1564,6 @@ export function LogisticsMap({
       selIdx >= 0 && showMapPinSelected ? selIdx : -1
 
     const landingShowcaseIdx = (() => {
-      /** B2 + no pickup: never use POI 1 as inline showcase (MW collapsed row or desktop expanded list). */
-      if (variantId === 'b2' && selectedStopId === '') {
-        return -1
-      }
       const id = landingDefaultExpandedStopId
       if (id) {
         const j = stops.findIndex((s) => s.id === id)
@@ -1600,8 +1596,8 @@ export function LogisticsMap({
     highlightSelectedPin,
     lastSelectSource,
     expandedStopId,
-    variantId,
     landingDefaultExpandedStopId,
+    variantId,
   ])
 
   const showB2MeetingModalPanel = useMemo(
@@ -1740,10 +1736,6 @@ export function LogisticsMap({
     const syncInlineMapPinsWithTimeline = showMapPinPhotoHead
 
     const landingShowcaseIdx = (() => {
-      /** B2 + no pickup: never use POI 1 as inline showcase (collapsed or expanded meeting row). */
-      if (vid === 'b2' && selectedStopIdRef.current === '') {
-        return -1
-      }
       const id = landingDefaultExpandedStopIdRef.current
       if (id) {
         const j = stopsLocal.findIndex((s) => s.id === id)
