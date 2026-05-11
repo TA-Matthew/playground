@@ -745,11 +745,6 @@ const OVERVIEW_ZOOM_ANIM_MS_MOBILE = 480
 /** Viewport width at or below this value uses the mobile map pattern (locked preview + sheet). */
 const MOBILE_COOPERATIVE_MAX_WIDTH_PX = 768
 
-/** Compact attribution starts expanded; collapse after this delay so credits stay discoverable via the (i) control. */
-const ATTRIBUTION_AUTO_COLLAPSE_MS = 4000
-/** Opacity transition before programmatic collapse. */
-const ATTRIBUTION_FADE_MS = 380
-
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, '&amp;')
@@ -2349,7 +2344,8 @@ export function LogisticsMap({
     syncMapInteractions(map, initialMobile ? 'mobile-preview' : 'desktop')
 
     map.addControl(
-      new maplibregl.AttributionControl({ compact: true, customAttribution: 'MapLibre' }),
+      /** Full attribution text (docs default) — source credits only; no compact / “i” toggle. */
+      new maplibregl.AttributionControl({ compact: false }),
       'bottom-right',
     )
 
@@ -2419,9 +2415,6 @@ export function LogisticsMap({
     const resize = () => {
       map.resize()
     }
-
-    let attributionCollapseTimer: ReturnType<typeof setTimeout> | undefined
-    let attributionFadeFallbackTimer: ReturnType<typeof setTimeout> | undefined
 
     /** Only update GL canvas size — do not refit bounds here (was undoing user zoom). */
     const ro = new ResizeObserver(() => {
@@ -2695,48 +2688,12 @@ export function LogisticsMap({
       })
 
       if (!cancelled) setMapReady(true)
-
-      attributionCollapseTimer = window.setTimeout(() => {
-        if (cancelled) return
-        const root = map.getContainer()
-        const details = root.querySelector<HTMLDetailsElement>(
-          'details.maplibregl-ctrl-attrib',
-        )
-        if (!details?.hasAttribute('open')) return
-
-        const fadeTarget =
-          details.querySelector<HTMLElement>('.maplibregl-ctrl-attrib-inner') ??
-          details
-
-        let finished = false
-        const finishCollapse = () => {
-          if (cancelled || finished) return
-          finished = true
-          window.clearTimeout(attributionFadeFallbackTimer)
-          fadeTarget.removeEventListener('transitionend', onFadeEnd)
-          root.querySelector<HTMLElement>('.maplibregl-ctrl-attrib-button')?.click()
-          fadeTarget.style.transition = ''
-          fadeTarget.style.opacity = ''
-        }
-
-        const onFadeEnd = (e: TransitionEvent) => {
-          if (e.propertyName !== 'opacity') return
-          finishCollapse()
-        }
-
-        fadeTarget.style.transition = `opacity ${ATTRIBUTION_FADE_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`
-        fadeTarget.style.opacity = '0'
-        fadeTarget.addEventListener('transitionend', onFadeEnd)
-        attributionFadeFallbackTimer = window.setTimeout(finishCollapse, ATTRIBUTION_FADE_MS + 100)
-      }, ATTRIBUTION_AUTO_COLLAPSE_MS)
     }
 
     map.on('load', onLoad)
 
     return () => {
       cancelled = true
-      window.clearTimeout(attributionCollapseTimer)
-      window.clearTimeout(attributionFadeFallbackTimer)
       overviewModeRef.current = true
       trackRecentreHintRef.current = false
       userGesturePendingRecentreRef.current = false
@@ -3424,7 +3381,7 @@ export function LogisticsMap({
     <>
       <div
         ref={wrapRef}
-        className={`relative h-[300px] w-full overflow-hidden rounded-2xl border border-stone-200/70 bg-stone-50 md:h-[480px] [&_.maplibregl-ctrl-attrib]:text-[10px] [&_.maplibregl-ctrl-attrib]:leading-snug [&_.maplibregl-ctrl-attrib_a]:text-[10px] ${mobilePreviewCursor}`}
+        className={`relative h-[300px] w-full overflow-hidden rounded-2xl border border-stone-200/70 bg-stone-50 md:h-[480px] [&_.maplibregl-ctrl-bottom-right]:!p-0 [&_.maplibregl-ctrl-attrib]:!m-0 [&_.maplibregl-ctrl-attrib]:!border-0 [&_.maplibregl-ctrl-attrib]:!bg-transparent [&_.maplibregl-ctrl-attrib]:!p-0 [&_.maplibregl-ctrl-attrib]:!shadow-none [&_.maplibregl-ctrl-attrib-inner]:text-[10px] [&_.maplibregl-ctrl-attrib-inner]:leading-snug [&_.maplibregl-ctrl-attrib]:text-[10px] [&_.maplibregl-ctrl-attrib]:leading-snug [&_.maplibregl-ctrl-attrib_a]:text-[10px] ${mobilePreviewCursor}`}
       >
         <div ref={previewMapHostRef} className="absolute inset-0 min-h-0">
           <div
