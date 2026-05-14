@@ -1,14 +1,22 @@
 import { BookingSidebar } from '../../booking/BookingSidebar'
+import type { ProductHighlightLayoutId } from '../../../data/productHighlightLayouts'
+import type { ProductHighlightSetId } from '../../../data/productHighlightSets'
 import { viatorListing } from '../../../data/viatorListing'
 import type { BookingContent } from '../../../data/variants'
 import { PdpOverviewSection } from './PdpOverviewSection'
 import { PdpPromotedExperiences } from './PdpPromotedExperiences'
 import { PdpViatorHeroGallery } from './PdpViatorHeroGallery'
+import { PdpProductHighlights } from './PdpProductHighlights'
 import { PdpViatorIconRail } from './PdpViatorIconRail'
 import { PdpWhatsIncludedSection } from './PdpWhatsIncludedSection'
 import { PdpWhyTravelersLoved } from './PdpWhyTravelersLoved'
 
-type Props = { booking: BookingContent }
+type Props = {
+  booking: BookingContent
+  /** When set (product-highlight project), renders between icon rail and “Why travelers loved this”. */
+  productHighlightSetId?: ProductHighlightSetId | null
+  productHighlightLayoutId?: ProductHighlightLayoutId | null
+}
 
 /**
  * Upper PDP: hero + thumbnails (Figma 20632:95823), key facts, rewards, body sections.
@@ -16,8 +24,9 @@ type Props = { booking: BookingContent }
  * Title/meta render full-width above the page grid — see {@link ExperiencePage}.
  * Down-page traveler photos and deep reviews live on {@link ExperiencePage}.
  */
-export function FigmaViatorPdpBlock({ booking }: Props) {
+export function FigmaViatorPdpBlock({ booking, productHighlightSetId, productHighlightLayoutId }: Props) {
   const l = viatorListing
+  const hideStandaloneIconRail = productHighlightLayoutId === 'withlocals-merged'
 
   return (
     <div className="w-full">
@@ -27,8 +36,11 @@ export function FigmaViatorPdpBlock({ booking }: Props) {
           <div className="lg:hidden">
             <BookingSidebar booking={booking} embedded />
           </div>
-          <PdpViatorIconRail items={l.iconRail} />
+          {hideStandaloneIconRail ? null : <PdpViatorIconRail items={l.iconRail} />}
         </div>
+        {productHighlightSetId && productHighlightLayoutId ? (
+          <PdpProductHighlights setId={productHighlightSetId} layoutId={productHighlightLayoutId} />
+        ) : null}
         <PdpWhyTravelersLoved />
         <div className="mt-5 flex flex-col gap-5">
           <PdpPromotedExperiences />

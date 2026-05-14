@@ -1,18 +1,56 @@
 import type { VariantId } from '../../data/variants'
 
+const FACILITATOR_VARIANT_UI: Record<
+  VariantId,
+  {
+    label: string
+    title?: string
+  }
+> = {
+  a: { label: 'Variant A' },
+  a2: {
+    label: 'A2 (multiple meeting)',
+    title: 'A2 (multiple meeting — pickup card only)',
+  },
+  b: { label: 'Variant B' },
+  b2: { label: 'B2 (multiple meeting)', title: 'B2 (multiple meeting)' },
+  c: { label: 'Variant C' },
+}
+
 type Props = {
   variant: VariantId
+  /** Which variants appear in the facilitator strip (order preserved). */
+  allowedVariants: VariantId[]
   onVariantChange: (v: VariantId) => void
   onCopyParticipantLink: () => void
   copyFeedback: boolean
+  /** Product highlight project only — switches PDP “Product highlights” preset (`phSet`). */
+  highlightCopyControls?: {
+    selectedId: string
+    options: { id: string; label: string }[]
+    onChange: (id: string) => void
+  }
+  /** Product highlight project only — switches layout chrome (`phLayout`). */
+  highlightLayoutControls?: {
+    selectedId: string
+    options: { id: string; label: string }[]
+    onChange: (id: string) => void
+  }
 }
 
 export function FacilitatorBar({
   variant,
+  allowedVariants,
   onVariantChange,
   onCopyParticipantLink,
   copyFeedback,
+  highlightCopyControls,
+  highlightLayoutControls,
 }: Props) {
+  const singleVariant = allowedVariants.length === 1
+  const onlyId = singleVariant ? allowedVariants[0] : null
+  const onlyUi = onlyId ? FACILITATOR_VARIANT_UI[onlyId] : null
+
   return (
     <div
       className="mb-8 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 via-white to-orange-50/40 px-5 py-4 text-[13px] text-amber-950 shadow-sm ring-1 ring-amber-100/80"
@@ -24,54 +62,32 @@ export function FacilitatorBar({
           <span className="text-[11px] font-medium uppercase tracking-widest text-amber-900/90">
             UXR — Variations
           </span>
-          <div className="inline-flex flex-wrap gap-1 rounded-xl border border-amber-200/90 bg-white/90 p-1 shadow-sm">
-            <button
-              type="button"
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                variant === 'a'
-                  ? 'bg-amber-600 text-white shadow-sm'
-                  : 'text-amber-950 hover:bg-amber-50'
-              }`}
-              onClick={() => onVariantChange('a')}
-            >
-              Variant A
-            </button>
-            <button
-              type="button"
-              title="A2 (multiple meeting — pickup card only)"
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                variant === 'a2'
-                  ? 'bg-amber-600 text-white shadow-sm'
-                  : 'text-amber-950 hover:bg-amber-50'
-              }`}
-              onClick={() => onVariantChange('a2')}
-            >
-              A2 (multiple meeting)
-            </button>
-            <button
-              type="button"
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                variant === 'b'
-                  ? 'bg-amber-600 text-white shadow-sm'
-                  : 'text-amber-950 hover:bg-amber-50'
-              }`}
-              onClick={() => onVariantChange('b')}
-            >
-              Variant B
-            </button>
-            <button
-              type="button"
-              title="B2 (multiple meeting)"
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                variant === 'b2'
-                  ? 'bg-amber-600 text-white shadow-sm'
-                  : 'text-amber-950 hover:bg-amber-50'
-              }`}
-              onClick={() => onVariantChange('b2')}
-            >
-              B2 (multiple meeting)
-            </button>
-          </div>
+          {singleVariant && onlyUi ? (
+            <p className="rounded-xl border border-amber-200/90 bg-white/90 px-4 py-2 text-sm font-medium text-amber-950 shadow-sm">
+              {onlyUi.label}
+            </p>
+          ) : (
+            <div className="inline-flex flex-wrap gap-1 rounded-xl border border-amber-200/90 bg-white/90 p-1 shadow-sm">
+              {allowedVariants.map((id) => {
+                const ui = FACILITATOR_VARIANT_UI[id]
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    title={ui.title}
+                    className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                      variant === id
+                        ? 'bg-amber-600 text-white shadow-sm'
+                        : 'text-amber-950 hover:bg-amber-50'
+                    }`}
+                    onClick={() => onVariantChange(id)}
+                  >
+                    {ui.label}
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </div>
 
         <button
@@ -82,10 +98,77 @@ export function FacilitatorBar({
           {copyFeedback ? 'Copied to clipboard' : 'Copy participant link'}
         </button>
       </div>
+
+      {highlightCopyControls ? (
+        <div className="flex flex-col gap-2 border-t border-amber-200/60 pt-4">
+          <span className="text-[11px] font-medium uppercase tracking-widest text-amber-900/90">
+            Product highlight — copy
+          </span>
+          <div className="inline-flex max-w-full flex-wrap gap-1 rounded-xl border border-amber-200/90 bg-white/90 p-1 shadow-sm">
+            {highlightCopyControls.options.map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                className={`rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
+                  highlightCopyControls.selectedId === opt.id
+                    ? 'bg-amber-600 text-white shadow-sm'
+                    : 'text-amber-950 hover:bg-amber-50'
+                }`}
+                onClick={() => highlightCopyControls.onChange(opt.id)}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {highlightLayoutControls ? (
+        <div className="flex flex-col gap-2 border-t border-amber-200/60 pt-4">
+          <span className="text-[11px] font-medium uppercase tracking-widest text-amber-900/90">
+            Product highlight — layout
+          </span>
+          <div className="inline-flex max-w-full flex-wrap gap-1 rounded-xl border border-amber-200/90 bg-white/90 p-1 shadow-sm">
+            {highlightLayoutControls.options.map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                className={`rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
+                  highlightLayoutControls.selectedId === opt.id
+                    ? 'bg-amber-600 text-white shadow-sm'
+                    : 'text-amber-950 hover:bg-amber-50'
+                }`}
+                onClick={() => highlightLayoutControls.onChange(opt.id)}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       <p className="mt-3 border-t border-amber-200/60 pt-3 text-[12px] leading-relaxed text-amber-900/75">
         Participant links always include <code className="rounded bg-white/70 px-1">hideUi=1</code> and the
-        current variant. Use the discreet corner control to show these tools again locally without changing
-        the shared URL.
+        current variant.
+        {highlightCopyControls || highlightLayoutControls ? (
+          <>
+            {' '}
+            On this project, participant URLs also preserve{' '}
+            {highlightCopyControls ? (
+              <>
+                highlight copy (<code className="rounded bg-white/70 px-1">phSet</code>)
+              </>
+            ) : null}
+            {highlightCopyControls && highlightLayoutControls ? ' and ' : null}
+            {highlightLayoutControls ? (
+              <>
+                layout (<code className="rounded bg-white/70 px-1">phLayout</code>)
+              </>
+            ) : null}
+            .
+          </>
+        ) : null}{' '}
+        Use the discreet corner control to show these tools again locally without changing the shared URL.
       </p>
     </div>
   )

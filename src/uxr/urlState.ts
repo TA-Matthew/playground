@@ -1,3 +1,15 @@
+import {
+  DEFAULT_PRODUCT_HIGHLIGHT_LAYOUT,
+  isProductHighlightLayoutId,
+  PRODUCT_HIGHLIGHT_LAYOUT_QUERY,
+  type ProductHighlightLayoutId,
+} from '../data/productHighlightLayouts'
+import {
+  DEFAULT_PRODUCT_HIGHLIGHT_SET,
+  isProductHighlightSetId,
+  PRODUCT_HIGHLIGHT_SET_QUERY,
+  type ProductHighlightSetId,
+} from '../data/productHighlightSets'
 import type { VariantId } from '../data/variants'
 
 /** Session-only: facilitator unlocked controls while URL stays participant-safe (hideUi=1). */
@@ -33,6 +45,22 @@ export function parseVariant(searchParams: URLSearchParams): VariantId {
   return 'a'
 }
 
+/** Product highlight — `phLayout` query; invalid or missing → default chrome. */
+export function parseHighlightLayout(searchParams: URLSearchParams): ProductHighlightLayoutId {
+  const v = searchParams.get(PRODUCT_HIGHLIGHT_LAYOUT_QUERY)
+  /** Legacy `phLayout=airbnb-trust` merged into `ggy-list` (same UI). */
+  if (v === 'airbnb-trust') return 'ggy-list'
+  if (v && isProductHighlightLayoutId(v)) return v
+  return DEFAULT_PRODUCT_HIGHLIGHT_LAYOUT
+}
+
+/** Product highlight experiment — `phSet` query; invalid or missing → default balanced set. */
+export function parseHighlightSet(searchParams: URLSearchParams): ProductHighlightSetId {
+  const v = searchParams.get(PRODUCT_HIGHLIGHT_SET_QUERY)
+  if (v && isProductHighlightSetId(v)) return v
+  return DEFAULT_PRODUCT_HIGHLIGHT_SET
+}
+
 /** Whether facilitator chrome (variant switcher, etc.) should show for this URL + session. */
 export function shouldShowFacilitatorChrome(
   hideUi: boolean,
@@ -45,10 +73,24 @@ export function shouldShowFacilitatorChrome(
 /**
  * Participant-safe share link: always includes hideUi=1 and current variant.
  * (Copies URL text — not a screenshot.)
+ * On the product-highlight route, pass `highlightSetId` / `highlightLayoutId` so `phSet` / `phLayout`
+ * are preserved on the shared URL.
  */
-export function buildParticipantUrl(variant: VariantId): string {
+export function buildParticipantUrl(
+  variant: VariantId,
+  extras?: {
+    highlightSetId?: ProductHighlightSetId
+    highlightLayoutId?: ProductHighlightLayoutId
+  },
+): string {
   const url = new URL(window.location.origin + window.location.pathname)
   url.searchParams.set('variant', variant)
   url.searchParams.set('hideUi', '1')
+  if (extras?.highlightSetId != null) {
+    url.searchParams.set(PRODUCT_HIGHLIGHT_SET_QUERY, extras.highlightSetId)
+  }
+  if (extras?.highlightLayoutId != null) {
+    url.searchParams.set(PRODUCT_HIGHLIGHT_LAYOUT_QUERY, extras.highlightLayoutId)
+  }
   return url.toString()
 }

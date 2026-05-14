@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { usePreloadMapPinImages } from '../hooks/usePreloadMapPinImages'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { AdditionalInfo } from '../components/additional/AdditionalInfo'
 import { BookingSidebar } from '../components/booking/BookingSidebar'
 import { CollapsibleSection } from '../components/common/CollapsibleSection'
@@ -15,6 +15,25 @@ import { ViatorPdpBlock } from '../components/experience/pdp/ViatorPdpBlock'
 import { LogisticsBlock } from '../components/logistics/LogisticsBlock'
 import { FacilitatorBar } from '../components/uxr/FacilitatorBar'
 import { SecretUnlock } from '../components/uxr/SecretUnlock'
+import {
+  LOGISTICS_FACILITATOR_VARIANTS,
+  PRODUCT_HIGHLIGHT_FACILITATOR_VARIANTS,
+  PRODUCT_HIGHLIGHT_PROJECT_PATH,
+} from '../data/projects'
+import {
+  DEFAULT_PRODUCT_HIGHLIGHT_LAYOUT,
+  isProductHighlightLayoutId,
+  PRODUCT_HIGHLIGHT_LAYOUTS,
+  PRODUCT_HIGHLIGHT_LAYOUT_QUERY,
+  type ProductHighlightLayoutId,
+} from '../data/productHighlightLayouts'
+import {
+  DEFAULT_PRODUCT_HIGHLIGHT_SET,
+  isProductHighlightSetId,
+  PRODUCT_HIGHLIGHT_SETS,
+  PRODUCT_HIGHLIGHT_SET_QUERY,
+  type ProductHighlightSetId,
+} from '../data/productHighlightSets'
 import { viatorListing } from '../data/viatorListing'
 import {
   isVariantBLayout,
@@ -25,6 +44,8 @@ import {
 import {
   buildParticipantUrl,
   parseHideUi,
+  parseHighlightLayout,
+  parseHighlightSet,
   parseVariant,
   readFacilitatorUnlock,
   setFacilitatorUnlock,
@@ -32,13 +53,88 @@ import {
 } from '../uxr/urlState'
 
 export function ExperiencePage() {
+  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const [unlock, setUnlock] = useState(() => readFacilitatorUnlock())
   const [copyFeedback, setCopyFeedback] = useState(false)
 
+  const isProductHighlight = location.pathname === PRODUCT_HIGHLIGHT_PROJECT_PATH
+  const parsedVariant = parseVariant(searchParams)
+  const variant: VariantId = isProductHighlight ? 'a' : parsedVariant
+  const facilitatorVariants = isProductHighlight
+    ? PRODUCT_HIGHLIGHT_FACILITATOR_VARIANTS
+    : LOGISTICS_FACILITATOR_VARIANTS
+
+  const rawPhSetParam = searchParams.get(PRODUCT_HIGHLIGHT_SET_QUERY)
+  const rawPhLayoutParam = searchParams.get(PRODUCT_HIGHLIGHT_LAYOUT_QUERY)
+  const highlightSetId: ProductHighlightSetId | null = useMemo(
+    () => (isProductHighlight ? parseHighlightSet(searchParams) : null),
+    [isProductHighlight, searchParams],
+  )
+  const highlightLayoutId: ProductHighlightLayoutId | null = useMemo(
+    () => (isProductHighlight ? parseHighlightLayout(searchParams) : null),
+    [isProductHighlight, searchParams],
+  )
+
   const hideUi = parseHideUi(searchParams)
-  const variant: VariantId = parseVariant(searchParams)
   const data = variants[variant]
+
+  useLayoutEffect(() => {
+    if (!isProductHighlight) return
+    if (parsedVariant !== 'a') {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          next.set('variant', 'a')
+          return next
+        },
+        { replace: true },
+      )
+    }
+  }, [isProductHighlight, parsedVariant, setSearchParams])
+
+  useLayoutEffect(() => {
+    if (!isProductHighlight) return
+    if (rawPhSetParam !== null && rawPhSetParam !== '' && !isProductHighlightSetId(rawPhSetParam)) {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          next.set(PRODUCT_HIGHLIGHT_SET_QUERY, DEFAULT_PRODUCT_HIGHLIGHT_SET)
+          return next
+        },
+        { replace: true },
+      )
+    }
+  }, [isProductHighlight, rawPhSetParam, setSearchParams])
+
+  useLayoutEffect(() => {
+    if (!isProductHighlight) return
+    if (rawPhLayoutParam === 'airbnb-trust') {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          next.set(PRODUCT_HIGHLIGHT_LAYOUT_QUERY, 'ggy-list')
+          return next
+        },
+        { replace: true },
+      )
+      return
+    }
+    if (
+      rawPhLayoutParam !== null &&
+      rawPhLayoutParam !== '' &&
+      !isProductHighlightLayoutId(rawPhLayoutParam)
+    ) {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          next.set(PRODUCT_HIGHLIGHT_LAYOUT_QUERY, DEFAULT_PRODUCT_HIGHLIGHT_LAYOUT)
+          return next
+        },
+        { replace: true },
+      )
+    }
+  }, [isProductHighlight, rawPhLayoutParam, setSearchParams])
 
   /** B2: shared with `LogisticsBlock` so Meeting & Pickup search stays synced with map/timeline. */
   const [b2PickupId, setB2PickupId] = useState<string | null>(null)
@@ -106,8 +202,49 @@ export function ExperiencePage() {
     [setSearchParams],
   )
 
+  const setHighlightSet = useCallback(
+    (id: ProductHighlightSetId) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          if (id === DEFAULT_PRODUCT_HIGHLIGHT_SET) {
+            next.delete(PRODUCT_HIGHLIGHT_SET_QUERY)
+          } else {
+            next.set(PRODUCT_HIGHLIGHT_SET_QUERY, id)
+          }
+          return next
+        },
+        { replace: true },
+      )
+    },
+    [setSearchParams],
+  )
+
+  const setHighlightLayout = useCallback(
+    (id: ProductHighlightLayoutId) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          if (id === DEFAULT_PRODUCT_HIGHLIGHT_LAYOUT) {
+            next.delete(PRODUCT_HIGHLIGHT_LAYOUT_QUERY)
+          } else {
+            next.set(PRODUCT_HIGHLIGHT_LAYOUT_QUERY, id)
+          }
+          return next
+        },
+        { replace: true },
+      )
+    },
+    [setSearchParams],
+  )
+
   const copyParticipantLink = useCallback(async () => {
-    const url = buildParticipantUrl(variant)
+    const url = buildParticipantUrl(
+      variant,
+      isProductHighlight && highlightSetId != null && highlightLayoutId != null
+        ? { highlightSetId, highlightLayoutId }
+        : undefined,
+    )
     try {
       await navigator.clipboard.writeText(url)
       setFacilitatorUnlock(false)
@@ -125,7 +262,7 @@ export function ExperiencePage() {
     } catch {
       setCopyFeedback(false)
     }
-  }, [variant, setSearchParams])
+  }, [variant, setSearchParams, isProductHighlight, highlightSetId, highlightLayoutId])
 
   const toggleSecretUnlock = useCallback(() => {
     const next = !readFacilitatorUnlock()
@@ -153,9 +290,38 @@ export function ExperiencePage() {
         {showFacilitatorChrome ? (
           <FacilitatorBar
             variant={variant}
+            allowedVariants={facilitatorVariants}
             onVariantChange={setVariant}
             onCopyParticipantLink={copyParticipantLink}
             copyFeedback={copyFeedback}
+            highlightCopyControls={
+              isProductHighlight && highlightSetId
+                ? {
+                    selectedId: highlightSetId,
+                    options: PRODUCT_HIGHLIGHT_SETS.map((s) => ({
+                      id: s.id,
+                      label: s.facilitatorLabel,
+                    })),
+                    onChange: (id) => {
+                      if (isProductHighlightSetId(id)) setHighlightSet(id)
+                    },
+                  }
+                : undefined
+            }
+            highlightLayoutControls={
+              isProductHighlight && highlightLayoutId
+                ? {
+                    selectedId: highlightLayoutId,
+                    options: PRODUCT_HIGHLIGHT_LAYOUTS.map((l) => ({
+                      id: l.id,
+                      label: l.facilitatorLabel,
+                    })),
+                    onChange: (id) => {
+                      if (isProductHighlightLayoutId(id)) setHighlightLayout(id)
+                    },
+                  }
+                : undefined
+            }
           />
         ) : null}
 
@@ -170,7 +336,11 @@ export function ExperiencePage() {
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start lg:gap-6 xl:gap-6">
           <main className="pdp-figma w-full min-w-0 max-w-[864px] lg:order-1">
-            <ViatorPdpBlock booking={data.booking} />
+            <ViatorPdpBlock
+              booking={data.booking}
+              productHighlightSetId={isProductHighlight ? highlightSetId : null}
+              productHighlightLayoutId={isProductHighlight ? highlightLayoutId : null}
+            />
             {!isVariantBLayout(variant) && meetingAndPickupSection}
 
             <CollapsibleSection title="Itinerary" defaultOpen>
