@@ -13,7 +13,7 @@ import { buildTimelineSelectedTeardropHtml } from './logisticsTeardropMarkup'
 
 const PREVIEW_CHARS = 220
 
-/** Same ms for list fade-out (pick option) and fade-in (“Select a different meeting point”). */
+/** Same ms for list fade-out (pick option) and fade-in (“See other meeting points”). */
 const MEETING_LIST_FADE_MS = 300
 
 /** Align with `LogisticsBlock` / map mobile sheet breakpoint. */
@@ -358,7 +358,7 @@ export function TimelineB2MeetingRow({
                     onClick={openPickerAgain}
                   >
                     <ChangeMeetingIcon className="h-4 w-4 shrink-0 text-stone-500" />
-                    Select a different meeting point
+                    See other meeting points
                   </button>
                 ) : null}
               </div>
@@ -413,7 +413,7 @@ function PickupChosenCheckIcon({ className }: { className?: string }) {
   )
 }
 
-/** Swap / change — pairs with “Select a different meeting point”. */
+/** Swap / change — pairs with “See other meeting points”. */
 function ChangeMeetingIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>

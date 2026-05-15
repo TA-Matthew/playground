@@ -1,9 +1,8 @@
-import { useState, type MouseEvent } from 'react'
+import { type MouseEvent, type PointerEvent } from 'react'
 import type { Stop, VariantId } from '../../data/variants'
+import { TimelineStopDescription } from './Timeline'
 import { getPoiOrderForStopIndex } from './poiOrder'
 import { buildTimelineSelectedTeardropHtml } from './logisticsTeardropMarkup'
-
-const PREVIEW_CHARS = 220
 
 const PICKUP_LABELS = ['Prati north', 'Ottaviano', 'Via Plauto'] as const
 
@@ -14,41 +13,22 @@ type Props = {
   meetings: Stop[]
   /** Committed pickup (timeline + confirmed in this modal). */
   pickupId: string | null
-  /** Map modal only: highlighted list row / pin target — not committed until `onConfirmPickup`. */
+  /** Map modal only: highlighted list row / pin target for map preview. */
   pendingPickupId: string | null
   /** When true, show the meeting list even though `pickupId` is set (user is changing meeting). */
   reselectPickerOpen?: boolean
   onPendingPickupChange: (meetingStopId: string | null) => void
-  onConfirmPickup: () => void
-  /** Enter list UI again without clearing `pickupId` — keeps previous meeting until Select. */
+  /** Commit pickup; pass `meetingStopId` from list taps (MW modal has no separate Select CTA). */
+  onConfirmPickup: (meetingStopId?: string) => void
+  /** Enter list UI again without clearing `pickupId` — keeps previous meeting until a list row is tapped. */
   onBeginReselect?: () => void
   /** MW map modal: chevron — same dismiss pipeline as `MobileMapModalStopPanel`. */
   onDismiss?: () => void
-}
-
-function MeetingDescriptionBody({ meeting }: { meeting: Stop }) {
-  const [readOpen, setReadOpen] = useState(false)
-  const text = meeting.description
-  const needsToggle = text.length > PREVIEW_CHARS
-  const shown = readOpen || !needsToggle ? text : `${text.slice(0, PREVIEW_CHARS).trim()}…`
-
-  return (
-    <div className="text-[14px] leading-relaxed text-stone-600">
-      <p className="whitespace-pre-wrap">{shown}</p>
-      {needsToggle ? (
-        <button
-          type="button"
-          className="mt-2 inline-flex items-center gap-1 text-[14px] font-medium text-stone-900 underline decoration-stone-300 underline-offset-4 transition hover:decoration-stone-500"
-          onClick={(e) => {
-            e.stopPropagation()
-            setReadOpen((o) => !o)
-          }}
-        >
-          {readOpen ? 'Read less' : 'Read more'}
-        </button>
-      ) : null}
-    </div>
-  )
+  /**
+   * When true, render without the floating card chrome and without pointer/click capture on the shell —
+   * used inside `MobileMapModalStopPanelCard` on the MW horizontal shelf so sideways swipes reach the shelf.
+   */
+  embedded?: boolean
 }
 
 function PickupChosenCheckIcon({ className }: { className?: string }) {
@@ -102,7 +82,7 @@ function ChangeMeetingIcon({ className }: { className?: string }) {
 }
 
 /**
- * Full-screen map modal bottom “selected meeting point” box — list/pin pick a **pending** option; **Select** commits (MW modal only).
+ * Full-screen map modal bottom meeting box — list row tap sets pickup (MW modal; no separate Select CTA).
  */
 export function MobileMapModalB2MeetingPanel({
   variantId,
@@ -115,6 +95,7 @@ export function MobileMapModalB2MeetingPanel({
   onConfirmPickup,
   onBeginReselect,
   onDismiss,
+  embedded = false,
 }: Props) {
   const activeMeeting = pickupId ? meetings.find((m) => m.id === pickupId) : undefined
   const idx =
@@ -141,14 +122,22 @@ export function MobileMapModalB2MeetingPanel({
     return buildTimelineSelectedTeardropHtml(activeMeeting, variantId, poiOrder)
   })()
 
+  const shellClass = embedded
+    ? 'flex min-h-0 min-w-0 flex-col pb-3'
+    : 'rounded-2xl border border-stone-200/90 bg-white/95 px-4 py-3 shadow-xl shadow-stone-900/12 ring-1 ring-stone-200/80 backdrop-blur-md'
+
   return (
     <div
-      className="rounded-2xl border border-stone-200/90 bg-white/95 px-4 py-3 shadow-xl shadow-stone-900/12 ring-1 ring-stone-200/80 backdrop-blur-md"
-      role="region"
+      className={shellClass}
+      role={embedded ? 'group' : 'region'}
       aria-live="polite"
       aria-label={regionAriaLabel}
-      onClick={(e) => e.stopPropagation()}
-      onPointerDown={(e) => e.stopPropagation()}
+      {...(embedded
+        ? {}
+        : {
+            onClick: (e: MouseEvent<HTMLDivElement>) => e.stopPropagation(),
+            onPointerDown: (e: PointerEvent<HTMLDivElement>) => e.stopPropagation(),
+          })}
     >
       <div
         className={selectedTeardropHtml != null ? 'flex gap-4' : undefined}
@@ -178,7 +167,14 @@ export function MobileMapModalB2MeetingPanel({
                 </h3>
               )}
               {showPickerList ? (
-                <p className="mt-1.5 text-[13px] leading-snug text-stone-500">Tap to preview on map</p>
+                <p className="mt-1.5 text-[13px] leading-snug text-stone-500">Tap a meeting point to read more</p>
+              ) : activeMeeting?.durationLine?.trim() ? (
+                <p
+                  className="mt-1.5 min-w-0 truncate text-[13px] leading-snug text-stone-500"
+                  title={activeMeeting.durationLine.trim()}
+                >
+                  {activeMeeting.durationLine.trim()}
+                </p>
               ) : null}
             </div>
             {onDismiss ? (
@@ -200,7 +196,7 @@ export function MobileMapModalB2MeetingPanel({
           {showPickerList ? (
             <>
               <p id="b2-map-modal-meeting-options-label" className="sr-only">
-                Pickup location — tap an option to preview on the map, then tap Select
+                Pickup location — tap an option to select it
               </p>
               <ul
                 role="listbox"
@@ -224,6 +220,7 @@ export function MobileMapModalB2MeetingPanel({
                         onClick={(e) => {
                           e.stopPropagation()
                           onPendingPickupChange(m.id)
+                          onConfirmPickup(m.id)
                         }}
                       >
                         <span
@@ -240,36 +237,25 @@ export function MobileMapModalB2MeetingPanel({
                   )
                 })}
               </ul>
-              <button
-                type="button"
-                disabled={pendingPickupId == null}
-                className="mt-3 w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-[14px] font-medium text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-stone-200 disabled:text-stone-500"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onConfirmPickup()
-                }}
-                aria-label="Select meeting point"
-              >
-                Select
-              </button>
             </>
           ) : (
-            <>
-              <p className="mt-1.5 text-[13px] leading-snug text-stone-500">
-                {activeMeeting?.durationLine ?? ''}
-              </p>
-              <div className="mt-4 px-0 sm:px-0">
-                {activeMeeting ? <MeetingDescriptionBody meeting={activeMeeting} /> : null}
+            <div className="mt-4 px-0 sm:px-0">
+                {activeMeeting ? (
+                  <TimelineStopDescription
+                    key={activeMeeting.id}
+                    text={activeMeeting.description ?? ''}
+                    shelfScrollFade
+                  />
+                ) : null}
                 <button
                   type="button"
                   className="mt-4 inline-flex w-full items-center gap-1.5 text-left text-[13px] leading-snug text-stone-500 underline decoration-stone-300 underline-offset-4 transition hover:text-stone-600 hover:decoration-stone-400 sm:w-auto"
                   onClick={openPickerAgain}
                 >
                   <ChangeMeetingIcon className="h-4 w-4 shrink-0 text-stone-500" />
-                  Select a different meeting point
+                  See other meeting points
                 </button>
-              </div>
-            </>
+            </div>
           )}
         </div>
       </div>

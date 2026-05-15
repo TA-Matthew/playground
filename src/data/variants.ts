@@ -152,7 +152,7 @@ Some background will also be provided on the history of the Sistine Chapel (we d
     id: 'poi-conciliazione',
     kind: 'passby',
     title: 'Via Della Conciliazione',
-    durationLine: 'Passing by (Short stop/visit)',
+    durationLine: 'Passing by / Short stop',
     popupImageSrc: CONCILIAZIONE_PASSBY_IMAGE_SRC,
     popupImageAlt: CONCILIAZIONE_PASSBY_IMAGE_ALT,
     description:

@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ComponentProps,
   type MouseEvent,
   type MutableRefObject,
 } from 'react'
@@ -39,6 +40,37 @@ import {
   mapSelectedTeardropMarkerHtml,
   itineraryStopUsesTeardropWhenSelected,
 } from './logisticsTeardropMarkup'
+
+type MobileMapB2MeetingHubShelfProps = Pick<
+  ComponentProps<typeof MobileMapModalB2MeetingPanel>,
+  | 'variantId'
+  | 'stops'
+  | 'meetings'
+  | 'pickupId'
+  | 'pendingPickupId'
+  | 'reselectPickerOpen'
+  | 'onPendingPickupChange'
+  | 'onConfirmPickup'
+  | 'onBeginReselect'
+  | 'onDismiss'
+>
+
+/** MW map modal stop shelf: `ResizeObserver` writes this on the scroll track. Card width is `track − 32px` with `gap-[8px]` so each edge shows 8px of the neighbor card after the 8px gap (with `−16px`, `(track−card)/2` equaled the gap and the “peek” was empty gutter). */
+const MW_MAP_SHELF_TRACK_PX_VAR = '--mw-map-shelf-track-px'
+
+/** MW shelf card shell — height follows content (`items-end` on the track). */
+const MW_MAP_SHELF_CARD_CLASS =
+  'flex w-[calc(var(--mw-map-shelf-track-px,100dvw)-32px)] shrink-0 snap-center self-end flex-col overflow-y-auto overscroll-y-contain rounded-2xl border border-stone-200/90 bg-white/95 px-4 pt-3 pb-0 shadow-xl shadow-stone-900/12 ring-1 ring-stone-200/80 backdrop-blur-md'
+
+/** First MW shelf slide for B2 triple-meeting: list or “Meet at” (`MobileMapModalB2MeetingPanel` embedded). */
+const MW_MAP_B2_SHELF_HUB_STOP_ID = '__mw_map_b2_shelf_hub__'
+const MW_MAP_B2_SHELF_HUB_STOP: Stop = {
+  id: MW_MAP_B2_SHELF_HUB_STOP_ID,
+  title: 'Meeting points',
+  durationLine: '',
+  description: '',
+  kind: 'meeting',
+}
 
 /** Persistent on the marker `<button>`: teardrop bounce intro at most once per marker element. */
 const MAP_PIN_DS_INTRO_SEEN = 'mapPinHeadIntroSeen'
@@ -768,6 +800,27 @@ function parseDurationAndAdmission(durationLine: string): {
   return null
 }
 
+/** MW map modal bottom shelf: meetings first (B-layout), then itinerary legs, then end. */
+function getMobileMapModalShelfStops(variantId: VariantId, stops: Stop[]): Stop[] {
+  if (stops.length === 0) return []
+  if (!isVariantBLayout(variantId)) return stops
+  const meetings: Stop[] = []
+  const middle: Stop[] = []
+  const ends: Stop[] = []
+  let i = 0
+  while (i < stops.length && stops[i]?.kind === 'meeting') {
+    meetings.push(stops[i]!)
+    i++
+  }
+  while (i < stops.length) {
+    const s = stops[i]!
+    if (s.kind === 'end') ends.push(s)
+    else middle.push(s)
+    i++
+  }
+  return [...meetings, ...middle, ...ends]
+}
+
 function MobileMapModalChevronDown({ className }: { className?: string }) {
   return (
     <svg
@@ -789,23 +842,38 @@ function MobileMapModalChevronDown({ className }: { className?: string }) {
   )
 }
 
-/** MW map modal overlay — same rail pin + copy stack as `Timeline` POI row.
- * Description always matches the itinerary (`TimelineStopDescription`); unlike inline PDP popups, `poiPopupContent`
- * image-only does not strip body copy here. */
-function MobileMapModalStopPanel({
+/** One stop card in the MW map modal horizontal shelf (same rail + copy as `Timeline` POI row). */
+function MobileMapModalStopPanelCard({
   stop,
   variantId,
   stops,
   onDismiss,
   b2CommittedPickupId,
+  b2MeetingHubProps,
 }: {
   stop: Stop
   variantId: VariantId
   stops: Stop[]
   onDismiss?: () => void
-  /** B2 triple-meeting: bottom card copy follows committed pickup, not landing pin resolution. */
+  /** B2 triple-meeting: meeting cards follow committed pickup copy. */
   b2CommittedPickupId?: string | null
+  /** B2 MW shelf: first slide embeds `MobileMapModalB2MeetingPanel` (list or Meet at). */
+  b2MeetingHubProps?: MobileMapB2MeetingHubShelfProps | null
 }) {
+  if (stop.id === MW_MAP_B2_SHELF_HUB_STOP_ID && b2MeetingHubProps != null) {
+    return (
+      <div
+        data-shelf-card
+        data-stop-id={stop.id}
+        className={MW_MAP_SHELF_CARD_CLASS}
+        role="group"
+        aria-label="Meeting pickup — map modal"
+      >
+        <MobileMapModalB2MeetingPanel embedded {...b2MeetingHubProps} />
+      </div>
+    )
+  }
+
   const logisticsB = isVariantBLayout(variantId)
   const selectionIsMeeting = logisticsB && stop.kind === 'meeting'
   const displayStop =
@@ -831,12 +899,13 @@ function MobileMapModalStopPanel({
 
   return (
     <div
-      className="touch-none rounded-2xl border border-stone-200/90 bg-white/95 px-4 py-3 shadow-xl shadow-stone-900/12 ring-1 ring-stone-200/80 backdrop-blur-md"
-      role="region"
-      aria-live="polite"
-      aria-label="Details for the selected map stop"
+      data-shelf-card
+      data-stop-id={stop.id}
+      className={MW_MAP_SHELF_CARD_CLASS}
+      role="group"
+      aria-label={`${title} — itinerary details`}
     >
-      <div className="flex gap-4">
+      <div className={desc ? 'flex gap-4' : 'flex gap-4 pb-3'}>
         <div className="flex w-10 shrink-0 flex-col items-center sm:w-11" aria-hidden>
           {selectedTeardropHtml != null ? (
             <div
@@ -907,15 +976,160 @@ function MobileMapModalStopPanel({
             ) : null}
           </div>
           {desc ? (
-            <div
-              className="mt-4 px-1"
-              onClick={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-            >
-              <TimelineStopDescription text={desc} clampLines={3} />
+            <div className="mt-4 px-1" onClick={(e) => e.stopPropagation()}>
+              <TimelineStopDescription text={desc} shelfScrollFade />
             </div>
           ) : null}
         </div>
+      </div>
+    </div>
+  )
+}
+
+function findShelfCenterStopId(scrollEl: HTMLDivElement, shelfStops: Stop[]): string | null {
+  const cx = scrollEl.scrollLeft + scrollEl.clientWidth / 2
+  let bestId: string | null = null
+  let bestDist = Infinity
+  for (const s of shelfStops) {
+    const el = scrollEl.querySelector(`[data-shelf-card][data-stop-id="${CSS.escape(s.id)}"]`) as HTMLElement | null
+    if (!el) continue
+    const mid = el.offsetLeft + el.offsetWidth / 2
+    const d = Math.abs(mid - cx)
+    if (d < bestDist) {
+      bestDist = d
+      bestId = s.id
+    }
+  }
+  return bestId
+}
+
+/**
+ * MW map modal: horizontal shelf of the same stop cards — meetings (B-layout), POIs, end; swipe changes
+ * selection and map pin focus like tapping each pin.
+ */
+function MobileMapModalStopShelf({
+  shelfStops,
+  selectedStopId,
+  variantId,
+  stops,
+  onDismiss,
+  onShelfCommitStop,
+  b2CommittedPickupId,
+  shelfHubStopId = '',
+  b2MeetingHubProps = null,
+}: {
+  shelfStops: Stop[]
+  selectedStopId: string
+  variantId: VariantId
+  stops: Stop[]
+  onDismiss?: () => void
+  onShelfCommitStop: (stopId: string) => void
+  b2CommittedPickupId?: string | null
+  /** When set, snapping to this slide does not run `onShelfCommitStop` (B2 hub is not a map stop). */
+  shelfHubStopId?: string
+  b2MeetingHubProps?: MobileMapB2MeetingHubShelfProps | null
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const suppressNextScrollIntoViewRef = useRef(false)
+  const programmaticScrollRef = useRef(false)
+  const scrollIdleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const scheduleCommitFromScroll = useCallback(() => {
+    if (programmaticScrollRef.current) return
+    const el = scrollRef.current
+    if (!el || shelfStops.length === 0) return
+    const id = findShelfCenterStopId(el, shelfStops)
+    if (id == null) return
+    if (shelfHubStopId && id === shelfHubStopId) {
+      suppressNextScrollIntoViewRef.current = true
+      onShelfCommitStop(id)
+      return
+    }
+    if (id === selectedStopId) return
+    suppressNextScrollIntoViewRef.current = true
+    onShelfCommitStop(id)
+  }, [shelfStops, selectedStopId, onShelfCommitStop, shelfHubStopId])
+
+  useLayoutEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    if (suppressNextScrollIntoViewRef.current) {
+      suppressNextScrollIntoViewRef.current = false
+      return
+    }
+    if (!selectedStopId || !shelfStops.some((s) => s.id === selectedStopId)) return
+    const card = el.querySelector(
+      `[data-shelf-card][data-stop-id="${CSS.escape(selectedStopId)}"]`,
+    ) as HTMLElement | null
+    if (!card) return
+    const targetLeft = card.offsetLeft + card.offsetWidth / 2 - el.clientWidth / 2
+    programmaticScrollRef.current = true
+    el.scrollTo({ left: Math.max(0, targetLeft), behavior: 'auto' })
+    requestAnimationFrame(() => {
+      programmaticScrollRef.current = false
+    })
+  }, [selectedStopId, shelfStops])
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const onScrollEnd = () => {
+      scheduleCommitFromScroll()
+    }
+    const onScroll = () => {
+      if (scrollIdleTimerRef.current != null) clearTimeout(scrollIdleTimerRef.current)
+      scrollIdleTimerRef.current = setTimeout(() => {
+        scrollIdleTimerRef.current = null
+        scheduleCommitFromScroll()
+      }, 140)
+    }
+    el.addEventListener('scrollend', onScrollEnd)
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      el.removeEventListener('scrollend', onScrollEnd)
+      el.removeEventListener('scroll', onScroll)
+      if (scrollIdleTimerRef.current != null) clearTimeout(scrollIdleTimerRef.current)
+    }
+  }, [scheduleCommitFromScroll])
+
+  useLayoutEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const sync = () => {
+      const w = el.clientWidth
+      if (w > 0) el.style.setProperty(MW_MAP_SHELF_TRACK_PX_VAR, `${w}px`)
+    }
+    sync()
+    const ro = new ResizeObserver(sync)
+    ro.observe(el)
+    return () => {
+      ro.disconnect()
+      el.style.removeProperty(MW_MAP_SHELF_TRACK_PX_VAR)
+    }
+  }, [shelfStops.length])
+
+  return (
+    <div
+      className="w-full min-w-0"
+      role="region"
+      aria-live="polite"
+      aria-label="Itinerary stops — swipe sideways to see each stop"
+    >
+      <div
+        ref={scrollRef}
+        className="flex items-end snap-x snap-mandatory gap-[8px] overflow-x-auto overflow-y-hidden overscroll-x-contain py-0.5 touch-pan-x pl-4 pr-4 scroll-pl-4 scroll-pr-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
+      >
+        {shelfStops.map((s) => (
+          <MobileMapModalStopPanelCard
+            key={s.id}
+            stop={s}
+            variantId={variantId}
+            stops={stops}
+            onDismiss={onDismiss}
+            b2CommittedPickupId={b2CommittedPickupId}
+            b2MeetingHubProps={shelfHubStopId && s.id === shelfHubStopId ? b2MeetingHubProps : null}
+          />
+        ))}
       </div>
     </div>
   )
@@ -1372,7 +1586,7 @@ type Props = {
   onSelectStop: (id: string, source: SelectSource) => void
   /** Called when Re-centre is used — parent may sync timeline; numbered POI selection stays on camera-only refits. */
   onRecentre?: () => void
-  /** MW full-screen map: dismiss bottom POI card + clear map/list selection (chevron on `MobileMapModalStopPanel`). */
+  /** MW full-screen map: dismiss bottom POI shelf + clear map/list selection (chevron on each stop card). */
   onDismissMobileMapStopPanel?: () => void
   /** Map pin popup: `image-only` drops title/duration/body (PDP embedded map). */
   poiPopupContent?: 'full' | 'image-only'
@@ -1499,13 +1713,13 @@ export function LogisticsMap({
   const [mobileModalB2MeetingPanelOpen, setMobileModalB2MeetingPanelOpen] = useState(false)
   const setMobileModalB2MeetingPanelOpenRef = useRef(setMobileModalB2MeetingPanelOpen)
   setMobileModalB2MeetingPanelOpenRef.current = setMobileModalB2MeetingPanelOpen
-  /** Map modal: list/pin selection before Confirm — does not commit until `onB2PickupChange` from confirm. */
+  /** Map modal: highlighted meeting for map preview; cleared after list tap commits pickup. */
   const [mobileB2MeetingPendingId, setMobileB2MeetingPendingId] = useState<string | null>(null)
   const mobileB2MeetingPendingIdRef = useRef(mobileB2MeetingPendingId)
   mobileB2MeetingPendingIdRef.current = mobileB2MeetingPendingId
   /**
    * While true, modal shows the meeting **list** even though `b2CommittedPickupId` is set — user is
-   * changing meeting point; commit only on Select (timeline “Select different” no longer clears pickup first).
+   * changing meeting point; a list row tap commits (MW modal has no separate confirm button).
    */
   const [mobileB2MeetingReselectPicker, setMobileB2MeetingReselectPicker] = useState(false)
   const mobileB2MeetingReselectPickerRef = useRef(mobileB2MeetingReselectPicker)
@@ -1530,8 +1744,9 @@ export function LogisticsMap({
   /** Exit animation runs imperatively so entrance can stay declarative (controls retained opacity 0 after dismiss). */
   const mobileModalStopPanelMotionRef = useRef<HTMLDivElement | null>(null)
   const dismissingMobileModalStopPanelRef = useRef(false)
-  const mobileModalB2MeetingPanelMotionRef = useRef<HTMLDivElement | null>(null)
-  const dismissingMobileModalB2MeetingPanelRef = useRef(false)
+  /** B2 meeting picker hub on shelf — zoom out to all meeting pins (`runRecentreLikeButton` assigned after init). */
+  const fitB2MeetingListOverviewOnMapRef = useRef<() => void>(() => {})
+  const lastHubShelfCameraKeyRef = useRef<string | null>(null)
   const onB2MeetingHoverRef = useRef(onB2MeetingHover)
   onB2MeetingHoverRef.current = onB2MeetingHover
 
@@ -1615,6 +1830,23 @@ export function LogisticsMap({
   )
   showB2MeetingModalPanelRef.current = showB2MeetingModalPanel
 
+  /** B2 triple-meeting MW shelf (hub slide + itinerary cards) — independent of `showB2MeetingModalPanel` pin gating. */
+  const b2TripleMeetingMwShelfActive = useMemo(
+    () =>
+      variantId === 'b2' &&
+      isVariantB2TripleMeeting(variantId, stops) &&
+      onB2PickupChange != null &&
+      mobileSheetOpen &&
+      !mobileModalStopPanelDismissed,
+    [
+      variantId,
+      stops,
+      onB2PickupChange,
+      mobileSheetOpen,
+      mobileModalStopPanelDismissed,
+    ],
+  )
+
   const getMobileModalPoiFocusPaddingRef = useRef<() => maplibregl.PaddingOptions>(() => mobileModalPoiViewPadding())
 
   const getMobileModalPoiFocusPadding = useCallback((): maplibregl.PaddingOptions => {
@@ -1622,16 +1854,13 @@ export function LogisticsMap({
     const mapEl = sheetMapHostRef.current
     if (!mapEl) return mobileModalPoiViewPadding()
 
-    const panelEl =
-      showB2MeetingModalPanel && mobileModalB2MeetingPanelMotionRef.current
-        ? mobileModalB2MeetingPanelMotionRef.current
-        : mobileModalStopPanelMotionRef.current
+    const panelEl = mobileModalStopPanelMotionRef.current
 
     if (!panelEl) return mobileModalPoiViewPadding()
 
     const measured = computeModalBandCenterPadding(mapEl, panelEl)
     return measured ?? mobileModalPoiViewPadding()
-  }, [isMobile, mobileSheetOpen, showB2MeetingModalPanel])
+  }, [isMobile, mobileSheetOpen])
 
   getMobileModalPoiFocusPaddingRef.current = getMobileModalPoiFocusPadding
 
@@ -1660,6 +1889,53 @@ export function LogisticsMap({
     variantId,
     stops,
     onB2PickupChange,
+  ])
+
+  const mobileMapModalShelfStops = useMemo(() => {
+    if (
+      variantId !== 'b2' ||
+      !isVariantB2TripleMeeting(variantId, stops) ||
+      onB2PickupChange == null
+    ) {
+      return getMobileMapModalShelfStops(variantId, stops)
+    }
+    const middle: Stop[] = []
+    const ends: Stop[] = []
+    let i = 0
+    while (i < stops.length && stops[i]?.kind === 'meeting') {
+      i++
+    }
+    while (i < stops.length) {
+      const s = stops[i]!
+      if (s.kind === 'end') ends.push(s)
+      else middle.push(s)
+      i++
+    }
+    return [MW_MAP_B2_SHELF_HUB_STOP, ...middle, ...ends]
+  }, [variantId, stops, onB2PickupChange])
+
+  const mobileMapModalShelfSelectedStopId = useMemo(() => {
+    if (!b2TripleMeetingMwShelfActive) {
+      return selectedStopId
+    }
+    const tripleIds = stops.slice(0, 3).map((s) => s.id)
+    const listMode = b2CommittedPickupId == null || mobileB2MeetingReselectPicker
+    if (listMode) {
+      if (!selectedStopId || tripleIds.includes(selectedStopId)) {
+        return MW_MAP_B2_SHELF_HUB_STOP_ID
+      }
+      return selectedStopId
+    }
+    if (b2CommittedPickupId != null && selectedStopId === b2CommittedPickupId) {
+      return MW_MAP_B2_SHELF_HUB_STOP_ID
+    }
+    return selectedStopId
+  }, [
+    b2TripleMeetingMwShelfActive,
+    stops,
+    selectedStopId,
+    b2CommittedPickupId,
+    mobileB2MeetingReselectPicker,
   ])
 
   syncMarkersAppearanceRef.current = () => {
@@ -1983,25 +2259,76 @@ export function LogisticsMap({
     }
   }, [dismissMobileModalStopPanel])
 
-  /** Same exit motion as `MobileMapModalStopPanel` — targets the B2 meeting wrapper ref. */
-  const dismissMobileModalB2MeetingPanelAnimated = useCallback(async () => {
-    const el = mobileModalB2MeetingPanelMotionRef.current
-    if (!el || dismissingMobileModalB2MeetingPanelRef.current) return
-    dismissingMobileModalB2MeetingPanelRef.current = true
-    try {
-      await animate(
-        el,
-        { opacity: 0, y: 56 },
-        {
-          duration: 0.26,
-          ease: [0.4, 0, 0.2, 1],
-        },
+  /** MW map modal: shelf swipe / snap — same camera + pin focus as tapping the map marker. */
+  const focusMobileModalShelfStop = useCallback(
+    (stopId: string, opts?: { alwaysRefocus?: boolean }) => {
+      if (
+        !opts?.alwaysRefocus &&
+        selectedStopIdRef.current === stopId &&
+        lastSelectSourceRef.current === 'mapModal'
+      ) {
+        return
+      }
+      const map = mapRef.current
+      if (!map) return
+      const i = stops.findIndex((s) => s.id === stopId)
+      if (i < 0) return
+      const coord = routeLngLat[i]
+      if (!coord) return
+
+      setMobileModalStopPanelDismissedRef.current(false)
+      setMobileModalB2MeetingPanelOpenRef.current(false)
+      setMobileB2MeetingPendingIdRef.current(null)
+      onB2MeetingHoverRef.current?.(null)
+
+      onSelectRef.current(stopId, 'mapModal')
+      selectedStopIdRef.current = stopId
+      lastSelectSourceRef.current = 'mapModal'
+      highlightSelectedPinRef.current = true
+      syncMarkersAppearanceRef.current()
+      overviewModeRef.current = false
+      setShowRecentre(true)
+      ignoreMoveEndForRecentreUntilRef.current = Math.max(
+        ignoreMoveEndForRecentreUntilRef.current,
+        Date.now() + 150,
       )
-      dismissMobileModalStopPanel()
-    } finally {
-      dismissingMobileModalB2MeetingPanelRef.current = false
-    }
-  }, [dismissMobileModalStopPanel])
+      poiPopupRef.current?.remove()
+      poiPopupRef.current = null
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          runMobileModalPoiFocus(
+            map,
+            coord,
+            routeLngLat,
+            i,
+            POI_FOCUS_DURATION_MS,
+            getMobileModalPoiFocusPaddingRef.current(),
+          )
+        })
+      })
+    },
+    [stops, routeLngLat],
+  )
+
+  const handleMobileModalShelfSelect = useCallback(
+    (stopId: string) => {
+      if (stopId === MW_MAP_B2_SHELF_HUB_STOP_ID) {
+        const committedId = b2CommittedPickupIdRef.current
+        const reselect = mobileB2MeetingReselectPickerRef.current
+        if (committedId != null && !reselect) {
+          focusMobileModalShelfStop(committedId, { alwaysRefocus: true })
+          return
+        }
+        lastHubShelfCameraKeyRef.current = 'list'
+        fitB2MeetingListOverviewOnMapRef.current()
+        return
+      }
+      // Shelf snap is explicit navigation — refocus even if this stop was already selected (e.g. after hub overview).
+      lastHubShelfCameraKeyRef.current = null
+      focusMobileModalShelfStop(stopId, { alwaysRefocus: true })
+    },
+    [focusMobileModalShelfStop],
+  )
 
   const handleMobileB2PendingPickupChange = useCallback(
     (id: string | null) => {
@@ -2020,13 +2347,44 @@ export function LogisticsMap({
     }
   }, [onB2MeetingHover])
 
-  const confirmMobileB2MeetingPickup = useCallback(() => {
-    if (mobileB2MeetingPendingId == null) return
-    onB2PickupChange?.(mobileB2MeetingPendingId)
-    setMobileB2MeetingReselectPicker(false)
-    setMobileB2MeetingPendingId(null)
-    onB2MeetingHover?.(null)
-  }, [mobileB2MeetingPendingId, onB2PickupChange, onB2MeetingHover])
+  const confirmMobileB2MeetingPickup = useCallback(
+    (meetingStopId?: string) => {
+      const id = meetingStopId ?? mobileB2MeetingPendingId
+      if (id == null) return
+      onB2PickupChange?.(id)
+      setMobileB2MeetingReselectPicker(false)
+      setMobileB2MeetingPendingId(null)
+      onB2MeetingHover?.(null)
+    },
+    [mobileB2MeetingPendingId, onB2PickupChange, onB2MeetingHover],
+  )
+
+  const b2MeetingHubProps = useMemo((): MobileMapB2MeetingHubShelfProps | null => {
+    if (!b2TripleMeetingMwShelfActive) return null
+    return {
+      variantId,
+      stops,
+      meetings: stops.slice(0, 3),
+      pickupId: b2CommittedPickupId ?? null,
+      pendingPickupId: mobileB2MeetingPendingId,
+      reselectPickerOpen: mobileB2MeetingReselectPicker,
+      onPendingPickupChange: handleMobileB2PendingPickupChange,
+      onConfirmPickup: confirmMobileB2MeetingPickup,
+      onBeginReselect: handleBeginMobileB2ReselectPicker,
+      onDismiss: dismissMobileModalStopPanelAnimated,
+    }
+  }, [
+    b2TripleMeetingMwShelfActive,
+    variantId,
+    stops,
+    b2CommittedPickupId,
+    mobileB2MeetingPendingId,
+    mobileB2MeetingReselectPicker,
+    handleMobileB2PendingPickupChange,
+    confirmMobileB2MeetingPickup,
+    handleBeginMobileB2ReselectPicker,
+    dismissMobileModalStopPanelAnimated,
+  ])
 
   const closePoiDescriptionSheet = useCallback(() => {
     setPoiDescriptionSheet(null)
@@ -2546,8 +2904,8 @@ export function LogisticsMap({
                 const committedId = b2CommittedPickupIdRef.current
                 const reselectPickerActive = mobileB2MeetingReselectPickerRef.current
                 /**
-                 * Committed pin alone → bottom POI detail card only. During “change meeting”, same pin
-                 * keeps `MobileMapModalB2MeetingPanel` (list / Meet at copy) instead of the generic stop panel.
+                 * Committed pin alone → bottom MW shelf with Meet-at hub first. During “change meeting”, same pin
+                 * keeps the hub slide (embedded list / Meet at) instead of the generic stop panel.
                  */
                 if (
                   committedId == null ||
@@ -2819,10 +3177,7 @@ export function LogisticsMap({
           b2CommittedPickupIdRef.current,
         )
         const mapEl = sheetHost
-        const panelEl =
-          showB2MeetingModalPanelRef.current && mobileModalB2MeetingPanelMotionRef.current
-            ? mobileModalB2MeetingPanelMotionRef.current
-            : mobileModalStopPanelMotionRef.current
+        const panelEl = mobileModalStopPanelMotionRef.current
         const measuredOverviewPad =
           mapEl && panelEl ? computeModalOverviewFitPadding(mapEl, panelEl) : undefined
         fitRouteOverview(
@@ -2900,10 +3255,7 @@ export function LogisticsMap({
       const m = mapRef.current
       const host = sheetMapHostRef.current
       if (!m || !host) return
-      const panelEl =
-        showB2MeetingModalPanelRef.current && mobileModalB2MeetingPanelMotionRef.current
-          ? mobileModalB2MeetingPanelMotionRef.current
-          : mobileModalStopPanelMotionRef.current
+      const panelEl = mobileModalStopPanelMotionRef.current
       if (!panelEl) return
       const pad = computeModalOverviewFitPadding(host, panelEl)
       if (!pad) return
@@ -2927,10 +3279,7 @@ export function LogisticsMap({
       )
     }
 
-    const panelEl =
-      showB2MeetingModalPanelRef.current && mobileModalB2MeetingPanelMotionRef.current
-        ? mobileModalB2MeetingPanelMotionRef.current
-        : mobileModalStopPanelMotionRef.current
+    const panelEl = mobileModalStopPanelMotionRef.current
     if (!panelEl || typeof ResizeObserver === 'undefined') {
       return () => {
         if (debounceTimer) clearTimeout(debounceTimer)
@@ -2992,9 +3341,7 @@ export function LogisticsMap({
         if (fitIsMobile && mobileSheetOpenRef.current) {
           const host = sheetMapHostRef.current
           const panel =
-            showB2MeetingModalPanelRef.current && mobileModalB2MeetingPanelMotionRef.current
-              ? mobileModalB2MeetingPanelMotionRef.current
-              : mobileModalStopPanelMotionRef.current
+            mobileModalStopPanelMotionRef.current
           if (host && panel) {
             paddingOverride = computeModalOverviewFitPadding(host, panel) ?? undefined
           }
@@ -3022,8 +3369,56 @@ export function LogisticsMap({
     [onRecentre, variantId, routeLngLat, stops, b2CommittedPickupId],
   )
 
+  fitB2MeetingListOverviewOnMapRef.current = () => {
+    if (variantIdRef.current !== 'b2' || !isVariantB2TripleMeeting(variantIdRef.current, stopsRef.current)) {
+      return
+    }
+    runRecentreLikeButton(true)
+  }
+
   /**
-   * MW map modal: after confirming a meeting then tapping “Select a different meeting point”, zoom back
+   * Hub shelf: committed → POI zoom; meeting list (no pickup / re-select) → full-route overview with all meetings.
+   */
+  const lastHubShelfCameraMeetingRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (!isMobile || !mobileSheetOpen || !b2TripleMeetingMwShelfActive) {
+      lastHubShelfCameraMeetingRef.current = null
+      lastHubShelfCameraKeyRef.current = null
+      return
+    }
+    if (mobileMapModalShelfSelectedStopId !== MW_MAP_B2_SHELF_HUB_STOP_ID) {
+      lastHubShelfCameraMeetingRef.current = null
+      lastHubShelfCameraKeyRef.current = null
+      return
+    }
+    const listMode = b2CommittedPickupId == null || mobileB2MeetingReselectPicker
+    if (listMode) {
+      if (lastHubShelfCameraKeyRef.current === 'list') return
+      lastHubShelfCameraKeyRef.current = 'list'
+      lastHubShelfCameraMeetingRef.current = null
+      fitB2MeetingListOverviewOnMapRef.current()
+      return
+    }
+    const committedId = b2CommittedPickupId
+    if (committedId == null) return
+    const key = `committed:${committedId}`
+    if (lastHubShelfCameraKeyRef.current === key) return
+    lastHubShelfCameraKeyRef.current = key
+    lastHubShelfCameraMeetingRef.current = committedId
+    focusMobileModalShelfStop(committedId, { alwaysRefocus: true })
+  }, [
+    isMobile,
+    mobileSheetOpen,
+    b2TripleMeetingMwShelfActive,
+    mobileMapModalShelfSelectedStopId,
+    b2CommittedPickupId,
+    mobileB2MeetingReselectPicker,
+    focusMobileModalShelfStop,
+    runRecentreLikeButton,
+  ])
+
+  /**
+   * MW map modal: after confirming a meeting then tapping “See other meeting points”, zoom back
    * out so all meeting pins + route are in view (`routeCoordsForVariantOverview` with no committed id).
    */
   useEffect(() => {
@@ -3052,9 +3447,7 @@ export function LogisticsMap({
     )
     const host = sheetMapHostRef.current
     const panel =
-      showB2MeetingModalPanelRef.current && mobileModalB2MeetingPanelMotionRef.current
-        ? mobileModalB2MeetingPanelMotionRef.current
-        : mobileModalStopPanelMotionRef.current
+      mobileModalStopPanelMotionRef.current
     const measuredPad =
       host && panel ? computeModalOverviewFitPadding(host, panel) : undefined
     fitRouteOverview(
@@ -3080,7 +3473,7 @@ export function LogisticsMap({
   ])
 
   /**
-   * MW map modal: “Select a different meeting point” (timeline or sheet) turns on reselect **without**
+   * MW map modal: “See other meeting points” (timeline or sheet) turns on reselect **without**
    * clearing `b2CommittedPickupId` — fit full-route overview so every meeting pin is in frame.
    */
   useEffect(() => {
@@ -3116,9 +3509,7 @@ export function LogisticsMap({
           )
           const host = sheetMapHostRef.current
           const panel =
-            showB2MeetingModalPanelRef.current && mobileModalB2MeetingPanelMotionRef.current
-              ? mobileModalB2MeetingPanelMotionRef.current
-              : mobileModalStopPanelMotionRef.current
+            mobileModalStopPanelMotionRef.current
           const measuredPad =
             host && panel ? computeModalOverviewFitPadding(host, panel) : undefined
           fitRouteOverview(
@@ -3511,8 +3902,10 @@ export function LogisticsMap({
                   <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
               </button>
-            <div className="relative min-h-0 flex-1 overflow-hidden">
-              <div ref={sheetMapHostRef} className="absolute inset-0 min-h-0 bg-stone-50" />
+            <div className="relative min-h-0 flex-1">
+              <div className="absolute inset-0 overflow-hidden">
+                <div ref={sheetMapHostRef} className="absolute inset-0 min-h-0 bg-stone-50" />
+              </div>
               {showRecentre ? (
                 <div
                   className={`pointer-events-none absolute left-1/2 top-[max(3rem,env(safe-area-inset-top))] flex -translate-x-1/2 justify-center ${MAP_CHROME_ABOVE_MARKERS_CLASS}`}
@@ -3533,47 +3926,34 @@ export function LogisticsMap({
                 </div>
               ) : null}
               <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[55] flex flex-col-reverse gap-2 overscroll-none px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
-                {showB2MeetingModalPanel ? (
-                  <motion.div
-                    ref={mobileModalB2MeetingPanelMotionRef}
-                    key="b2-meeting-modal-panel"
-                    className="pointer-events-auto w-full max-w-full origin-bottom"
-                    style={{ willChange: 'transform, opacity' }}
-                    initial={{ opacity: 0, y: 18 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.24, ease: [0.4, 0, 0.2, 1] }}
-                  >
-                    <div className="max-h-[min(42vh,320px)] w-full overflow-y-auto overscroll-contain">
-                      <MobileMapModalB2MeetingPanel
-                        variantId={variantId}
-                        stops={stops}
-                        meetings={stops.slice(0, 3)}
-                        pickupId={b2CommittedPickupId}
-                        pendingPickupId={mobileB2MeetingPendingId}
-                        reselectPickerOpen={mobileB2MeetingReselectPicker}
-                        onPendingPickupChange={handleMobileB2PendingPickupChange}
-                        onConfirmPickup={confirmMobileB2MeetingPickup}
-                        onBeginReselect={handleBeginMobileB2ReselectPicker}
-                        onDismiss={dismissMobileModalB2MeetingPanelAnimated}
-                      />
-                    </div>
-                  </motion.div>
-                ) : mobileModalDetailStop ? (
+                {b2TripleMeetingMwShelfActive || mobileModalDetailStop ? (
                   <motion.div
                     ref={mobileModalStopPanelMotionRef}
-                    key={mobileModalDetailStop.id}
-                    className="pointer-events-auto w-full max-w-full origin-bottom"
+                    key="mobile-map-stop-shelf"
+                    className="pointer-events-auto w-[calc(100%_+_1.5rem)] max-w-none origin-bottom -mx-3"
                     style={{ willChange: 'transform, opacity' }}
                     initial={{ opacity: 0, y: 18 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.24, ease: [0.4, 0, 0.2, 1] }}
                   >
-                    <MobileMapModalStopPanel
-                      stop={mobileModalDetailStop}
+                    <MobileMapModalStopShelf
+                      shelfStops={mobileMapModalShelfStops}
+                      selectedStopId={
+                        mobileMapModalShelfSelectedStopId ||
+                        mobileModalDetailStop?.id ||
+                        mobileMapModalShelfStops[0]?.id ||
+                        selectedStopId ||
+                        ''
+                      }
                       variantId={variantId}
                       stops={stops}
                       onDismiss={dismissMobileModalStopPanelAnimated}
+                      onShelfCommitStop={handleMobileModalShelfSelect}
                       b2CommittedPickupId={b2CommittedPickupId}
+                      shelfHubStopId={
+                        b2TripleMeetingMwShelfActive ? MW_MAP_B2_SHELF_HUB_STOP_ID : ''
+                      }
+                      b2MeetingHubProps={b2MeetingHubProps}
                     />
                   </motion.div>
                 ) : null}

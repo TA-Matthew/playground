@@ -1,4 +1,4 @@
-import { memo, useState } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
   isVariantB2TripleMeeting,
   isVariantBLayout,
@@ -219,13 +219,278 @@ function FlagGlyph({ className }: { className?: string }) {
   )
 }
 
-/** Shared with map modal POI overlay — inline read more/less (220-char preview by default, or `clampLines` CSS ellipsis). */
-export function TimelineStopDescription({
+/** ~8.75rem at 16px — initial description peek before drag-to-expand. */
+const SHELF_DESC_PEEK_PX = 140
+/** Pointer: min vertical travel (px) on release to snap open / closed. */
+const SHELF_DESC_SNAP_POINTER_DY = 28
+
+/**
+ * MW map horizontal shelf: **snap** description height — wheel / vertical drag up → full copy,
+ * wheel / drag down → peek. No continuous height adjustment. Gradient only while peek-clipped.
+ */
+function TimelineShelfScrollFadeDescription({ text }: { text: string }) {
+  const clipRef = useRef<HTMLDivElement>(null)
+  const measureRef = useRef<HTMLParagraphElement>(null)
+  const naturalHRef = useRef(0)
+  const peekRef = useRef(0)
+  const revealRef = useRef(SHELF_DESC_PEEK_PX)
+
+  const [naturalH, setNaturalH] = useState(0)
+  const [revealPx, setRevealPx] = useState(SHELF_DESC_PEEK_PX)
+
+  useLayoutEffect(() => {
+    const p = measureRef.current
+    if (!p) return
+    const h = Math.ceil(p.scrollHeight)
+    naturalHRef.current = h
+    const peek = Math.min(h, SHELF_DESC_PEEK_PX)
+    peekRef.current = peek
+    const next = h <= peek ? h : peek
+    revealRef.current = next
+    setNaturalH(h)
+    setRevealPx(next)
+  }, [text])
+
+  const recalcNaturalFromResize = useCallback(() => {
+    const p = measureRef.current
+    if (!p) return
+    const h = Math.ceil(p.scrollHeight)
+    naturalHRef.current = h
+    const peek = Math.min(h, SHELF_DESC_PEEK_PX)
+    peekRef.current = peek
+    setNaturalH(h)
+    setRevealPx((prev) => {
+      if (h <= peek) {
+        revealRef.current = h
+        return h
+      }
+      const wasFull = prev >= h - 2
+      const next = wasFull ? h : peek
+      revealRef.current = next
+      return next
+    })
+  }, [])
+
+  useEffect(() => {
+    const p = measureRef.current
+    if (!p) return
+    const ro = new ResizeObserver(() => recalcNaturalFromResize())
+    ro.observe(p)
+    return () => ro.disconnect()
+  }, [text, recalcNaturalFromResize])
+
+  useEffect(() => {
+    const clip = clipRef.current
+    if (!clip) return
+    const card = clip.closest('[data-shelf-card]') as HTMLElement | null
+    if (!card) return
+
+    const isInteractiveTarget = (t: EventTarget | null) => {
+      const el = t as HTMLElement | null
+      if (!el || !card.contains(el)) return true
+      return !!el.closest(
+        'button, a, input, textarea, select, [role="listbox"], [role="option"], [contenteditable="true"]',
+      )
+    }
+
+    const setRevealExact = (value: number) => {
+      const n = naturalHRef.current
+      const peek = peekRef.current
+      if (n <= 0) return
+      const v = n <= peek ? n : Math.min(n, Math.max(peek, value))
+      if (v === revealRef.current) return
+      revealRef.current = v
+      setRevealPx(v)
+    }
+
+    const snapFull = () => {
+      const n = naturalHRef.current
+      if (n <= peekRef.current) return
+      setRevealExact(n)
+    }
+
+    const snapPeek = () => {
+      const n = naturalHRef.current
+      const peek = peekRef.current
+      if (n <= 0) return
+      setRevealExact(n <= peek ? n : peek)
+    }
+
+    type Pending = { ox: number; oy: number; pointerId: number }
+    let pending: Pending | null = null
+    let dragging = false
+    let sheetGestureLocked = false
+
+    const unlockSheetGesture = () => {
+      if (!sheetGestureLocked) return
+      sheetGestureLocked = false
+      card.style.touchAction = ''
+      card.style.userSelect = ''
+      card.style.setProperty('-webkit-user-select', '')
+    }
+
+    const lockSheetGesture = () => {
+      if (sheetGestureLocked) return
+      sheetGestureLocked = true
+      card.style.touchAction = 'none'
+      card.style.userSelect = 'none'
+      card.style.setProperty('-webkit-user-select', 'none')
+    }
+
+    const clearWindow = () => {
+      window.removeEventListener('pointermove', onPointerMove, true)
+      window.removeEventListener('pointerup', onPointerEnd, true)
+      window.removeEventListener('pointercancel', onPointerEnd, true)
+    }
+
+    const onPointerEnd = (e: PointerEvent) => {
+      if (!pending || e.pointerId !== pending.pointerId) return
+      if (dragging) {
+        unlockSheetGesture()
+
+        const n = naturalHRef.current
+        const netDy = pending.oy - e.clientY
+        const atFull = revealRef.current >= n - 2
+        const canCardScroll = card.scrollHeight > card.clientHeight + 2
+
+        if (netDy >= SHELF_DESC_SNAP_POINTER_DY) {
+          if (!(atFull && canCardScroll)) snapFull()
+        } else if (netDy <= -SHELF_DESC_SNAP_POINTER_DY) {
+          snapPeek()
+          card.scrollTop = 0
+        }
+
+        try {
+          card.releasePointerCapture(e.pointerId)
+        } catch {
+          /* noop */
+        }
+      }
+      clearWindow()
+      pending = null
+      dragging = false
+    }
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!pending || e.pointerId !== pending.pointerId) return
+      const dx = e.clientX - pending.ox
+      const dy = pending.oy - e.clientY
+
+      if (!dragging) {
+        if (Math.abs(dx) > Math.abs(dy) + 12 && Math.abs(dx) > 12) {
+          onPointerEnd(e)
+          return
+        }
+        if (Math.abs(dy) < 10) return
+        if (Math.abs(dy) <= Math.abs(dx)) return
+
+        const n = naturalHRef.current
+        const atFull = revealRef.current >= n - 2
+        const canCardScroll = card.scrollHeight > card.clientHeight + 2
+        if (atFull && dy > 0 && canCardScroll) {
+          onPointerEnd(e)
+          return
+        }
+
+        dragging = true
+        lockSheetGesture()
+        if (e.cancelable) e.preventDefault()
+        try {
+          card.setPointerCapture(e.pointerId)
+        } catch {
+          /* noop */
+        }
+      }
+
+      if (dragging && e.cancelable) {
+        e.preventDefault()
+      }
+    }
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (naturalHRef.current <= peekRef.current) return
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      if (isInteractiveTarget(e.target)) return
+
+      pending = {
+        ox: e.clientX,
+        oy: e.clientY,
+        pointerId: e.pointerId,
+      }
+      dragging = false
+      window.addEventListener('pointermove', onPointerMove, { capture: true, passive: false })
+      window.addEventListener('pointerup', onPointerEnd, { capture: true })
+      window.addEventListener('pointercancel', onPointerEnd, { capture: true })
+      if (e.cancelable) e.preventDefault()
+    }
+
+    const onWheel = (e: WheelEvent) => {
+      if (naturalHRef.current <= peekRef.current) return
+      if (isInteractiveTarget(e.target)) return
+      const n = naturalHRef.current
+      const atFull = revealRef.current >= n - 2
+
+      if (e.deltaY < 0) {
+        if (!atFull) {
+          e.preventDefault()
+          snapFull()
+        }
+      } else if (e.deltaY > 0 && atFull) {
+        e.preventDefault()
+        snapPeek()
+        card.scrollTop = 0
+      }
+    }
+
+    card.addEventListener('pointerdown', onPointerDown, { passive: false })
+    card.addEventListener('wheel', onWheel, { passive: false })
+    return () => {
+      card.removeEventListener('pointerdown', onPointerDown)
+      unlockSheetGesture()
+      card.removeEventListener('wheel', onWheel)
+      if (dragging && pending) {
+        try {
+          card.releasePointerCapture(pending.pointerId)
+        } catch {
+          /* noop */
+        }
+      }
+      clearWindow()
+      pending = null
+      dragging = false
+    }
+  }, [text])
+
+  const showFade = naturalH > revealPx + 2
+
+  return (
+    <div
+      ref={clipRef}
+      style={{
+        maxHeight: `${revealPx}px`,
+        overflow: 'hidden',
+      }}
+      className="relative isolate text-[14px] leading-relaxed text-stone-600 transition-[max-height] duration-[380ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none motion-reduce:duration-0"
+    >
+      <div ref={measureRef} className="pb-3">
+        <p className="whitespace-pre-wrap">{text}</p>
+      </div>
+      {showFade ? (
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-16 bg-gradient-to-t from-white/95 from-[35%] via-white/55 to-transparent"
+          aria-hidden
+        />
+      ) : null}
+    </div>
+  )
+}
+
+/** Inline read more/less (220-char preview by default, or `line-clamp-*`). Not used when `shelfScrollFade`. */
+function TimelineStopDescriptionClampOrPreview({
   text,
   clampLines,
 }: {
   text: string
-  /** MW map modal: truncate visually with `line-clamp-*` instead of character slice. */
   clampLines?: 3
 }) {
   const [readOpen, setReadOpen] = useState(false)
@@ -259,6 +524,23 @@ export function TimelineStopDescription({
       ) : null}
     </div>
   )
+}
+
+/** Shared with map modal POI overlay — default: read more/less; MW shelf: snap peek/full description. */
+export function TimelineStopDescription({
+  text,
+  clampLines,
+  shelfScrollFade,
+}: {
+  text: string
+  clampLines?: 3
+  /** MW map modal shelf: snap peek ↔ full on wheel or vertical drag (no in-between heights). */
+  shelfScrollFade?: boolean
+}) {
+  if (shelfScrollFade) {
+    return <TimelineShelfScrollFadeDescription text={text} />
+  }
+  return <TimelineStopDescriptionClampOrPreview text={text} clampLines={clampLines} />
 }
 
 function ChevronRow({ up }: { up: boolean }) {
