@@ -228,12 +228,21 @@ const SHELF_DESC_SNAP_POINTER_DY = 24
  * MW map horizontal shelf: **snap** description height — wheel / vertical drag up → full copy,
  * wheel / drag down → peek. No continuous height adjustment. Gradient only while peek-clipped.
  */
-function TimelineShelfScrollFadeDescription({ text }: { text: string }) {
+function TimelineShelfScrollFadeDescription({
+  text,
+  shelfDescriptionActive = true,
+}: {
+  text: string
+  /** MW shelf: when the slide is not centered, snap back to peek so swiping away does not preserve “full” height. */
+  shelfDescriptionActive?: boolean
+}) {
   const clipRef = useRef<HTMLDivElement>(null)
   const measureRef = useRef<HTMLParagraphElement>(null)
   const naturalHRef = useRef(0)
   const peekRef = useRef(0)
   const revealRef = useRef(SHELF_DESC_PEEK_PX)
+  const shelfDescriptionActiveRef = useRef(shelfDescriptionActive)
+  shelfDescriptionActiveRef.current = shelfDescriptionActive
 
   const [naturalH, setNaturalH] = useState(0)
   const [revealPx, setRevealPx] = useState(SHELF_DESC_PEEK_PX)
@@ -245,7 +254,9 @@ function TimelineShelfScrollFadeDescription({ text }: { text: string }) {
     naturalHRef.current = h
     const peek = Math.min(h, SHELF_DESC_PEEK_PX)
     peekRef.current = peek
-    const next = h <= peek ? h : peek
+    const active = shelfDescriptionActiveRef.current
+    const next =
+      !active && h > peek ? peek : h <= peek ? h : peek
     revealRef.current = next
     setNaturalH(h)
     setRevealPx(next)
@@ -260,6 +271,11 @@ function TimelineShelfScrollFadeDescription({ text }: { text: string }) {
     peekRef.current = peek
     setNaturalH(h)
     setRevealPx((prev) => {
+      if (!shelfDescriptionActiveRef.current) {
+        const next = h <= peek ? h : peek
+        revealRef.current = next
+        return next
+      }
       if (h <= peek) {
         revealRef.current = h
         return h
@@ -278,6 +294,19 @@ function TimelineShelfScrollFadeDescription({ text }: { text: string }) {
     ro.observe(p)
     return () => ro.disconnect()
   }, [text, recalcNaturalFromResize])
+
+  useEffect(() => {
+    if (shelfDescriptionActive) return
+    const clip = clipRef.current
+    const n = naturalHRef.current
+    const peek = peekRef.current
+    if (n <= 0) return
+    const next = n <= peek ? n : peek
+    revealRef.current = next
+    setRevealPx(next)
+    const card = clip?.closest('[data-shelf-card]') as HTMLElement | null
+    if (card) card.scrollTop = 0
+  }, [shelfDescriptionActive])
 
   useEffect(() => {
     const clip = clipRef.current
@@ -414,6 +443,7 @@ function TimelineShelfScrollFadeDescription({ text }: { text: string }) {
     }
 
     const onPointerDown = (e: PointerEvent) => {
+      if (!shelfDescriptionActiveRef.current) return
       if (naturalHRef.current <= peekRef.current) return
       if (e.pointerType === 'mouse' && e.button !== 0) return
       if (isInteractiveTarget(e.target)) return
@@ -437,6 +467,7 @@ function TimelineShelfScrollFadeDescription({ text }: { text: string }) {
     }
 
     const onWheel = (e: WheelEvent) => {
+      if (!shelfDescriptionActiveRef.current) return
       if (naturalHRef.current <= peekRef.current) return
       if (isInteractiveTarget(e.target)) return
       const n = naturalHRef.current
@@ -547,14 +578,22 @@ export function TimelineStopDescription({
   text,
   clampLines,
   shelfScrollFade,
+  shelfDescriptionActive = true,
 }: {
   text: string
   clampLines?: 3
   /** MW map modal shelf: snap peek ↔ full on wheel or vertical drag (no in-between heights). */
   shelfScrollFade?: boolean
+  /** MW shelf: false when this slide is not centered — description returns to peek. */
+  shelfDescriptionActive?: boolean
 }) {
   if (shelfScrollFade) {
-    return <TimelineShelfScrollFadeDescription text={text} />
+    return (
+      <TimelineShelfScrollFadeDescription
+        text={text}
+        shelfDescriptionActive={shelfDescriptionActive}
+      />
+    )
   }
   return <TimelineStopDescriptionClampOrPreview text={text} clampLines={clampLines} />
 }

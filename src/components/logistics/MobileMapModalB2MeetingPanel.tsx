@@ -29,6 +29,8 @@ type Props = {
    * used inside `MobileMapModalStopPanelCard` on the MW horizontal shelf so sideways swipes reach the shelf.
    */
   embedded?: boolean
+  /** MW shelf: when this hub slide is not centered, snap embedded meeting description back to peek. */
+  shelfDescriptionActive?: boolean
 }
 
 function PickupChosenCheckIcon({ className }: { className?: string }) {
@@ -96,6 +98,7 @@ export function MobileMapModalB2MeetingPanel({
   onBeginReselect,
   onDismiss,
   embedded = false,
+  shelfDescriptionActive = true,
 }: Props) {
   const activeMeeting = pickupId ? meetings.find((m) => m.id === pickupId) : undefined
   const idx =
@@ -245,6 +248,7 @@ export function MobileMapModalB2MeetingPanel({
                     key={activeMeeting.id}
                     text={activeMeeting.description ?? ''}
                     shelfScrollFade
+                    shelfDescriptionActive={shelfDescriptionActive}
                   />
                 ) : null}
                 <button

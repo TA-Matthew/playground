@@ -850,6 +850,7 @@ function MobileMapModalStopPanelCard({
   onDismiss,
   b2CommittedPickupId,
   b2MeetingHubProps,
+  shelfCardIsSelected,
 }: {
   stop: Stop
   variantId: VariantId
@@ -859,6 +860,8 @@ function MobileMapModalStopPanelCard({
   b2CommittedPickupId?: string | null
   /** B2 MW shelf: first slide embeds `MobileMapModalB2MeetingPanel` (list or Meet at). */
   b2MeetingHubProps?: MobileMapB2MeetingHubShelfProps | null
+  /** MW shelf: centered slide — off-slide descriptions reset to peek. */
+  shelfCardIsSelected: boolean
 }) {
   if (stop.id === MW_MAP_B2_SHELF_HUB_STOP_ID && b2MeetingHubProps != null) {
     return (
@@ -869,7 +872,11 @@ function MobileMapModalStopPanelCard({
         role="group"
         aria-label="Meeting pickup — map modal"
       >
-        <MobileMapModalB2MeetingPanel embedded {...b2MeetingHubProps} />
+        <MobileMapModalB2MeetingPanel
+          embedded
+          {...b2MeetingHubProps}
+          shelfDescriptionActive={shelfCardIsSelected}
+        />
       </div>
     )
   }
@@ -977,7 +984,11 @@ function MobileMapModalStopPanelCard({
           </div>
           {desc ? (
             <div className="mt-4 px-1" onClick={(e) => e.stopPropagation()}>
-              <TimelineStopDescription text={desc} shelfScrollFade />
+              <TimelineStopDescription
+                text={desc}
+                shelfScrollFade
+                shelfDescriptionActive={shelfCardIsSelected}
+              />
             </div>
           ) : null}
         </div>
@@ -1128,6 +1139,7 @@ function MobileMapModalStopShelf({
             onDismiss={onDismiss}
             b2CommittedPickupId={b2CommittedPickupId}
             b2MeetingHubProps={shelfHubStopId && s.id === shelfHubStopId ? b2MeetingHubProps : null}
+            shelfCardIsSelected={selectedStopId === s.id}
           />
         ))}
       </div>
