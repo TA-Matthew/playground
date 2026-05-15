@@ -477,7 +477,11 @@ function TimelineShelfScrollFadeDescription({ text }: { text: string }) {
       </div>
       {showFade ? (
         <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-16 bg-gradient-to-t from-white/95 from-[35%] via-white/55 to-transparent"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-16"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(255, 255, 255, 0.00) 0%, rgba(255, 255, 255, 0.80) 49.52%, #FFF 100%)',
+          }}
           aria-hidden
         />
       ) : null}
