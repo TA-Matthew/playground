@@ -219,10 +219,10 @@ function FlagGlyph({ className }: { className?: string }) {
   )
 }
 
-/** ~8.75rem at 16px — initial description peek before drag-to-expand. */
-const SHELF_DESC_PEEK_PX = 140
+/** Default shelf description clip ≈ 3 lines (`text-[14px] leading-relaxed` ~22.75px/line) + a little room for the bottom fade. */
+const SHELF_DESC_PEEK_PX = Math.ceil(14 * 1.625 * 3 + 12)
 /** Pointer: min vertical travel (px) on release to snap open / closed. */
-const SHELF_DESC_SNAP_POINTER_DY = 28
+const SHELF_DESC_SNAP_POINTER_DY = 24
 
 /**
  * MW map horizontal shelf: **snap** description height — wheel / vertical drag up → full copy,
@@ -339,36 +339,48 @@ function TimelineShelfScrollFadeDescription({ text }: { text: string }) {
 
     const clearWindow = () => {
       window.removeEventListener('pointermove', onPointerMove, true)
-      window.removeEventListener('pointerup', onPointerEnd, true)
-      window.removeEventListener('pointercancel', onPointerEnd, true)
+      window.removeEventListener('pointerup', onPointerEndWindow, true)
+      window.removeEventListener('pointercancel', onPointerEndWindow, true)
     }
 
-    const onPointerEnd = (e: PointerEvent) => {
+    const onPointerEnd = (e: PointerEvent, applySnap: boolean) => {
       if (!pending || e.pointerId !== pending.pointerId) return
-      if (dragging) {
-        unlockSheetGesture()
 
-        const n = naturalHRef.current
+      if (applySnap) {
+        const netDx = pending.ox - e.clientX
         const netDy = pending.oy - e.clientY
-        const atFull = revealRef.current >= n - 2
-        const canCardScroll = card.scrollHeight > card.clientHeight + 2
+        const verticalDominant =
+          Math.abs(netDy) >= SHELF_DESC_SNAP_POINTER_DY &&
+          Math.abs(netDy) >= Math.abs(netDx) - 6
 
-        if (netDy >= SHELF_DESC_SNAP_POINTER_DY) {
-          if (!(atFull && canCardScroll)) snapFull()
-        } else if (netDy <= -SHELF_DESC_SNAP_POINTER_DY) {
-          snapPeek()
-          card.scrollTop = 0
-        }
+        if (verticalDominant) {
+          const n = naturalHRef.current
+          const atFull = revealRef.current >= n - 2
+          const canCardScroll = card.scrollHeight > card.clientHeight + 2
 
-        try {
-          card.releasePointerCapture(e.pointerId)
-        } catch {
-          /* noop */
+          if (netDy >= SHELF_DESC_SNAP_POINTER_DY) {
+            if (!(atFull && canCardScroll)) snapFull()
+          } else if (netDy <= -SHELF_DESC_SNAP_POINTER_DY) {
+            snapPeek()
+            card.scrollTop = 0
+          }
         }
       }
+
+      try {
+        card.releasePointerCapture(e.pointerId)
+      } catch {
+        /* noop */
+      }
+
       clearWindow()
       pending = null
       dragging = false
+      unlockSheetGesture()
+    }
+
+    const onPointerEndWindow = (e: PointerEvent) => {
+      onPointerEnd(e, true)
     }
 
     const onPointerMove = (e: PointerEvent) => {
@@ -378,7 +390,7 @@ function TimelineShelfScrollFadeDescription({ text }: { text: string }) {
 
       if (!dragging) {
         if (Math.abs(dx) > Math.abs(dy) + 12 && Math.abs(dx) > 12) {
-          onPointerEnd(e)
+          onPointerEnd(e, false)
           return
         }
         if (Math.abs(dy) < 10) return
@@ -388,18 +400,12 @@ function TimelineShelfScrollFadeDescription({ text }: { text: string }) {
         const atFull = revealRef.current >= n - 2
         const canCardScroll = card.scrollHeight > card.clientHeight + 2
         if (atFull && dy > 0 && canCardScroll) {
-          onPointerEnd(e)
+          onPointerEnd(e, false)
           return
         }
 
         dragging = true
-        lockSheetGesture()
         if (e.cancelable) e.preventDefault()
-        try {
-          card.setPointerCapture(e.pointerId)
-        } catch {
-          /* noop */
-        }
       }
 
       if (dragging && e.cancelable) {
@@ -418,9 +424,15 @@ function TimelineShelfScrollFadeDescription({ text }: { text: string }) {
         pointerId: e.pointerId,
       }
       dragging = false
+      lockSheetGesture()
+      try {
+        card.setPointerCapture(e.pointerId)
+      } catch {
+        /* noop */
+      }
       window.addEventListener('pointermove', onPointerMove, { capture: true, passive: false })
-      window.addEventListener('pointerup', onPointerEnd, { capture: true })
-      window.addEventListener('pointercancel', onPointerEnd, { capture: true })
+      window.addEventListener('pointerup', onPointerEndWindow, { capture: true })
+      window.addEventListener('pointercancel', onPointerEndWindow, { capture: true })
       if (e.cancelable) e.preventDefault()
     }
 
@@ -446,9 +458,8 @@ function TimelineShelfScrollFadeDescription({ text }: { text: string }) {
     card.addEventListener('wheel', onWheel, { passive: false })
     return () => {
       card.removeEventListener('pointerdown', onPointerDown)
-      unlockSheetGesture()
       card.removeEventListener('wheel', onWheel)
-      if (dragging && pending) {
+      if (pending) {
         try {
           card.releasePointerCapture(pending.pointerId)
         } catch {
@@ -456,6 +467,7 @@ function TimelineShelfScrollFadeDescription({ text }: { text: string }) {
         }
       }
       clearWindow()
+      unlockSheetGesture()
       pending = null
       dragging = false
     }
