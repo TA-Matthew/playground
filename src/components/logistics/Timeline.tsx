@@ -402,6 +402,13 @@ function TimelineShelfScrollFadeDescription({
       window.removeEventListener('pointercancel', onPointerEndWindow, true)
     }
 
+    const atFullReveal = () => {
+      const n = naturalHRef.current
+      return n > 0 && revealRef.current >= n - 2
+    }
+
+    const canCardScroll = () => card.scrollHeight > card.clientHeight + 2
+
     const onPointerEnd = (e: PointerEvent, applySnap: boolean) => {
       if (!pending || e.pointerId !== pending.pointerId) return
 
@@ -413,21 +420,22 @@ function TimelineShelfScrollFadeDescription({
           Math.abs(netDy) >= Math.abs(netDx) - 6
 
         if (verticalDominant) {
-          const n = naturalHRef.current
-          const atFull = revealRef.current >= n - 2
-          const canCardScroll = card.scrollHeight > card.clientHeight + 2
+          const atFull = atFullReveal()
+          const cardScrollable = canCardScroll()
 
           if (netDy >= SHELF_DESC_SNAP_POINTER_DY) {
-            if (!(atFull && canCardScroll)) snapFull()
+            if (!(atFull && cardScrollable && card.scrollTop > 2)) snapFull()
           } else if (netDy <= -SHELF_DESC_SNAP_POINTER_DY) {
-            snapPeek()
-            card.scrollTop = 0
+            if (!(atFull && cardScrollable && card.scrollTop > 2)) {
+              snapPeek()
+              card.scrollTop = 0
+            }
           }
         }
       }
 
       try {
-        card.releasePointerCapture(e.pointerId)
+        clip.releasePointerCapture(e.pointerId)
       } catch {
         /* noop */
       }
@@ -446,19 +454,27 @@ function TimelineShelfScrollFadeDescription({
       if (!pending || e.pointerId !== pending.pointerId) return
       const dx = e.clientX - pending.ox
       const dy = pending.oy - e.clientY
+      const atFull = atFullReveal()
+      const collapseReady = atFull && card.scrollTop <= 1
 
       if (!dragging) {
-        if (Math.abs(dx) > Math.abs(dy) + 12 && Math.abs(dx) > 12) {
+        if (
+          !collapseReady &&
+          Math.abs(dx) > Math.abs(dy) + 12 &&
+          Math.abs(dx) > 12
+        ) {
           onPointerEnd(e, false)
           return
         }
         if (Math.abs(dy) < 10) return
-        if (Math.abs(dy) <= Math.abs(dx)) return
+        if (!collapseReady && Math.abs(dy) <= Math.abs(dx)) return
 
-        const n = naturalHRef.current
-        const atFull = revealRef.current >= n - 2
-        const canCardScroll = card.scrollHeight > card.clientHeight + 2
-        if (atFull && dy > 0 && canCardScroll) {
+        const cardScrollable = canCardScroll()
+        if (atFull && dy > 0 && cardScrollable && card.scrollTop > 2) {
+          onPointerEnd(e, false)
+          return
+        }
+        if (atFull && dy < 0 && cardScrollable && card.scrollTop > 2) {
           onPointerEnd(e, false)
           return
         }
@@ -474,6 +490,12 @@ function TimelineShelfScrollFadeDescription({
       if (dragging && dy > 0) {
         const n = naturalHRef.current
         if (revealRef.current < n - 2 && dy >= 12) snapFull()
+      } else if (dragging && dy < 0) {
+        const peek = peekRef.current
+        if (revealRef.current > peek + 2 && dy <= -12) {
+          snapPeek()
+          card.scrollTop = 0
+        }
       }
     }
 
@@ -491,7 +513,7 @@ function TimelineShelfScrollFadeDescription({
       dragging = false
       lockSheetGesture()
       try {
-        card.setPointerCapture(e.pointerId)
+        clip.setPointerCapture(e.pointerId)
       } catch {
         /* noop */
       }
@@ -520,14 +542,14 @@ function TimelineShelfScrollFadeDescription({
       }
     }
 
-    card.addEventListener('pointerdown', onPointerDown, { passive: false })
-    card.addEventListener('wheel', onWheel, { passive: false })
+    clip.addEventListener('pointerdown', onPointerDown, { passive: false })
+    clip.addEventListener('wheel', onWheel, { passive: false })
     return () => {
-      card.removeEventListener('pointerdown', onPointerDown)
-      card.removeEventListener('wheel', onWheel)
+      clip.removeEventListener('pointerdown', onPointerDown)
+      clip.removeEventListener('wheel', onWheel)
       if (pending) {
         try {
-          card.releasePointerCapture(pending.pointerId)
+          clip.releasePointerCapture(pending.pointerId)
         } catch {
           /* noop */
         }
@@ -540,6 +562,8 @@ function TimelineShelfScrollFadeDescription({
   }, [text])
 
   const showFade = naturalH > revealPx + 2
+  const descPeek = Math.min(naturalH, SHELF_DESC_PEEK_PX)
+  const descGesturePanY = shelfDescriptionActive && naturalH > descPeek + 2
 
   return (
     <div
@@ -548,6 +572,7 @@ function TimelineShelfScrollFadeDescription({
       style={{
         maxHeight: `${revealPx}px`,
         overflow: 'hidden',
+        touchAction: descGesturePanY ? 'pan-y' : undefined,
       }}
       className="relative isolate text-[14px] leading-relaxed text-stone-600 transition-[max-height] duration-[380ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none motion-reduce:duration-0"
       onTransitionEnd={(e) => {
