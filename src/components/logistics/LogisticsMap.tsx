@@ -2673,6 +2673,16 @@ export function LogisticsMap({
     setMobileModalStopPanelDismissed(false)
     setMobileSheetOpen(true)
     setMobileModalB2MeetingPanelOpen(true)
+    /**
+     * Timeline “Show meeting points on map” — shelf must land on the hub slide (meeting list), not
+     * whatever POI `selectedStopId` was left from the inline map / accordion.
+     */
+    onSelectRef.current('', 'mapModal')
+    selectedStopIdRef.current = ''
+    lastSelectSourceRef.current = 'mapModal'
+    highlightSelectedPinRef.current = false
+    lastHubShelfCameraKeyRef.current = null
+    lastHubShelfCameraMeetingRef.current = null
     const committed = b2CommittedPickupIdRef.current
     if (committed != null) {
       setMobileB2MeetingReselectPicker(true)
@@ -2683,6 +2693,7 @@ export function LogisticsMap({
       setMobileB2MeetingPendingId(firstMeeting?.id ?? null)
       onB2MeetingHover?.(firstMeeting?.id ?? null)
     }
+    syncMarkersAppearanceRef.current()
   }, [
     b2OpenMeetingModalSignal,
     isMobile,
