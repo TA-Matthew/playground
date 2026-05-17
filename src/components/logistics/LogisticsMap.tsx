@@ -68,7 +68,7 @@ const MW_MAP_SHELF_TRACK_PX_VAR = '--mw-map-shelf-track-px'
 
 /** MW shelf card shell — track height matches the centered slide; cards bottom-align in the row (`self-end`). */
 const MW_MAP_SHELF_CARD_CLASS =
-  'flex w-[calc(var(--mw-map-shelf-track-px,100dvw)-32px)] shrink-0 snap-center self-end flex-col overflow-y-auto overscroll-y-contain touch-pan-x rounded-2xl border border-stone-200/90 bg-white/95 px-4 pt-3 pb-0 shadow-xl shadow-stone-900/12 ring-1 ring-stone-200/80 backdrop-blur-md'
+  'flex w-[calc(var(--mw-map-shelf-track-px,100dvw)-32px)] shrink-0 snap-always snap-center self-end flex-col overflow-y-auto overscroll-y-contain touch-pan-x rounded-2xl border border-stone-200/90 bg-white/95 px-4 pt-3 pb-0 shadow-xl shadow-stone-900/12 ring-1 ring-stone-200/80 backdrop-blur-md'
 
 /** First MW shelf slide for B2 triple-meeting: list or “Meet at” (`MobileMapModalB2MeetingPanel` embedded). */
 const MW_MAP_B2_SHELF_HUB_STOP_ID = '__mw_map_b2_shelf_hub__'
@@ -1022,6 +1022,31 @@ function findShelfCenterStopId(scrollEl: HTMLDivElement, shelfStops: Stop[]): st
   return bestId
 }
 
+function getShelfCardTargetScrollLeft(
+  track: HTMLDivElement,
+  card: HTMLElement,
+): number {
+  return Math.max(0, card.offsetLeft + card.offsetWidth / 2 - track.clientWidth / 2)
+}
+
+/** Nudge scroll so the nearest shelf card is centered (after height / snap settle). */
+function correctShelfSnapToCenter(
+  track: HTMLDivElement,
+  shelfStops: Stop[],
+  stopId?: string | null,
+): boolean {
+  const id = stopId ?? findShelfCenterStopId(track, shelfStops)
+  if (!id) return false
+  const card = track.querySelector(
+    `[data-shelf-card][data-stop-id="${CSS.escape(id)}"]`,
+  ) as HTMLElement | null
+  if (!card) return false
+  const targetLeft = getShelfCardTargetScrollLeft(track, card)
+  if (Math.abs(track.scrollLeft - targetLeft) < 2) return false
+  track.scrollTo({ left: targetLeft, behavior: 'auto' })
+  return true
+}
+
 /**
  * MW map modal: horizontal shelf of the same stop cards — meetings (B-layout), POIs, end; swipe changes
  * selection and map pin focus like tapping each pin.
@@ -1053,20 +1078,23 @@ function MobileMapModalStopShelf({
   const programmaticScrollRef = useRef(false)
   const programmaticScrollReleaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const scrollIdleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const userShelfScrollingRef = useRef(false)
   /** Row height follows the **centered** snap slide so a tall off-screen slide does not stretch the shelf. */
   const [shelfTrackHeightPx, setShelfTrackHeightPx] = useState<number | null>(null)
+  const [shelfTrackHeightInstant, setShelfTrackHeightInstant] = useState(false)
   const shelfTrackStyle = useMemo((): CSSProperties | undefined => {
     if (shelfTrackHeightPx == null) return undefined
     const reduceMotion = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
     return {
       height: shelfTrackHeightPx,
-      transition: reduceMotion
-        ? undefined
-        : `height ${MW_SHELF_DESC_TRANSITION_MS}ms ${MW_SHELF_DESC_EASE}`,
+      transition:
+        reduceMotion || shelfTrackHeightInstant
+          ? undefined
+          : `height ${MW_SHELF_DESC_TRANSITION_MS}ms ${MW_SHELF_DESC_EASE}`,
     }
-  }, [shelfTrackHeightPx])
+  }, [shelfTrackHeightPx, shelfTrackHeightInstant])
 
-  const syncShelfTrackHeight = useCallback(() => {
+  const syncShelfTrackHeight = useCallback((opts?: { instant?: boolean }) => {
     const track = scrollRef.current
     if (!track || shelfStops.length === 0) {
       setShelfTrackHeightPx(null)
@@ -1110,7 +1138,10 @@ function MobileMapModalStopShelf({
       }
     }
     const h = Math.ceil(contentH + padY)
-    if (h > 0) setShelfTrackHeightPx(h)
+    if (h > 0) {
+      setShelfTrackHeightInstant(opts?.instant ?? false)
+      setShelfTrackHeightPx(h)
+    }
   }, [shelfStops, selectedStopId])
 
   const scheduleCommitFromScroll = useCallback(() => {
@@ -1129,14 +1160,34 @@ function MobileMapModalStopShelf({
     onShelfCommitStop(id)
   }, [shelfStops, selectedStopId, onShelfCommitStop, shelfHubStopId])
 
+  const settleUserShelfScroll = useCallback(() => {
+    const track = scrollRef.current
+    if (!track || shelfStops.length === 0) return
+    userShelfScrollingRef.current = false
+    programmaticScrollRef.current = true
+    const centeredId = findShelfCenterStopId(track, shelfStops)
+    syncShelfTrackHeight({ instant: true })
+    correctShelfSnapToCenter(track, shelfStops, centeredId)
+    requestAnimationFrame(() => {
+      syncShelfTrackHeight({ instant: true })
+      correctShelfSnapToCenter(track, shelfStops, centeredId)
+      programmaticScrollRef.current = false
+      scheduleCommitFromScroll()
+    })
+  }, [shelfStops, syncShelfTrackHeight, scheduleCommitFromScroll])
+
   const finishProgrammaticShelfScroll = useCallback(() => {
+    const track = scrollRef.current
     programmaticScrollRef.current = false
     if (programmaticScrollReleaseTimerRef.current != null) {
       clearTimeout(programmaticScrollReleaseTimerRef.current)
       programmaticScrollReleaseTimerRef.current = null
     }
     syncShelfTrackHeight()
-  }, [syncShelfTrackHeight])
+    if (track) {
+      correctShelfSnapToCenter(track, shelfStops, selectedStopId)
+    }
+  }, [syncShelfTrackHeight, shelfStops, selectedStopId])
 
   const scrollShelfToStopId = useCallback(
     (stopId: string) => {
@@ -1151,7 +1202,7 @@ function MobileMapModalStopShelf({
       )?.matches
         ? 'auto'
         : 'smooth'
-      const targetLeft = card.offsetLeft + card.offsetWidth / 2 - el.clientWidth / 2
+      const targetLeft = getShelfCardTargetScrollLeft(el, card)
       programmaticScrollRef.current = true
       if (programmaticScrollReleaseTimerRef.current != null) {
         clearTimeout(programmaticScrollReleaseTimerRef.current)
@@ -1200,16 +1251,21 @@ function MobileMapModalStopShelf({
     const el = scrollRef.current
     if (!el) return
     const onScrollEnd = () => {
-      syncShelfTrackHeight()
-      scheduleCommitFromScroll()
+      if (scrollIdleTimerRef.current != null) {
+        clearTimeout(scrollIdleTimerRef.current)
+        scrollIdleTimerRef.current = null
+      }
+      if (programmaticScrollRef.current) return
+      settleUserShelfScroll()
     }
     const onScroll = () => {
-      syncShelfTrackHeight()
+      if (programmaticScrollRef.current) return
+      userShelfScrollingRef.current = true
       if (scrollIdleTimerRef.current != null) clearTimeout(scrollIdleTimerRef.current)
       scrollIdleTimerRef.current = setTimeout(() => {
         scrollIdleTimerRef.current = null
-        scheduleCommitFromScroll()
-      }, 140)
+        settleUserShelfScroll()
+      }, 280)
     }
     el.addEventListener('scrollend', onScrollEnd)
     el.addEventListener('scroll', onScroll, { passive: true })
@@ -1218,7 +1274,7 @@ function MobileMapModalStopShelf({
       el.removeEventListener('scroll', onScroll)
       if (scrollIdleTimerRef.current != null) clearTimeout(scrollIdleTimerRef.current)
     }
-  }, [scheduleCommitFromScroll, syncShelfTrackHeight])
+  }, [settleUserShelfScroll])
 
   useLayoutEffect(() => {
     const el = scrollRef.current
@@ -1240,7 +1296,10 @@ function MobileMapModalStopShelf({
     const track = scrollRef.current
     if (!track) return
     syncShelfTrackHeight()
-    const ro = new ResizeObserver(() => syncShelfTrackHeight())
+    const ro = new ResizeObserver(() => {
+      if (userShelfScrollingRef.current || programmaticScrollRef.current) return
+      syncShelfTrackHeight()
+    })
     const cards = track.querySelectorAll('[data-shelf-card]')
     cards.forEach((card) => ro.observe(card))
     return () => ro.disconnect()
@@ -1249,7 +1308,10 @@ function MobileMapModalStopShelf({
   useEffect(() => {
     const track = scrollRef.current
     if (!track) return
-    const onLayout = () => syncShelfTrackHeight()
+    const onLayout = () => {
+      if (userShelfScrollingRef.current) return
+      syncShelfTrackHeight()
+    }
     track.addEventListener(MW_SHELF_CARD_LAYOUT_EVENT, onLayout)
     return () => track.removeEventListener(MW_SHELF_CARD_LAYOUT_EVENT, onLayout)
   }, [syncShelfTrackHeight])
