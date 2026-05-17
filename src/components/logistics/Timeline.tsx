@@ -219,10 +219,27 @@ function FlagGlyph({ className }: { className?: string }) {
   )
 }
 
-/** Default shelf description clip ≈ 3 lines (`text-[14px] leading-relaxed` ~22.75px/line) + a little room for the bottom fade. */
-const SHELF_DESC_PEEK_PX = Math.ceil(14 * 1.625 * 3 + 12)
+/** Default shelf description clip ≈ 4.5 lines (`text-[14px] leading-relaxed` ~22.75px/line) + a little room for the bottom fade. */
+const SHELF_DESC_PEEK_PX = Math.ceil(14 * 1.625 * 4.5 + 12)
 /** Pointer: min vertical travel (px) on release to snap open / closed. */
 const SHELF_DESC_SNAP_POINTER_DY = 24
+
+/** Bubbles to `MobileMapModalStopShelf` so the track height tracks peek ↔ full transitions. */
+export const MW_SHELF_CARD_LAYOUT_EVENT = 'mw-shelf-card-layout'
+
+/** Shared timing for shelf description expand/collapse and shelf row height (GPS chrome follows). */
+export const MW_SHELF_DESC_TRANSITION_MS = 380
+export const MW_SHELF_DESC_EASE = 'cubic-bezier(0.4, 0, 0.2, 1)'
+export const mwShelfLayoutTransition = {
+  duration: MW_SHELF_DESC_TRANSITION_MS / 1000,
+  ease: [0.4, 0, 0.2, 1] as [number, number, number, number],
+}
+
+function notifyMwShelfCardLayout(clipEl: HTMLElement | null) {
+  clipEl?.closest('[data-shelf-card]')?.dispatchEvent(
+    new CustomEvent(MW_SHELF_CARD_LAYOUT_EVENT, { bubbles: true }),
+  )
+}
 
 /**
  * MW map horizontal shelf: **snap** description height — wheel / vertical drag up → full copy,
@@ -260,6 +277,8 @@ function TimelineShelfScrollFadeDescription({
     revealRef.current = next
     setNaturalH(h)
     setRevealPx(next)
+    const shelfCard = clipRef.current?.closest('[data-shelf-card]') as HTMLElement | null
+    if (shelfCard) shelfCard.dataset.shelfTargetRevealPx = String(next)
   }, [text])
 
   const recalcNaturalFromResize = useCallback(() => {
@@ -305,8 +324,16 @@ function TimelineShelfScrollFadeDescription({
     revealRef.current = next
     setRevealPx(next)
     const card = clip?.closest('[data-shelf-card]') as HTMLElement | null
-    if (card) card.scrollTop = 0
+    if (card) {
+      card.dataset.shelfTargetRevealPx = String(next)
+      card.scrollTop = 0
+    }
+    notifyMwShelfCardLayout(clip)
   }, [shelfDescriptionActive])
+
+  useLayoutEffect(() => {
+    notifyMwShelfCardLayout(clipRef.current)
+  }, [revealPx])
 
   useEffect(() => {
     const clip = clipRef.current
@@ -330,6 +357,9 @@ function TimelineShelfScrollFadeDescription({
       if (v === revealRef.current) return
       revealRef.current = v
       setRevealPx(v)
+      const shelfCard = clipRef.current?.closest('[data-shelf-card]') as HTMLElement | null
+      if (shelfCard) shelfCard.dataset.shelfTargetRevealPx = String(v)
+      notifyMwShelfCardLayout(clipRef.current)
     }
 
     const snapFull = () => {
@@ -440,6 +470,11 @@ function TimelineShelfScrollFadeDescription({
       if (dragging && e.cancelable) {
         e.preventDefault()
       }
+
+      if (dragging && dy > 0) {
+        const n = naturalHRef.current
+        if (revealRef.current < n - 2 && dy >= 12) snapFull()
+      }
     }
 
     const onPointerDown = (e: PointerEvent) => {
@@ -509,11 +544,16 @@ function TimelineShelfScrollFadeDescription({
   return (
     <div
       ref={clipRef}
+      data-shelf-desc-clip
       style={{
         maxHeight: `${revealPx}px`,
         overflow: 'hidden',
       }}
       className="relative isolate text-[14px] leading-relaxed text-stone-600 transition-[max-height] duration-[380ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none motion-reduce:duration-0"
+      onTransitionEnd={(e) => {
+        if (e.propertyName !== 'max-height') return
+        notifyMwShelfCardLayout(clipRef.current)
+      }}
     >
       <div ref={measureRef} className="pb-3">
         <p className="whitespace-pre-wrap">{text}</p>
@@ -523,7 +563,7 @@ function TimelineShelfScrollFadeDescription({
           className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-16"
           style={{
             background:
-              'linear-gradient(180deg, rgba(255, 255, 255, 0.00) 0%, rgba(255, 255, 255, 0.80) 49.52%, #FFF 100%)',
+              'linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #FFFFFF 100%)',
           }}
           aria-hidden
         />

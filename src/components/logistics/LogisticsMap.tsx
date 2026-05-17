@@ -7,10 +7,11 @@ import {
   useRef,
   useState,
   type ComponentProps,
+  type CSSProperties,
   type MouseEvent,
   type MutableRefObject,
 } from 'react'
-import { AnimatePresence, animate, motion } from 'framer-motion'
+import { AnimatePresence, animate, LayoutGroup, motion } from 'framer-motion'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import {
@@ -19,7 +20,14 @@ import {
   type Stop,
   type VariantId,
 } from '../../data/variants'
-import { TimelineStopDescription, type SelectSource } from './Timeline'
+import {
+  MW_SHELF_CARD_LAYOUT_EVENT,
+  MW_SHELF_DESC_EASE,
+  MW_SHELF_DESC_TRANSITION_MS,
+  mwShelfLayoutTransition,
+  TimelineStopDescription,
+  type SelectSource,
+} from './Timeline'
 import { getPoiOrderForStopIndex } from './poiOrder'
 import { viatorMeetingMarkSvgHtml } from './viatorMeetingMark'
 import {
@@ -58,7 +66,7 @@ type MobileMapB2MeetingHubShelfProps = Pick<
 /** MW map modal stop shelf: `ResizeObserver` writes this on the scroll track. Card width is `track − 32px` with `gap-[8px]` so each edge shows 8px of the neighbor card after the 8px gap (with `−16px`, `(track−card)/2` equaled the gap and the “peek” was empty gutter). */
 const MW_MAP_SHELF_TRACK_PX_VAR = '--mw-map-shelf-track-px'
 
-/** MW shelf card shell — height follows content (`items-end` on the track). */
+/** MW shelf card shell — track height matches the centered slide; cards bottom-align in the row (`self-end`). */
 const MW_MAP_SHELF_CARD_CLASS =
   'flex w-[calc(var(--mw-map-shelf-track-px,100dvw)-32px)] shrink-0 snap-center self-end flex-col overflow-y-auto overscroll-y-contain rounded-2xl border border-stone-200/90 bg-white/95 px-4 pt-3 pb-0 shadow-xl shadow-stone-900/12 ring-1 ring-stone-200/80 backdrop-blur-md'
 
@@ -1043,7 +1051,67 @@ function MobileMapModalStopShelf({
   const scrollRef = useRef<HTMLDivElement>(null)
   const suppressNextScrollIntoViewRef = useRef(false)
   const programmaticScrollRef = useRef(false)
+  const programmaticScrollReleaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const scrollIdleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  /** Row height follows the **centered** snap slide so a tall off-screen slide does not stretch the shelf. */
+  const [shelfTrackHeightPx, setShelfTrackHeightPx] = useState<number | null>(null)
+  const shelfTrackStyle = useMemo((): CSSProperties | undefined => {
+    if (shelfTrackHeightPx == null) return undefined
+    const reduceMotion = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
+    return {
+      height: shelfTrackHeightPx,
+      transition: reduceMotion
+        ? undefined
+        : `height ${MW_SHELF_DESC_TRANSITION_MS}ms ${MW_SHELF_DESC_EASE}`,
+    }
+  }, [shelfTrackHeightPx])
+
+  const syncShelfTrackHeight = useCallback(() => {
+    const track = scrollRef.current
+    if (!track || shelfStops.length === 0) {
+      setShelfTrackHeightPx(null)
+      return
+    }
+    const centeredId =
+      findShelfCenterStopId(track, shelfStops) ??
+      (selectedStopId && shelfStops.some((s) => s.id === selectedStopId)
+        ? selectedStopId
+        : null)
+    if (!centeredId) {
+      setShelfTrackHeightPx(null)
+      return
+    }
+    const centeredCard = track.querySelector(
+      `[data-shelf-card][data-stop-id="${CSS.escape(centeredId)}"]`,
+    ) as HTMLElement | null
+    if (!centeredCard) {
+      setShelfTrackHeightPx(null)
+      return
+    }
+    for (const s of shelfStops) {
+      if (s.id === centeredId) continue
+      const c = track.querySelector(
+        `[data-shelf-card][data-stop-id="${CSS.escape(s.id)}"]`,
+      ) as HTMLElement | null
+      if (c && c.scrollTop > 0) c.scrollTop = 0
+    }
+    const cs = getComputedStyle(track)
+    const padY =
+      (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0)
+    const targetRevealRaw = centeredCard.dataset.shelfTargetRevealPx
+    const clip = centeredCard.querySelector('[data-shelf-desc-clip]') as HTMLElement | null
+    let contentH = Math.max(centeredCard.offsetHeight, centeredCard.scrollHeight)
+    if (targetRevealRaw && clip) {
+      const targetReveal = Number.parseInt(targetRevealRaw, 10)
+      if (Number.isFinite(targetReveal)) {
+        const currentClipH = clip.getBoundingClientRect().height
+        const shellH = centeredCard.offsetHeight - currentClipH
+        contentH = Math.ceil(shellH + targetReveal)
+      }
+    }
+    const h = Math.ceil(contentH + padY)
+    if (h > 0) setShelfTrackHeightPx(h)
+  }, [shelfStops, selectedStopId])
 
   const scheduleCommitFromScroll = useCallback(() => {
     if (programmaticScrollRef.current) return
@@ -1061,33 +1129,82 @@ function MobileMapModalStopShelf({
     onShelfCommitStop(id)
   }, [shelfStops, selectedStopId, onShelfCommitStop, shelfHubStopId])
 
+  const finishProgrammaticShelfScroll = useCallback(() => {
+    programmaticScrollRef.current = false
+    if (programmaticScrollReleaseTimerRef.current != null) {
+      clearTimeout(programmaticScrollReleaseTimerRef.current)
+      programmaticScrollReleaseTimerRef.current = null
+    }
+    syncShelfTrackHeight()
+  }, [syncShelfTrackHeight])
+
+  const scrollShelfToStopId = useCallback(
+    (stopId: string) => {
+      const el = scrollRef.current
+      if (!el) return
+      const card = el.querySelector(
+        `[data-shelf-card][data-stop-id="${CSS.escape(stopId)}"]`,
+      ) as HTMLElement | null
+      if (!card) return
+      const behavior: ScrollBehavior = globalThis.matchMedia?.(
+        '(prefers-reduced-motion: reduce)',
+      )?.matches
+        ? 'auto'
+        : 'smooth'
+      const targetLeft = card.offsetLeft + card.offsetWidth / 2 - el.clientWidth / 2
+      programmaticScrollRef.current = true
+      if (programmaticScrollReleaseTimerRef.current != null) {
+        clearTimeout(programmaticScrollReleaseTimerRef.current)
+        programmaticScrollReleaseTimerRef.current = null
+      }
+      let released = false
+      const release = () => {
+        if (released) return
+        released = true
+        el.removeEventListener('scrollend', release)
+        if (programmaticScrollReleaseTimerRef.current != null) {
+          clearTimeout(programmaticScrollReleaseTimerRef.current)
+          programmaticScrollReleaseTimerRef.current = null
+        }
+        finishProgrammaticShelfScroll()
+      }
+      el.scrollTo({ left: Math.max(0, targetLeft), behavior })
+      if (behavior === 'smooth') {
+        el.addEventListener('scrollend', release, { once: true })
+        programmaticScrollReleaseTimerRef.current = setTimeout(release, 520)
+      } else {
+        requestAnimationFrame(finishProgrammaticShelfScroll)
+      }
+    },
+    [finishProgrammaticShelfScroll],
+  )
+
   useLayoutEffect(() => {
-    const el = scrollRef.current
-    if (!el) return
     if (suppressNextScrollIntoViewRef.current) {
       suppressNextScrollIntoViewRef.current = false
       return
     }
     if (!selectedStopId || !shelfStops.some((s) => s.id === selectedStopId)) return
-    const card = el.querySelector(
-      `[data-shelf-card][data-stop-id="${CSS.escape(selectedStopId)}"]`,
-    ) as HTMLElement | null
-    if (!card) return
-    const targetLeft = card.offsetLeft + card.offsetWidth / 2 - el.clientWidth / 2
-    programmaticScrollRef.current = true
-    el.scrollTo({ left: Math.max(0, targetLeft), behavior: 'auto' })
-    requestAnimationFrame(() => {
-      programmaticScrollRef.current = false
-    })
-  }, [selectedStopId, shelfStops])
+    scrollShelfToStopId(selectedStopId)
+  }, [selectedStopId, shelfStops, scrollShelfToStopId])
+
+  useEffect(() => {
+    return () => {
+      if (programmaticScrollReleaseTimerRef.current != null) {
+        clearTimeout(programmaticScrollReleaseTimerRef.current)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     const el = scrollRef.current
     if (!el) return
     const onScrollEnd = () => {
+      syncShelfTrackHeight()
       scheduleCommitFromScroll()
     }
     const onScroll = () => {
+      syncShelfTrackHeight()
       if (scrollIdleTimerRef.current != null) clearTimeout(scrollIdleTimerRef.current)
       scrollIdleTimerRef.current = setTimeout(() => {
         scrollIdleTimerRef.current = null
@@ -1101,7 +1218,7 @@ function MobileMapModalStopShelf({
       el.removeEventListener('scroll', onScroll)
       if (scrollIdleTimerRef.current != null) clearTimeout(scrollIdleTimerRef.current)
     }
-  }, [scheduleCommitFromScroll])
+  }, [scheduleCommitFromScroll, syncShelfTrackHeight])
 
   useLayoutEffect(() => {
     const el = scrollRef.current
@@ -1119,6 +1236,24 @@ function MobileMapModalStopShelf({
     }
   }, [shelfStops.length])
 
+  useLayoutEffect(() => {
+    const track = scrollRef.current
+    if (!track) return
+    syncShelfTrackHeight()
+    const ro = new ResizeObserver(() => syncShelfTrackHeight())
+    const cards = track.querySelectorAll('[data-shelf-card]')
+    cards.forEach((card) => ro.observe(card))
+    return () => ro.disconnect()
+  }, [syncShelfTrackHeight, shelfStops, b2MeetingHubProps])
+
+  useEffect(() => {
+    const track = scrollRef.current
+    if (!track) return
+    const onLayout = () => syncShelfTrackHeight()
+    track.addEventListener(MW_SHELF_CARD_LAYOUT_EVENT, onLayout)
+    return () => track.removeEventListener(MW_SHELF_CARD_LAYOUT_EVENT, onLayout)
+  }, [syncShelfTrackHeight])
+
   return (
     <div
       className="w-full min-w-0"
@@ -1128,7 +1263,8 @@ function MobileMapModalStopShelf({
     >
       <div
         ref={scrollRef}
-        className="flex items-end snap-x snap-mandatory gap-[8px] overflow-x-auto overflow-y-hidden overscroll-x-contain py-0.5 touch-pan-x pl-4 pr-4 scroll-pl-4 scroll-pr-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
+        className="flex items-end snap-x snap-mandatory gap-[8px] overflow-x-auto overflow-y-visible overscroll-x-contain py-0.5 touch-pan-x pl-4 pr-4 scroll-pl-4 scroll-pr-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
+        style={shelfTrackStyle}
       >
         {shelfStops.map((s) => (
           <MobileMapModalStopPanelCard
@@ -2929,6 +3065,17 @@ export function LogisticsMap({
                   setMobileB2MeetingReselectPickerRef.current(committedId != null)
                   setMobileB2MeetingPendingIdRef.current(stop.id)
                   onB2MeetingHoverRef.current?.(stop.id)
+                  /**
+                   * No committed pickup: snap the shelf to the hub slide (meeting list / picker).
+                   * `mobileMapModalShelfSelectedStopId` maps meeting ids → hub while in list mode.
+                   */
+                  if (committedId == null) {
+                    onSelectRef.current(stop.id, 'mapModal')
+                    selectedStopIdRef.current = stop.id
+                    lastSelectSourceRef.current = 'mapModal'
+                    highlightSelectedPinRef.current = true
+                    syncMarkersAppearanceRef.current()
+                  }
                   poiPopupRef.current?.remove()
                   poiPopupRef.current = null
                   return
@@ -3602,7 +3749,15 @@ export function LogisticsMap({
       syncMarkersAppearanceRef.current()
       previousSelectionForCameraRef.current = selectedStopId
       try {
-        runRecentreLikeButton(isMobile)
+        /**
+         * MW B2 shelf: hub-slide effect already runs `focusMobileModalShelfStop` on commit.
+         * Overview `runRecentreLikeButton` here stacked on top and read as 2–3 jumps.
+         */
+        const mwShelfHandlesCamera =
+          isMobile && mobileSheetOpen && b2TripleMeetingMwShelfActive
+        if (!mwShelfHandlesCamera) {
+          runRecentreLikeButton(isMobile)
+        }
       } finally {
         prevHighlightForCameraRef.current = highlightSelectedPin
       }
@@ -3723,6 +3878,7 @@ export function LogisticsMap({
     landingDefaultExpandedStopId,
     variantId,
     b2CommittedPickupId,
+    b2TripleMeetingMwShelfActive,
     runRecentreLikeButton,
   ])
 
@@ -3937,16 +4093,22 @@ export function LogisticsMap({
                   </button>
                 </div>
               ) : null}
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[55] flex flex-col-reverse gap-2 overscroll-none px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
+              <LayoutGroup id="mw-map-bottom-chrome">
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[55] flex flex-col-reverse gap-4 overscroll-none px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
                 {b2TripleMeetingMwShelfActive || mobileModalDetailStop ? (
                   <motion.div
                     ref={mobileModalStopPanelMotionRef}
                     key="mobile-map-stop-shelf"
+                    layout
                     className="pointer-events-auto w-[calc(100%_+_1.5rem)] max-w-none origin-bottom -mx-3"
                     style={{ willChange: 'transform, opacity' }}
                     initial={{ opacity: 0, y: 18 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.24, ease: [0.4, 0, 0.2, 1] }}
+                    transition={{
+                      duration: 0.24,
+                      ease: [0.4, 0, 0.2, 1],
+                      layout: mwShelfLayoutTransition,
+                    }}
                   >
                     <MobileMapModalStopShelf
                       shelfStops={mobileMapModalShelfStops}
@@ -3969,7 +4131,11 @@ export function LogisticsMap({
                     />
                   </motion.div>
                 ) : null}
-                <div className="flex w-full shrink-0 justify-end">
+                <motion.div
+                  layout
+                  className="flex w-full shrink-0 justify-end"
+                  transition={{ layout: mwShelfLayoutTransition }}
+                >
                   <button
                     type="button"
                     disabled={!mapReady}
@@ -4037,8 +4203,9 @@ export function LogisticsMap({
                       </defs>
                     </svg>
                   </button>
-                </div>
+                </motion.div>
               </div>
+              </LayoutGroup>
             </div>
             </motion.div>
         ) : null}
