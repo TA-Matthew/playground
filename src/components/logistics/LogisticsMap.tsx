@@ -68,7 +68,7 @@ const MW_MAP_SHELF_TRACK_PX_VAR = '--mw-map-shelf-track-px'
 
 /** MW shelf card shell — track height matches the centered slide; cards bottom-align in the row (`self-end`). */
 const MW_MAP_SHELF_CARD_CLASS =
-  'flex w-[calc(var(--mw-map-shelf-track-px,100dvw)-32px)] shrink-0 snap-center self-end flex-col overflow-y-auto overscroll-y-contain rounded-2xl border border-stone-200/90 bg-white/95 px-4 pt-3 pb-0 shadow-xl shadow-stone-900/12 ring-1 ring-stone-200/80 backdrop-blur-md'
+  'flex w-[calc(var(--mw-map-shelf-track-px,100dvw)-32px)] shrink-0 snap-center self-end flex-col overflow-y-auto overscroll-y-contain touch-pan-x rounded-2xl border border-stone-200/90 bg-white/95 px-4 pt-3 pb-0 shadow-xl shadow-stone-900/12 ring-1 ring-stone-200/80 backdrop-blur-md'
 
 /** First MW shelf slide for B2 triple-meeting: list or “Meet at” (`MobileMapModalB2MeetingPanel` embedded). */
 const MW_MAP_B2_SHELF_HUB_STOP_ID = '__mw_map_b2_shelf_hub__'
