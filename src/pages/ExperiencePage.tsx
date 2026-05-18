@@ -109,11 +109,17 @@ export function ExperiencePage() {
 
   useLayoutEffect(() => {
     if (!isProductHighlight) return
-    if (rawPhLayoutParam === 'airbnb-trust') {
+    if (
+      rawPhLayoutParam === 'airbnb-trust' ||
+      rawPhLayoutParam === 'ggy-list' ||
+      rawPhLayoutParam === 'viator-cards' ||
+      rawPhLayoutParam === 'compact-strip' ||
+      rawPhLayoutParam === 'withlocals-merged'
+    ) {
       setSearchParams(
         (prev) => {
           const next = new URLSearchParams(prev)
-          next.set(PRODUCT_HIGHLIGHT_LAYOUT_QUERY, 'ggy-list')
+          next.set(PRODUCT_HIGHLIGHT_LAYOUT_QUERY, DEFAULT_PRODUCT_HIGHLIGHT_LAYOUT)
           return next
         },
         { replace: true },
@@ -331,6 +337,12 @@ export function ExperiencePage() {
             averageRating={viatorListing.averageRating}
             reviewCount={viatorListing.reviewCount}
             locationLine={viatorListing.locationLine}
+            quickFacts={
+              isProductHighlight &&
+              (highlightLayoutId === 'headout-grid' || highlightLayoutId === 'expedia-klook-labels')
+                ? viatorListing.iconRail
+                : undefined
+            }
           />
         </div>
 

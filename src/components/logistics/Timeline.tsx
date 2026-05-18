@@ -263,8 +263,6 @@ function TimelineShelfScrollFadeDescription({
 
   const [naturalH, setNaturalH] = useState(0)
   const [revealPx, setRevealPx] = useState(SHELF_DESC_PEEK_PX)
-  /** Expand snaps instantly so copy is not clipped while the shelf row height animates. */
-  const [revealExpandInstant, setRevealExpandInstant] = useState(false)
 
   useLayoutEffect(() => {
     const p = measureRef.current
@@ -337,10 +335,13 @@ function TimelineShelfScrollFadeDescription({
     notifyMwShelfCardLayout(clipRef.current)
   }, [revealPx])
 
-  useLayoutEffect(() => {
-    if (!revealExpandInstant) return
-    setRevealExpandInstant(false)
-  }, [revealExpandInstant, revealPx])
+  useEffect(() => {
+    const clip = clipRef.current
+    if (!clip) return
+    const ro = new ResizeObserver(() => notifyMwShelfCardLayout(clip))
+    ro.observe(clip)
+    return () => ro.disconnect()
+  }, [text])
 
   useEffect(() => {
     const clip = clipRef.current
@@ -373,7 +374,8 @@ function TimelineShelfScrollFadeDescription({
       const n = naturalHRef.current
       if (n <= peekRef.current) return
       if (revealRef.current >= n - 2) return
-      setRevealExpandInstant(true)
+      const shelfCard = clipRef.current?.closest('[data-shelf-card]') as HTMLElement | null
+      if (shelfCard) shelfCard.scrollTop = 0
       setRevealExact(n)
     }
 
@@ -567,10 +569,6 @@ function TimelineShelfScrollFadeDescription({
   }, [text])
 
   const showFade = naturalH > revealPx + 2
-  const revealTransitionClass =
-    revealExpandInstant || globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
-      ? 'motion-reduce:transition-none'
-      : 'transition-[max-height] duration-[380ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none motion-reduce:duration-0'
 
   return (
     <div
@@ -580,7 +578,7 @@ function TimelineShelfScrollFadeDescription({
         maxHeight: `${revealPx}px`,
         overflow: 'hidden',
       }}
-      className={`relative isolate text-[14px] leading-relaxed text-stone-600 ${revealTransitionClass}`}
+      className="relative isolate text-[14px] leading-relaxed text-stone-600 transition-[max-height] duration-[380ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none motion-reduce:duration-0"
       onTransitionEnd={(e) => {
         if (e.propertyName !== 'max-height') return
         notifyMwShelfCardLayout(clipRef.current)

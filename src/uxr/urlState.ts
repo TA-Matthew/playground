@@ -48,8 +48,16 @@ export function parseVariant(searchParams: URLSearchParams): VariantId {
 /** Product highlight — `phLayout` query; invalid or missing → default chrome. */
 export function parseHighlightLayout(searchParams: URLSearchParams): ProductHighlightLayoutId {
   const v = searchParams.get(PRODUCT_HIGHLIGHT_LAYOUT_QUERY)
-  /** Legacy `phLayout=airbnb-trust` merged into `ggy-list` (same UI). */
-  if (v === 'airbnb-trust') return 'ggy-list'
+  /** Legacy `phLayout` values removed from the experiment. */
+  if (
+    v === 'airbnb-trust' ||
+    v === 'ggy-list' ||
+    v === 'viator-cards' ||
+    v === 'compact-strip' ||
+    v === 'withlocals-merged'
+  ) {
+    return DEFAULT_PRODUCT_HIGHLIGHT_LAYOUT
+  }
   if (v && isProductHighlightLayoutId(v)) return v
   return DEFAULT_PRODUCT_HIGHLIGHT_LAYOUT
 }

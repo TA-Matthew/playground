@@ -13,7 +13,7 @@ import { PdpWhyTravelersLoved } from './PdpWhyTravelersLoved'
 
 type Props = {
   booking: BookingContent
-  /** When set (product-highlight project), renders between icon rail and “Why travelers loved this”. */
+  /** When set (product-highlight project), renders below the hero gallery. */
   productHighlightSetId?: ProductHighlightSetId | null
   productHighlightLayoutId?: ProductHighlightLayoutId | null
 }
@@ -26,22 +26,30 @@ type Props = {
  */
 export function FigmaViatorPdpBlock({ booking, productHighlightSetId, productHighlightLayoutId }: Props) {
   const l = viatorListing
-  const hideStandaloneIconRail = productHighlightLayoutId === 'withlocals-merged'
+  const hideStandaloneIconRail =
+    productHighlightLayoutId === 'expedia-split' ||
+    productHighlightLayoutId === 'expedia-klook-labels' ||
+    productHighlightLayoutId === 'headout-grid'
 
   return (
     <div className="w-full">
       <div className="flex w-full flex-col">
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-6">
           <PdpViatorHeroGallery />
           <div className="lg:hidden">
             <BookingSidebar booking={booking} embedded />
           </div>
+          {productHighlightSetId && productHighlightLayoutId ? (
+            <PdpProductHighlights setId={productHighlightSetId} layoutId={productHighlightLayoutId} />
+          ) : null}
           {hideStandaloneIconRail ? null : <PdpViatorIconRail items={l.iconRail} />}
         </div>
-        {productHighlightSetId && productHighlightLayoutId ? (
-          <PdpProductHighlights setId={productHighlightSetId} layoutId={productHighlightLayoutId} />
-        ) : null}
-        <PdpWhyTravelersLoved />
+        <PdpWhyTravelersLoved
+          showTopDivider={
+            productHighlightLayoutId === 'expedia-split' ||
+            productHighlightLayoutId === 'expedia-klook-labels'
+          }
+        />
         <div className="mt-5 flex flex-col gap-5">
           <PdpPromotedExperiences />
           {/* gap-5 only before Overview; Whats included abuts Overview with no spacer (top rule flush). */}

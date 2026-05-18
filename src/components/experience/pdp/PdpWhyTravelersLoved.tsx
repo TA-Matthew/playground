@@ -8,7 +8,12 @@ import { ViatorSpotlightFiveStars } from './ViatorSpotlightFiveStars'
 /**
  * Viator B2C “Why travelers loved this” — social proof, theme chips, horizontally scrolling spotlight cards.
  */
-export function PdpWhyTravelersLoved() {
+type Props = {
+  /** Expedia-style PDP — divider + spacing above (replaces default top margin). */
+  showTopDivider?: boolean
+}
+
+export function PdpWhyTravelersLoved({ showTopDivider = false }: Props) {
   const w = viatorListing.whyTravelersLoved
   const spotlightScrollRef = useRef<HTMLDivElement>(null)
   const [spotlightHasMoreAfter, setSpotlightHasMoreAfter] = useState(true)
@@ -52,7 +57,14 @@ export function PdpWhyTravelersLoved() {
   }, [])
 
   return (
-    <section className="mt-6 pt-0" aria-labelledby="pdp-why-travelers-h">
+    <section
+      className={
+        showTopDivider
+          ? 'border-t border-slate-200/90 pt-8'
+          : 'mt-8 pt-0'
+      }
+      aria-labelledby="pdp-why-travelers-h"
+    >
       <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div>
           <h2

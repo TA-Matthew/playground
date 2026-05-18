@@ -68,7 +68,7 @@ const MW_MAP_SHELF_TRACK_PX_VAR = '--mw-map-shelf-track-px'
 
 /** MW shelf card shell — track height matches the centered slide; cards bottom-align in the row (`self-end`). */
 const MW_MAP_SHELF_CARD_CLASS =
-  'flex w-[calc(var(--mw-map-shelf-track-px,100dvw)-32px)] shrink-0 snap-always snap-center self-end flex-col overflow-y-auto overscroll-y-contain touch-pan-x rounded-2xl border border-stone-200/90 bg-white/95 px-4 pt-3 pb-0 shadow-xl shadow-stone-900/12 ring-1 ring-stone-200/80 backdrop-blur-md'
+  'flex w-[calc(var(--mw-map-shelf-track-px,100dvw)-32px)] shrink-0 snap-always snap-center self-end flex-col overflow-y-visible overscroll-y-contain touch-pan-x rounded-2xl border border-stone-200/90 bg-white/95 px-4 pt-3 pb-0 shadow-xl shadow-stone-900/12 ring-1 ring-stone-200/80 backdrop-blur-md'
 
 /** First MW shelf slide for B2 triple-meeting: list or “Meet at” (`MobileMapModalB2MeetingPanel` embedded). */
 const MW_MAP_B2_SHELF_HUB_STOP_ID = '__mw_map_b2_shelf_hub__'
@@ -1029,6 +1029,18 @@ function getShelfCardTargetScrollLeft(
   return Math.max(0, card.offsetLeft + card.offsetWidth / 2 - track.clientWidth / 2)
 }
 
+/** Content height of one shelf card (shell + live description clip). */
+function measureShelfCardContentHeight(card: HTMLElement): number {
+  const clip = card.querySelector('[data-shelf-desc-clip]') as HTMLElement | null
+  let contentH = Math.max(card.offsetHeight, card.scrollHeight)
+  if (clip) {
+    const clipH = Math.ceil(clip.getBoundingClientRect().height)
+    const shellH = card.offsetHeight - clipH
+    contentH = Math.ceil(shellH + clipH)
+  }
+  return contentH
+}
+
 /** Nudge scroll so the nearest shelf card is centered (after height / snap settle). */
 function correctShelfSnapToCenter(
   track: HTMLDivElement,
@@ -1094,7 +1106,7 @@ function MobileMapModalStopShelf({
     }
   }, [shelfTrackHeightPx, shelfTrackHeightInstant])
 
-  const syncShelfTrackHeight = useCallback((opts?: { instant?: boolean }) => {
+  const syncShelfTrackHeight = useCallback((opts?: { instant?: boolean; animate?: boolean }) => {
     const track = scrollRef.current
     if (!track || shelfStops.length === 0) {
       setShelfTrackHeightPx(null)
@@ -1126,20 +1138,12 @@ function MobileMapModalStopShelf({
     const cs = getComputedStyle(track)
     const padY =
       (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0)
-    const targetRevealRaw = centeredCard.dataset.shelfTargetRevealPx
-    const clip = centeredCard.querySelector('[data-shelf-desc-clip]') as HTMLElement | null
-    let contentH = Math.max(centeredCard.offsetHeight, centeredCard.scrollHeight)
-    if (targetRevealRaw && clip) {
-      const targetReveal = Number.parseInt(targetRevealRaw, 10)
-      if (Number.isFinite(targetReveal)) {
-        const currentClipH = clip.getBoundingClientRect().height
-        const shellH = centeredCard.offsetHeight - currentClipH
-        contentH = Math.ceil(shellH + targetReveal)
-      }
-    }
+    const contentH = measureShelfCardContentHeight(centeredCard)
     const h = Math.ceil(contentH + padY)
     if (h > 0) {
-      setShelfTrackHeightInstant(opts?.instant ?? false)
+      const instant = opts?.instant ?? false
+      const animate = opts?.animate ?? !instant
+      setShelfTrackHeightInstant(!animate)
       setShelfTrackHeightPx(h)
     }
   }, [shelfStops, selectedStopId])
@@ -1166,10 +1170,10 @@ function MobileMapModalStopShelf({
     userShelfScrollingRef.current = false
     programmaticScrollRef.current = true
     const centeredId = findShelfCenterStopId(track, shelfStops)
-    syncShelfTrackHeight({ instant: true })
+    syncShelfTrackHeight({ animate: true })
     correctShelfSnapToCenter(track, shelfStops, centeredId)
     requestAnimationFrame(() => {
-      syncShelfTrackHeight({ instant: true })
+      syncShelfTrackHeight({ animate: true })
       correctShelfSnapToCenter(track, shelfStops, centeredId)
       programmaticScrollRef.current = false
       scheduleCommitFromScroll()
@@ -1183,7 +1187,7 @@ function MobileMapModalStopShelf({
       clearTimeout(programmaticScrollReleaseTimerRef.current)
       programmaticScrollReleaseTimerRef.current = null
     }
-    syncShelfTrackHeight()
+    syncShelfTrackHeight({ animate: true })
     if (track) {
       correctShelfSnapToCenter(track, shelfStops, selectedStopId)
     }
@@ -1295,10 +1299,10 @@ function MobileMapModalStopShelf({
   useLayoutEffect(() => {
     const track = scrollRef.current
     if (!track) return
-    syncShelfTrackHeight()
+    syncShelfTrackHeight({ animate: true })
     const ro = new ResizeObserver(() => {
       if (userShelfScrollingRef.current || programmaticScrollRef.current) return
-      syncShelfTrackHeight()
+      syncShelfTrackHeight({ instant: true })
     })
     const cards = track.querySelectorAll('[data-shelf-card]')
     cards.forEach((card) => ro.observe(card))
@@ -1310,7 +1314,7 @@ function MobileMapModalStopShelf({
     if (!track) return
     const onLayout = () => {
       if (userShelfScrollingRef.current) return
-      syncShelfTrackHeight()
+      syncShelfTrackHeight({ instant: true })
     }
     track.addEventListener(MW_SHELF_CARD_LAYOUT_EVENT, onLayout)
     return () => track.removeEventListener(MW_SHELF_CARD_LAYOUT_EVENT, onLayout)
@@ -1318,14 +1322,14 @@ function MobileMapModalStopShelf({
 
   return (
     <div
-      className="w-full min-w-0"
+      className="w-full min-w-0 overflow-y-visible"
       role="region"
       aria-live="polite"
       aria-label="Itinerary stops — swipe sideways to see each stop"
     >
       <div
         ref={scrollRef}
-        className="flex items-end snap-x snap-mandatory gap-[8px] overflow-x-auto overflow-y-visible overscroll-x-contain py-0.5 touch-pan-x pl-4 pr-4 scroll-pl-4 scroll-pr-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
+        className="flex items-end snap-x snap-mandatory gap-[8px] overflow-x-auto overscroll-x-contain py-0.5 touch-pan-x pl-4 pr-4 scroll-pl-4 scroll-pr-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
         style={shelfTrackStyle}
       >
         {shelfStops.map((s) => (
@@ -4173,7 +4177,7 @@ export function LogisticsMap({
                     ref={mobileModalStopPanelMotionRef}
                     key="mobile-map-stop-shelf"
                     layout
-                    className="pointer-events-auto w-[calc(100%_+_1.5rem)] max-w-none origin-bottom -mx-3"
+                    className="pointer-events-auto w-[calc(100%_+_1.5rem)] max-w-none origin-bottom overflow-visible -mx-3"
                     style={{ willChange: 'transform, opacity' }}
                     initial={{ opacity: 0, y: 18 }}
                     animate={{ opacity: 1, y: 0 }}

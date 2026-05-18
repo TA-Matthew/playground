@@ -1,18 +1,9 @@
-import type { ReactElement, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import type { ProductHighlightLayoutId } from '../../../data/productHighlightLayouts'
 import type { IconRailItem } from '../../../data/viatorListing'
 import { viatorListing } from '../../../data/viatorListing'
 import type { ProductHighlightIconId, ProductHighlightSet, ProductHighlightSetId } from '../../../data/productHighlightSets'
 import { getProductHighlightSet } from '../../../data/productHighlightSets'
-
-/** Single accent — icons only; no filled wells (minimal chrome). */
-const iconFill = '#0f766e'
-
-function IconSlot({ children }: { children: ReactNode }) {
-  return (
-    <span className="flex w-6 shrink-0 justify-start pt-0.5 text-teal-800 [&>svg]:size-6">{children}</span>
-  )
-}
 
 /** Thin-line icons (GetYourGuide–style). */
 function PhLineIcon({ id, className = 'size-6 shrink-0 text-stone-400' }: { id: ProductHighlightIconId; className?: string }) {
@@ -143,214 +134,11 @@ function PhLineIcon({ id, className = 'size-6 shrink-0 text-stone-400' }: { id: 
   }
 }
 
-function StarIcon() {
-  return (
-    <svg className="size-6" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M12 3.5l2.09 4.24 4.68.68-3.39 3.3.8 4.66L12 14.77 7.82 16.38l.8-4.66-3.39-3.3 4.68-.68L12 3.5z"
-        fill={iconFill}
-      />
-    </svg>
-  )
-}
-
-function BadgeIcon() {
-  return (
-    <svg className="size-6" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M12 2l2.2 4.46 4.92.71-3.56 3.47.84 4.9L12 17.9l-4.4 2.31.84-4.9-3.56-3.47 4.92-.71L12 2z"
-        fill={iconFill}
-      />
-    </svg>
-  )
-}
-
-function HeartIcon() {
-  return (
-    <svg className="size-6" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M12 20s-7-4.35-7-9.5C5 7.46 6.79 6 9 6c1.2 0 2.32.55 3 1.42A3.49 3.49 0 0115 6c2.21 0 4 1.46 4 4.5 0 5.15-7 9.5-7 9.5z"
-        fill={iconFill}
-      />
-    </svg>
-  )
-}
-
-function TagIcon() {
-  return (
-    <svg className="size-6" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M3 12V5a2 2 0 012-2h7l9 9-7 7-9-9zM7.5 7.5h.01"
-        stroke={iconFill}
-        strokeWidth="2"
-        strokeLinecap="round"
-        fill="none"
-      />
-    </svg>
-  )
-}
-
-function ShieldIcon() {
-  return (
-    <svg className="size-6" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M12 3l7 3v6c0 4.25-3.4 7.95-7 9-3.6-1.05-7-4.75-7-9V6l7-3z"
-        stroke={iconFill}
-        strokeWidth="2"
-        fill="none"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function CheckIcon() {
-  return (
-    <svg className="size-6" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M6 12l4 4 8-8"
-        stroke={iconFill}
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function PinIcon() {
-  return (
-    <svg className="size-6" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M12 11a2 2 0 100-4 2 2 0 000 4zm-7 9l1.5-6A5 5 0 1117.5 14L19 20l-14-1z"
-        fill={iconFill}
-      />
-    </svg>
-  )
-}
-
-function TicketIcon() {
-  return (
-    <svg className="size-6" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M4 8a2 2 0 012-2h12a2 2 0 012 2v2.5a1.5 1.5 0 010 3V16a2 2 0 01-2 2H6a2 2 0 01-2-2v-2.5a1.5 1.5 0 010-3V8z"
-        stroke={iconFill}
-        strokeWidth="2"
-        fill="none"
-      />
-    </svg>
-  )
-}
-
-function ListIcon() {
-  return (
-    <svg className="size-6" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01"
-        stroke={iconFill}
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
-
-function UserIcon() {
-  return (
-    <svg className="size-6" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M12 12a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 0114 0H5z" fill={iconFill} />
-    </svg>
-  )
-}
-
-function FamilyIcon() {
-  return (
-    <svg className="size-6" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M9 10a2 2 0 11-4 0 2 2 0 014 0zm10 0a2 2 0 11-4 0 2 2 0 014 0zM4 20a5 5 0 0110 0H4zm6 0a5 5 0 0110 0h-4"
-        fill={iconFill}
-      />
-    </svg>
-  )
-}
-
-function ThumbsIcon() {
-  return (
-    <svg className="size-6" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M7 10V20H4V10h3zm12 .5l-1.5-3H11v9l1 4h6.5a2 2 0 002-1.7l1-6a2 2 0 00-2-2.3z"
-        fill={iconFill}
-      />
-    </svg>
-  )
-}
-
-const filledIconComponents: Record<ProductHighlightIconId, () => ReactElement> = {
-  star: StarIcon,
-  badge: BadgeIcon,
-  heart: HeartIcon,
-  tag: TagIcon,
-  shield: ShieldIcon,
-  check: CheckIcon,
-  pin: PinIcon,
-  ticket: TicketIcon,
-  list: ListIcon,
-  user: UserIcon,
-  family: FamilyIcon,
-  thumbs: ThumbsIcon,
-}
-
 function SectionShell({ children }: { children: ReactNode }) {
   return (
-    <section className="mt-6 font-sans" aria-label="Product highlights">
+    <section className="font-sans" aria-label="Product highlights">
       {children}
     </section>
-  )
-}
-
-function LayoutViatorCards({ set }: { set: ProductHighlightSet }) {
-  return (
-    <SectionShell>
-      <ul className="grid list-none grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-x-10 sm:gap-y-0">
-        {set.items.map((item) => {
-          const Icon = filledIconComponents[item.icon]
-          return (
-            <li key={`${set.id}-${item.title}`} className="flex gap-3 sm:flex-col sm:gap-2">
-              <IconSlot>
-                <Icon />
-              </IconSlot>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-[15px] font-medium leading-snug text-stone-900">{item.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-stone-500">{item.subtext}</p>
-              </div>
-            </li>
-          )
-        })}
-      </ul>
-    </SectionShell>
-  )
-}
-
-function LayoutAirbnbTrust({ set }: { set: ProductHighlightSet }) {
-  return (
-    <SectionShell>
-      <ul className="divide-y divide-stone-100">
-        {set.items.map((item) => {
-          const Icon = filledIconComponents[item.icon]
-          return (
-            <li key={`${set.id}-${item.title}`} className="flex gap-4 py-5 first:pt-0">
-              <IconSlot>
-                <Icon />
-              </IconSlot>
-              <div className="min-w-0">
-                <h3 className="text-[15px] font-medium text-stone-900">{item.title}</h3>
-                <p className="mt-1 text-sm leading-relaxed text-stone-500">{item.subtext}</p>
-              </div>
-            </li>
-          )
-        })}
-      </ul>
-    </SectionShell>
   )
 }
 
@@ -359,37 +147,19 @@ function LayoutHeadoutGrid({ set }: { set: ProductHighlightSet }) {
     <SectionShell>
       <ul className="grid list-none grid-cols-1 gap-x-12 gap-y-8 sm:grid-cols-2">
         {set.items.map((item) => (
-          <li key={`${set.id}-${item.title}`} className="flex gap-3">
-            <PhLineIcon id={item.icon} className="mt-0.5 size-6 shrink-0 text-stone-400" />
-            <div className="min-w-0">
+          <li key={`${set.id}-${item.title}`} className="flex items-start gap-3">
+            <span
+              className="flex size-11 shrink-0 items-center justify-center rounded-lg border border-stone-200 bg-white"
+              aria-hidden
+            >
+              <PhLineIcon id={item.icon} className="size-5 text-stone-800" />
+            </span>
+            <div className="min-w-0 pt-0.5">
               <h3 className="text-[15px] font-medium text-stone-900">{item.title}</h3>
               <p className="mt-1 text-sm leading-relaxed text-stone-500">{item.subtext}</p>
             </div>
           </li>
         ))}
-      </ul>
-    </SectionShell>
-  )
-}
-
-function LayoutCompactStrip({ set }: { set: ProductHighlightSet }) {
-  return (
-    <SectionShell>
-      <ul className="grid list-none grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">
-        {set.items.map((item) => {
-          const Icon = filledIconComponents[item.icon]
-          return (
-            <li key={`${set.id}-${item.title}`} className="flex gap-3">
-              <IconSlot>
-                <Icon />
-              </IconSlot>
-              <div className="min-w-0">
-                <h3 className="text-sm font-medium leading-snug text-stone-900">{item.title}</h3>
-                <p className="mt-1 text-xs leading-relaxed text-stone-500">{item.subtext}</p>
-              </div>
-            </li>
-          )
-        })}
       </ul>
     </SectionShell>
   )
@@ -437,77 +207,49 @@ function ExpediaRailIcon({
   )
 }
 
-function withlocalsRailHeading(it: IconRailItem): string {
-  if (it.id === 'duration') return 'Duration'
-  if (it.id === 'ticket') return 'Ticket'
-  if (it.id === 'lang') return it.label?.trim() ? it.label : 'Languages'
-  return 'Details'
-}
-
-/** Withlocals-style layout: merged block uses PDP teal icons + stone typography (not third-party accent colours). */
-function LayoutWithlocalsMerged({ set }: { set: ProductHighlightSet }) {
+function LayoutExpediaHighlights({
+  set,
+  includeQuickFactsRail,
+}: {
+  set: ProductHighlightSet
+  includeQuickFactsRail: boolean
+}) {
   const rail = viatorListing.iconRail
-  /** Match {@link PdpViatorIconRail} brand green #008768 */
-  const pdpIconClass = 'size-6 shrink-0 text-[#008768]'
-  return (
-    <SectionShell>
-      <div className="border-y border-[#d9d9d9] py-4">
-        <ul
-          className="grid list-none grid-cols-1 gap-x-10 gap-y-6 sm:grid-cols-2"
-          aria-label="Experience details and highlights"
-        >
-          {rail.map((it) => (
-            <li key={it.id} className={`flex gap-3 ${it.id === 'lang' ? 'sm:col-span-2' : ''}`}>
-              <ExpediaRailIcon kind={it.icon} iconClassName={pdpIconClass} />
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-stone-900">{withlocalsRailHeading(it)}</p>
-                <p className="mt-0.5 text-sm leading-relaxed text-stone-600">{it.value}</p>
-              </div>
-            </li>
-          ))}
-          {set.items.map((item) => (
-            <li key={`${set.id}-${item.title}`} className="flex gap-3 sm:col-span-2">
-              <PhLineIcon id={item.icon} className={pdpIconClass} />
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-stone-900">{item.title}</p>
-                <p className="mt-0.5 text-sm leading-relaxed text-stone-600">{item.subtext}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </SectionShell>
+  const highlightsBlock = (
+    <>
+      <p className="max-w-prose text-sm leading-relaxed text-slate-600">
+        Skip-the-line group tour of the Vatican Museums, Sistine Chapel, and St. Peter&apos;s Basilica with an expert
+        guide. About three hours; admission and mobile tickets included.
+      </p>
+      <ul className="mt-8 list-none space-y-8">
+        {set.items.map((item) => (
+          <li key={`${set.id}-${item.title}`} className="flex gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-sky-100">
+              <PhLineIcon id={item.icon} className="size-6 text-slate-800" />
+            </div>
+            <div className="min-w-0 pt-0.5">
+              <h3 className="text-base font-medium text-slate-900">{item.title}</h3>
+              <p className="mt-1 text-[15px] leading-relaxed text-slate-600">{item.subtext}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </>
   )
-}
 
-function LayoutExpediaSplit({ set }: { set: ProductHighlightSet }) {
-  const rail = viatorListing.iconRail
+  if (!includeQuickFactsRail) {
+    return (
+      <SectionShell>
+        <div className="pb-8">{highlightsBlock}</div>
+      </SectionShell>
+    )
+  }
+
   return (
     <SectionShell>
-      <div>
-        <h2 className="text-xl font-bold tracking-tight text-slate-800">Highlights</h2>
-        <p className="mt-2 max-w-prose text-sm leading-relaxed text-slate-600">
-          Highlights answer “why this listing”—curated proof points so you do not have to piece them together from long
-          descriptions and reviews.
-        </p>
-        <ul className="mt-8 list-none space-y-8">
-          {set.items.map((item) => (
-            <li key={`${set.id}-${item.title}`} className="flex gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-sky-100">
-                <PhLineIcon id={item.icon} className="size-6 text-slate-800" />
-              </div>
-              <div className="min-w-0 pt-0.5">
-                <h3 className="text-base font-semibold text-slate-900">{item.title}</h3>
-                <p className="mt-1 text-[15px] leading-relaxed text-slate-600">{item.subtext}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="mt-12 border-t border-slate-200/90 pt-10">
-        <h2 className="text-xl font-bold tracking-tight text-slate-800">About this property</h2>
-        <ul className="mt-5 grid list-none grid-cols-1 gap-x-12 gap-y-5 sm:grid-cols-2" aria-label="About this property">
+      <div className="flex flex-col divide-y divide-slate-200/90">
+        <div className="pb-8">{highlightsBlock}</div>
+        <ul className="grid list-none grid-cols-1 gap-x-12 gap-y-5 py-8 sm:grid-cols-2" aria-label="Quick facts">
           {rail.map((it) => (
             <li key={it.id} className="flex gap-3">
               <ExpediaRailIcon kind={it.icon} />
@@ -523,13 +265,17 @@ function LayoutExpediaSplit({ set }: { set: ProductHighlightSet }) {
             </li>
           ))}
         </ul>
-        <p className="mt-6 text-[15px] font-medium text-sky-700">
-          <span className="cursor-default">See all about this property</span>
-          <span aria-hidden> ›</span>
-        </p>
       </div>
     </SectionShell>
   )
+}
+
+function LayoutExpediaSplit({ set }: { set: ProductHighlightSet }) {
+  return <LayoutExpediaHighlights set={set} includeQuickFactsRail />
+}
+
+function LayoutExpediaKlookLabels({ set }: { set: ProductHighlightSet }) {
+  return <LayoutExpediaHighlights set={set} includeQuickFactsRail={false} />
 }
 
 type Props = {
@@ -538,24 +284,18 @@ type Props = {
 }
 
 /**
- * Product highlights — copy from {@link getProductHighlightSet}; layout presets (Viator, Airbnb list, Headout, compact, Expedia split, Withlocals merged).
+ * Product highlights — copy from {@link getProductHighlightSet}; layout presets (Headout, Expedia).
  */
 export function PdpProductHighlights({ setId, layoutId }: Props) {
   const set = getProductHighlightSet(setId)
 
   switch (layoutId) {
-    case 'ggy-list':
-      return <LayoutAirbnbTrust set={set} />
-    case 'headout-grid':
-      return <LayoutHeadoutGrid set={set} />
-    case 'compact-strip':
-      return <LayoutCompactStrip set={set} />
+    case 'expedia-klook-labels':
+      return <LayoutExpediaKlookLabels set={set} />
     case 'expedia-split':
       return <LayoutExpediaSplit set={set} />
-    case 'withlocals-merged':
-      return <LayoutWithlocalsMerged set={set} />
-    case 'viator-cards':
+    case 'headout-grid':
     default:
-      return <LayoutViatorCards set={set} />
+      return <LayoutHeadoutGrid set={set} />
   }
 }

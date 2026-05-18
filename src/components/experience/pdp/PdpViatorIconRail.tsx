@@ -87,6 +87,27 @@ const iconMap = {
 
 type Props = { items: readonly IconRailItem[] }
 
+function quickFactLabel(it: IconRailItem): string {
+  return it.label ? `${it.label}: ${it.value}` : it.value
+}
+
+/**
+ * Klook-style text pills under the PDP title — no icons, light grey fill.
+ */
+export function PdpQuickFactLabels({ items }: Props) {
+  return (
+    <ul className="flex flex-wrap gap-2 font-sans" aria-label="Quick facts">
+      {items.map((it) => (
+        <li key={it.id}>
+          <span className="inline-block rounded bg-[#f5f5f5] px-2 py-1 text-xs leading-snug text-[#666666] sm:px-2.5 sm:py-1 sm:text-sm">
+            {quickFactLabel(it)}
+          </span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 /**
  * Features row — vertical stack on small screens; horizontal wrap from `md` up.
  * 16px gap, neutral/80 borders; DS icons #008768; global/body (16px / 400 / #000).

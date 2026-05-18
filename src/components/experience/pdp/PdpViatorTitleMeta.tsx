@@ -1,4 +1,6 @@
+import type { IconRailItem } from '../../../data/viatorListing'
 import { Tag } from '../../common/Tag'
+import { PdpQuickFactLabels } from './PdpViatorIconRail'
 import { FigmaRatingRow } from './figmaListingUi'
 
 type Props = {
@@ -7,6 +9,8 @@ type Props = {
   reviewCount: number
   locationLine: string
   reviewsHref?: string
+  /** Headout layout only — Klook-style pills under the title. */
+  quickFacts?: readonly IconRailItem[]
 }
 
 function PriceTagIcon() {
@@ -101,6 +105,7 @@ export function PdpViatorTitleMeta({
   reviewCount,
   locationLine,
   reviewsHref = '#reviews',
+  quickFacts,
 }: Props) {
   return (
     <div className="space-y-3">
@@ -114,6 +119,7 @@ export function PdpViatorTitleMeta({
       >
         {title}
       </h1>
+      {quickFacts && quickFacts.length > 0 ? <PdpQuickFactLabels items={quickFacts} /> : null}
       <div className="flex w-full min-w-0 flex-col gap-y-2 md:flex-row md:items-center md:justify-between md:gap-x-4">
         <div
           className="flex min-w-0 w-full flex-1 flex-col items-start gap-y-2 md:min-w-0 md:flex-row md:flex-nowrap md:items-center md:gap-x-3"

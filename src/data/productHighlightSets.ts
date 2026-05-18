@@ -65,19 +65,19 @@ export const PRODUCT_HIGHLIGHT_SETS: ProductHighlightSet[] = [
         icon: 'star',
         title: 'Trusted by many guests',
         subtext:
-          '4.6★ from 13,603 reviews with a strong recommendation rate—social proof you can scan in seconds.',
+          'Rated 4.6 from over 13,000 reviews, and most guests say they would recommend this tour.',
       },
       {
         icon: 'check',
         title: 'Inclusions that matter',
         subtext:
-          'Mobile ticket, English-speaking guide, and a tight Vatican itinerary—critical facts before you read every line.',
+          'Your mobile ticket, English-speaking guide, and Vatican route are included for a focused visit.',
       },
       {
         icon: 'shield',
         title: 'Book with confidence',
         subtext:
-          'Free cancellation up to 24 hours before when your date is eligible—check checkout for your exact policy.',
+          'You can cancel for free up to 24 hours before your start time when your booking date qualifies.',
       },
     ],
   },
@@ -90,19 +90,19 @@ export const PRODUCT_HIGHLIGHT_SETS: ProductHighlightSet[] = [
         icon: 'star',
         title: 'Highly rated',
         subtext:
-          '4.6 average · 13,603 reviews · 91% of travelers recommend this experience—quality you can validate quickly.',
+          'Guests give it 4.6 stars on average, and about nine in ten say they would recommend it.',
       },
       {
         icon: 'badge',
         title: 'Badge of Excellence',
         subtext:
-          'Viator-recognized quality on top of strong ratings—an extra signal beyond stars alone.',
+          'Viator recognizes this operator for strong service, on top of consistently high guest ratings.',
       },
       {
         icon: 'heart',
         title: 'What guests love',
         subtext:
-          'Reviewers often praise guides, pacing, and sights—themes that match what you are hoping this tour delivers.',
+          'Recent reviewers often praise the guides, the pacing, and seeing the main Vatican highlights.',
       },
     ],
   },
@@ -115,19 +115,19 @@ export const PRODUCT_HIGHLIGHT_SETS: ProductHighlightSet[] = [
         icon: 'tag',
         title: 'Transparent value',
         subtext:
-          'Clear “from” pricing with room for promotions and kids’ discounts when you pick travelers and dates.',
+          'You see a clear starting price, with promotions and child discounts when you choose your date and party size.',
       },
       {
         icon: 'shield',
         title: 'Free cancellation',
         subtext:
-          'Cancel free up to 24 hours before on eligible bookings—see checkout for the policy on your specific date.',
+          'You can cancel up to 24 hours before for a full refund when your booking qualifies.',
       },
       {
         icon: 'check',
         title: 'Time well spent',
         subtext:
-          'About three hours focused on the Vatican, Sistine Chapel, and St. Peter’s—efficient coverage without filler.',
+          'The route covers the Vatican Museums, Sistine Chapel, and St. Peter’s in about three focused hours.',
       },
     ],
   },
@@ -140,19 +140,19 @@ export const PRODUCT_HIGHLIGHT_SETS: ProductHighlightSet[] = [
         icon: 'pin',
         title: 'Meeting & access',
         subtext:
-          'Straightforward meeting-point instructions; pickup options may apply depending on how you configure the booking.',
+          'Clear meeting-point directions help you arrive ready, with pickup on some booking options.',
       },
       {
         icon: 'ticket',
         title: 'Tickets & language',
         subtext:
-          'Mobile ticket and English-speaking guide; skip-the-line access where the operator secures it for the group.',
+          'Your mobile ticket and English-speaking guide cover entry and commentary at the main Vatican sites.',
       },
       {
         icon: 'list',
         title: 'Know before you go',
         subtext:
-          'Surfacing what is included vs. add-ons helps you validate expectations before you commit.',
+          'You can see what is included and what costs extra before you book, so the day matches your expectations.',
       },
     ],
   },
@@ -165,19 +165,19 @@ export const PRODUCT_HIGHLIGHT_SETS: ProductHighlightSet[] = [
         icon: 'user',
         title: 'Solo-friendly format',
         subtext:
-          'Small-group touring often works well for solo travelers—confirm minimum travelers in the booking picker.',
+          'A small-group tour makes it easy to join on your own without organizing a private booking.',
       },
       {
         icon: 'family',
         title: 'Families & ages',
         subtext:
-          'Watch for child pricing and age bands at checkout when you are booking with kids or teens.',
+          'Child prices and age limits show at checkout when you add kids or teens to your booking.',
       },
       {
         icon: 'thumbs',
         title: 'Less guesswork',
         subtext:
-          'Highlighting what is special upfront reduces the self-driven research that slows confident checkout.',
+          'The main details about this tour are summarized here so you spend less time reading the full listing.',
       },
     ],
   },

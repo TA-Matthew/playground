@@ -4,13 +4,7 @@
 
 export const PRODUCT_HIGHLIGHT_LAYOUT_QUERY = 'phLayout'
 
-export type ProductHighlightLayoutId =
-  | 'viator-cards'
-  | 'ggy-list'
-  | 'headout-grid'
-  | 'compact-strip'
-  | 'expedia-split'
-  | 'withlocals-merged'
+export type ProductHighlightLayoutId = 'headout-grid' | 'expedia-split' | 'expedia-klook-labels'
 
 export type ProductHighlightLayoutMeta = {
   id: ProductHighlightLayoutId
@@ -19,16 +13,9 @@ export type ProductHighlightLayoutMeta = {
   reference: string
 }
 
-const LAYOUT_IDS: ProductHighlightLayoutId[] = [
-  'viator-cards',
-  'ggy-list',
-  'headout-grid',
-  'compact-strip',
-  'expedia-split',
-  'withlocals-merged',
-]
+const LAYOUT_IDS: ProductHighlightLayoutId[] = ['headout-grid', 'expedia-split', 'expedia-klook-labels']
 
-export const DEFAULT_PRODUCT_HIGHLIGHT_LAYOUT: ProductHighlightLayoutId = 'viator-cards'
+export const DEFAULT_PRODUCT_HIGHLIGHT_LAYOUT: ProductHighlightLayoutId = 'headout-grid'
 
 export function isProductHighlightLayoutId(v: string): v is ProductHighlightLayoutId {
   return (LAYOUT_IDS as readonly string[]).includes(v)
@@ -36,33 +23,19 @@ export function isProductHighlightLayoutId(v: string): v is ProductHighlightLayo
 
 export const PRODUCT_HIGHLIGHT_LAYOUTS: ProductHighlightLayoutMeta[] = [
   {
-    id: 'viator-cards',
-    facilitatorLabel: 'Viator cards',
-    reference: 'Emerald icon wells + bordered cards (current PDP-adjacent).',
-  },
-  {
-    id: 'ggy-list',
-    facilitatorLabel: 'Airbnb trust',
-    reference: 'Three highlight rows with filled icons and light dividers (no hero band).',
-  },
-  {
     id: 'headout-grid',
-    facilitatorLabel: 'Headout grid',
+    facilitatorLabel: 'Headout with Klook label',
     reference: 'Two-column grid, light outlined icon tiles, airy spacing.',
-  },
-  {
-    id: 'compact-strip',
-    facilitatorLabel: 'Compact strip',
-    reference: 'Dense three-column strip — titles emphasized, subtext one line.',
   },
   {
     id: 'expedia-split',
     facilitatorLabel: 'Expedia-style',
-    reference: '“Highlights” stack with round icon wells, then “About this property” 2-col line-icon rail from listing quick facts.',
+    reference: 'Highlight rows with round icon wells, then 2-col quick-facts grid (no section header).',
   },
   {
-    id: 'withlocals-merged',
-    facilitatorLabel: 'Withlocals merged',
-    reference: 'Single block: listing quick facts (2-col) + highlight rows with the same icon + label rhythm.',
+    id: 'expedia-klook-labels',
+    facilitatorLabel: 'Expedia + Klook labels',
+    reference:
+      'Same Expedia summary + highlight rows; quick facts as Klook-style pills under the title (no in-section facts grid).',
   },
 ]
