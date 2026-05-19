@@ -150,7 +150,7 @@ export const viatorListing = {
   iconRail: [
     { id: 'duration', icon: 'clock' as const, value: '3 hours (approx.)' },
     { id: 'ticket', icon: 'mobile' as const, value: 'Mobile ticket' },
-    { id: 'lang', icon: 'language' as const, label: 'Offered in', value: 'English' },
+    { id: 'lang', icon: 'language' as const, value: 'English' },
   ] satisfies IconRailItem[],
   /** Figma: Inline Callout below features (Viator Rewards). */
   rewardsCallout: {

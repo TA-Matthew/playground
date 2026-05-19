@@ -21,19 +21,27 @@ import {
   PRODUCT_HIGHLIGHT_PROJECT_PATH,
 } from '../data/projects'
 import {
+  DEFAULT_PRODUCT_HIGHLIGHT_CONCISE_SUMMARY,
+  PRODUCT_HIGHLIGHT_CONCISE_SUMMARY_QUERY,
+} from '../data/productHighlightConciseSummary'
+import {
+  DEFAULT_PRODUCT_HIGHLIGHT_TOP_PRODUCT,
+  PRODUCT_HIGHLIGHT_TOP_PRODUCT_QUERY,
+} from '../data/productHighlightTopProduct'
+import {
+  DEFAULT_PRODUCT_HIGHLIGHT_ICON_STYLE,
+  isProductHighlightIconStyleId,
+  PRODUCT_HIGHLIGHT_ICON_STYLE_QUERY,
+  type ProductHighlightIconStyleId,
+} from '../data/productHighlightIconStyles'
+import {
   DEFAULT_PRODUCT_HIGHLIGHT_LAYOUT,
   isProductHighlightLayoutId,
-  PRODUCT_HIGHLIGHT_LAYOUTS,
+  parseProductHighlightLayoutOptions,
+  productHighlightLayoutFromOptions,
   PRODUCT_HIGHLIGHT_LAYOUT_QUERY,
   type ProductHighlightLayoutId,
 } from '../data/productHighlightLayouts'
-import {
-  DEFAULT_PRODUCT_HIGHLIGHT_SET,
-  isProductHighlightSetId,
-  PRODUCT_HIGHLIGHT_SETS,
-  PRODUCT_HIGHLIGHT_SET_QUERY,
-  type ProductHighlightSetId,
-} from '../data/productHighlightSets'
 import { viatorListing } from '../data/viatorListing'
 import {
   isVariantBLayout,
@@ -44,8 +52,10 @@ import {
 import {
   buildParticipantUrl,
   parseHideUi,
+  parseHighlightConciseSummary,
+  parseHighlightIconStyle,
   parseHighlightLayout,
-  parseHighlightSet,
+  parseHighlightTopProduct,
   parseVariant,
   readFacilitatorUnlock,
   setFacilitatorUnlock,
@@ -65,14 +75,22 @@ export function ExperiencePage() {
     ? PRODUCT_HIGHLIGHT_FACILITATOR_VARIANTS
     : LOGISTICS_FACILITATOR_VARIANTS
 
-  const rawPhSetParam = searchParams.get(PRODUCT_HIGHLIGHT_SET_QUERY)
   const rawPhLayoutParam = searchParams.get(PRODUCT_HIGHLIGHT_LAYOUT_QUERY)
-  const highlightSetId: ProductHighlightSetId | null = useMemo(
-    () => (isProductHighlight ? parseHighlightSet(searchParams) : null),
-    [isProductHighlight, searchParams],
-  )
+  const rawPhIconStyleParam = searchParams.get(PRODUCT_HIGHLIGHT_ICON_STYLE_QUERY)
   const highlightLayoutId: ProductHighlightLayoutId | null = useMemo(
     () => (isProductHighlight ? parseHighlightLayout(searchParams) : null),
+    [isProductHighlight, searchParams],
+  )
+  const highlightIconStyleId: ProductHighlightIconStyleId | null = useMemo(
+    () => (isProductHighlight ? parseHighlightIconStyle(searchParams) : null),
+    [isProductHighlight, searchParams],
+  )
+  const highlightConciseSummary: boolean | null = useMemo(
+    () => (isProductHighlight ? parseHighlightConciseSummary(searchParams) : null),
+    [isProductHighlight, searchParams],
+  )
+  const highlightTopProduct: boolean | null = useMemo(
+    () => (isProductHighlight ? parseHighlightTopProduct(searchParams) : null),
     [isProductHighlight, searchParams],
   )
 
@@ -95,17 +113,17 @@ export function ExperiencePage() {
 
   useLayoutEffect(() => {
     if (!isProductHighlight) return
-    if (rawPhSetParam !== null && rawPhSetParam !== '' && !isProductHighlightSetId(rawPhSetParam)) {
+    if (searchParams.has('phSet')) {
       setSearchParams(
         (prev) => {
           const next = new URLSearchParams(prev)
-          next.set(PRODUCT_HIGHLIGHT_SET_QUERY, DEFAULT_PRODUCT_HIGHLIGHT_SET)
+          next.delete('phSet')
           return next
         },
         { replace: true },
       )
     }
-  }, [isProductHighlight, rawPhSetParam, setSearchParams])
+  }, [isProductHighlight, searchParams, setSearchParams])
 
   useLayoutEffect(() => {
     if (!isProductHighlight) return
@@ -141,6 +159,24 @@ export function ExperiencePage() {
       )
     }
   }, [isProductHighlight, rawPhLayoutParam, setSearchParams])
+
+  useLayoutEffect(() => {
+    if (!isProductHighlight) return
+    if (
+      rawPhIconStyleParam !== null &&
+      rawPhIconStyleParam !== '' &&
+      !isProductHighlightIconStyleId(rawPhIconStyleParam)
+    ) {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          next.set(PRODUCT_HIGHLIGHT_ICON_STYLE_QUERY, DEFAULT_PRODUCT_HIGHLIGHT_ICON_STYLE)
+          return next
+        },
+        { replace: true },
+      )
+    }
+  }, [isProductHighlight, rawPhIconStyleParam, setSearchParams])
 
   /** B2: shared with `LogisticsBlock` so Meeting & Pickup search stays synced with map/timeline. */
   const [b2PickupId, setB2PickupId] = useState<string | null>(null)
@@ -208,24 +244,6 @@ export function ExperiencePage() {
     [setSearchParams],
   )
 
-  const setHighlightSet = useCallback(
-    (id: ProductHighlightSetId) => {
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev)
-          if (id === DEFAULT_PRODUCT_HIGHLIGHT_SET) {
-            next.delete(PRODUCT_HIGHLIGHT_SET_QUERY)
-          } else {
-            next.set(PRODUCT_HIGHLIGHT_SET_QUERY, id)
-          }
-          return next
-        },
-        { replace: true },
-      )
-    },
-    [setSearchParams],
-  )
-
   const setHighlightLayout = useCallback(
     (id: ProductHighlightLayoutId) => {
       setSearchParams(
@@ -244,11 +262,70 @@ export function ExperiencePage() {
     [setSearchParams],
   )
 
+  const setHighlightIconStyle = useCallback(
+    (id: ProductHighlightIconStyleId) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          if (id === DEFAULT_PRODUCT_HIGHLIGHT_ICON_STYLE) {
+            next.delete(PRODUCT_HIGHLIGHT_ICON_STYLE_QUERY)
+          } else {
+            next.set(PRODUCT_HIGHLIGHT_ICON_STYLE_QUERY, id)
+          }
+          return next
+        },
+        { replace: true },
+      )
+    },
+    [setSearchParams],
+  )
+
+  const setHighlightConciseSummary = useCallback(
+    (on: boolean) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          if (on === DEFAULT_PRODUCT_HIGHLIGHT_CONCISE_SUMMARY) {
+            next.delete(PRODUCT_HIGHLIGHT_CONCISE_SUMMARY_QUERY)
+          } else {
+            next.set(PRODUCT_HIGHLIGHT_CONCISE_SUMMARY_QUERY, on ? '1' : '0')
+          }
+          return next
+        },
+        { replace: true },
+      )
+    },
+    [setSearchParams],
+  )
+
+  const setHighlightTopProduct = useCallback(
+    (on: boolean) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          if (on === DEFAULT_PRODUCT_HIGHLIGHT_TOP_PRODUCT) {
+            next.delete(PRODUCT_HIGHLIGHT_TOP_PRODUCT_QUERY)
+          } else {
+            next.set(PRODUCT_HIGHLIGHT_TOP_PRODUCT_QUERY, '1')
+          }
+          return next
+        },
+        { replace: true },
+      )
+    },
+    [setSearchParams],
+  )
+
   const copyParticipantLink = useCallback(async () => {
     const url = buildParticipantUrl(
       variant,
-      isProductHighlight && highlightSetId != null && highlightLayoutId != null
-        ? { highlightSetId, highlightLayoutId }
+      isProductHighlight && highlightLayoutId != null
+        ? {
+            highlightLayoutId,
+            highlightIconStyleId: highlightIconStyleId ?? undefined,
+            highlightConciseSummary: highlightConciseSummary ?? undefined,
+            highlightTopProduct: highlightTopProduct ?? undefined,
+          }
         : undefined,
     )
     try {
@@ -268,7 +345,15 @@ export function ExperiencePage() {
     } catch {
       setCopyFeedback(false)
     }
-  }, [variant, setSearchParams, isProductHighlight, highlightSetId, highlightLayoutId])
+  }, [
+    variant,
+    setSearchParams,
+    isProductHighlight,
+    highlightLayoutId,
+    highlightIconStyleId,
+    highlightConciseSummary,
+    highlightTopProduct,
+  ])
 
   const toggleSecretUnlock = useCallback(() => {
     const next = !readFacilitatorUnlock()
@@ -300,31 +385,44 @@ export function ExperiencePage() {
             onVariantChange={setVariant}
             onCopyParticipantLink={copyParticipantLink}
             copyFeedback={copyFeedback}
-            highlightCopyControls={
-              isProductHighlight && highlightSetId
+            highlightLayoutControls={
+              isProductHighlight && highlightLayoutId
                 ? {
-                    selectedId: highlightSetId,
-                    options: PRODUCT_HIGHLIGHT_SETS.map((s) => ({
-                      id: s.id,
-                      label: s.facilitatorLabel,
-                    })),
-                    onChange: (id) => {
-                      if (isProductHighlightSetId(id)) setHighlightSet(id)
+                    ...parseProductHighlightLayoutOptions(highlightLayoutId),
+                    onBaseChange: (base) => {
+                      const { iconRail } = parseProductHighlightLayoutOptions(highlightLayoutId)
+                      setHighlightLayout(productHighlightLayoutFromOptions(base, iconRail))
+                    },
+                    onIconRailChange: (iconRail) => {
+                      const { base } = parseProductHighlightLayoutOptions(highlightLayoutId)
+                      setHighlightLayout(productHighlightLayoutFromOptions(base, iconRail))
                     },
                   }
                 : undefined
             }
-            highlightLayoutControls={
-              isProductHighlight && highlightLayoutId
+            highlightIconStyleControls={
+              isProductHighlight && highlightIconStyleId
                 ? {
-                    selectedId: highlightLayoutId,
-                    options: PRODUCT_HIGHLIGHT_LAYOUTS.map((l) => ({
-                      id: l.id,
-                      label: l.facilitatorLabel,
-                    })),
-                    onChange: (id) => {
-                      if (isProductHighlightLayoutId(id)) setHighlightLayout(id)
+                    iconStyle: highlightIconStyleId,
+                    onIconStyleChange: (iconStyle) => {
+                      if (isProductHighlightIconStyleId(iconStyle)) setHighlightIconStyle(iconStyle)
                     },
+                  }
+                : undefined
+            }
+            highlightConciseSummaryControls={
+              isProductHighlight && highlightConciseSummary != null
+                ? {
+                    conciseSummary: highlightConciseSummary,
+                    onConciseSummaryChange: setHighlightConciseSummary,
+                  }
+                : undefined
+            }
+            highlightTopProductControls={
+              isProductHighlight && highlightTopProduct != null
+                ? {
+                    topProduct: highlightTopProduct,
+                    onTopProductChange: setHighlightTopProduct,
                   }
                 : undefined
             }
@@ -338,9 +436,10 @@ export function ExperiencePage() {
             reviewCount={viatorListing.reviewCount}
             locationLine={viatorListing.locationLine}
             quickFacts={
-              isProductHighlight &&
-              (highlightLayoutId === 'headout-grid' || highlightLayoutId === 'expedia-klook-labels')
-                ? viatorListing.iconRail
+              isProductHighlight && highlightLayoutId
+                ? parseProductHighlightLayoutOptions(highlightLayoutId).iconRail === 'klook'
+                  ? viatorListing.iconRail
+                  : undefined
                 : undefined
             }
           />
@@ -350,8 +449,10 @@ export function ExperiencePage() {
           <main className="pdp-figma w-full min-w-0 max-w-[864px] lg:order-1">
             <ViatorPdpBlock
               booking={data.booking}
-              productHighlightSetId={isProductHighlight ? highlightSetId : null}
               productHighlightLayoutId={isProductHighlight ? highlightLayoutId : null}
+              productHighlightIconStyleId={isProductHighlight ? highlightIconStyleId : null}
+              productHighlightConciseSummary={isProductHighlight ? highlightConciseSummary : null}
+              productHighlightTopProduct={isProductHighlight ? highlightTopProduct : null}
             />
             {!isVariantBLayout(variant) && meetingAndPickupSection}
 

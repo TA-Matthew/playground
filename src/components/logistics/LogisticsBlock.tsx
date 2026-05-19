@@ -29,7 +29,7 @@ function landingDefaultExpandedStopIdForVariant(stops: Stop[], variantId: Varian
   return stops[0]?.id ?? ''
 }
 
-/** Desktop (≥769px): B / B2 open the meeting row first; MW keeps first POI expanded. */
+/** Desktop (≥769px): B2 opens the meeting row first; B and MW keep first POI expanded. */
 function getLandingStateForBlock(
   stops: Stop[],
   variantId: VariantId,
@@ -45,21 +45,11 @@ function getLandingStateForBlock(
     typeof globalThis.matchMedia === 'function' &&
     globalThis.matchMedia(`(min-width: ${MOBILE_MAP_MAX_WIDTH_PX + 1}px)`).matches
 
-  if (!desktop || (variantId !== 'b' && variantId !== 'b2')) {
+  if (!desktop || variantId !== 'b2') {
     return {
       landingDefaultExpandedStopId: poiDefault,
       selectedStopId: poiDefault,
       expandedId: poiDefault || null,
-    }
-  }
-
-  if (variantId === 'b') {
-    const meeting = stops.find((s) => s.kind === 'meeting')
-    const mid = meeting?.id ?? poiDefault
-    return {
-      landingDefaultExpandedStopId: mid,
-      selectedStopId: mid,
-      expandedId: mid,
     }
   }
 

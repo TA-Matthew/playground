@@ -1,6 +1,9 @@
 import { BookingSidebar } from '../../booking/BookingSidebar'
-import type { ProductHighlightLayoutId } from '../../../data/productHighlightLayouts'
-import type { ProductHighlightSetId } from '../../../data/productHighlightSets'
+import {
+  parseProductHighlightLayoutOptions,
+  type ProductHighlightLayoutId,
+} from '../../../data/productHighlightLayouts'
+import type { ProductHighlightIconStyleId } from '../../../data/productHighlightIconStyles'
 import { viatorListing } from '../../../data/viatorListing'
 import type { BookingContent } from '../../../data/variants'
 import { PdpOverviewSection } from './PdpOverviewSection'
@@ -14,8 +17,10 @@ import { PdpWhyTravelersLoved } from './PdpWhyTravelersLoved'
 type Props = {
   booking: BookingContent
   /** When set (product-highlight project), renders below the hero gallery. */
-  productHighlightSetId?: ProductHighlightSetId | null
   productHighlightLayoutId?: ProductHighlightLayoutId | null
+  productHighlightIconStyleId?: ProductHighlightIconStyleId | null
+  productHighlightConciseSummary?: boolean | null
+  productHighlightTopProduct?: boolean | null
 }
 
 /**
@@ -24,12 +29,32 @@ type Props = {
  * Title/meta render full-width above the page grid — see {@link ExperiencePage}.
  * Down-page traveler photos and deep reviews live on {@link ExperiencePage}.
  */
-export function FigmaViatorPdpBlock({ booking, productHighlightSetId, productHighlightLayoutId }: Props) {
+export function FigmaViatorPdpBlock({
+  booking,
+  productHighlightLayoutId,
+  productHighlightIconStyleId,
+  productHighlightConciseSummary,
+  productHighlightTopProduct,
+}: Props) {
   const l = viatorListing
-  const hideStandaloneIconRail =
-    productHighlightLayoutId === 'expedia-split' ||
-    productHighlightLayoutId === 'expedia-klook-labels' ||
-    productHighlightLayoutId === 'headout-grid'
+  const layoutOpts =
+    productHighlightLayoutId != null
+      ? parseProductHighlightLayoutOptions(productHighlightLayoutId)
+      : null
+  const showStandaloneIconRail =
+    productHighlightLayoutId == null || layoutOpts?.iconRail === 'viator'
+  const groupHighlightsWithViatorRail = layoutOpts?.iconRail === 'viator'
+
+  const productHighlights =
+    productHighlightLayoutId ? (
+      <PdpProductHighlights
+        layoutId={productHighlightLayoutId}
+        iconStyle={productHighlightIconStyleId ?? 'outline'}
+        conciseSummary={productHighlightConciseSummary ?? true}
+        topProduct={productHighlightTopProduct ?? false}
+      />
+    ) : null
+  const viatorIconRail = showStandaloneIconRail ? <PdpViatorIconRail items={l.iconRail} /> : null
 
   return (
     <div className="w-full">
@@ -39,16 +64,20 @@ export function FigmaViatorPdpBlock({ booking, productHighlightSetId, productHig
           <div className="lg:hidden">
             <BookingSidebar booking={booking} embedded />
           </div>
-          {productHighlightSetId && productHighlightLayoutId ? (
-            <PdpProductHighlights setId={productHighlightSetId} layoutId={productHighlightLayoutId} />
-          ) : null}
-          {hideStandaloneIconRail ? null : <PdpViatorIconRail items={l.iconRail} />}
+          {groupHighlightsWithViatorRail && productHighlights && viatorIconRail ? (
+            <div className="flex flex-col gap-8">
+              {productHighlights}
+              {viatorIconRail}
+            </div>
+          ) : (
+            <>
+              {productHighlights}
+              {viatorIconRail}
+            </>
+          )}
         </div>
         <PdpWhyTravelersLoved
-          showTopDivider={
-            productHighlightLayoutId === 'expedia-split' ||
-            productHighlightLayoutId === 'expedia-klook-labels'
-          }
+          showTopDivider={layoutOpts?.iconRail === 'expedia'}
         />
         <div className="mt-5 flex flex-col gap-5">
           <PdpPromotedExperiences />

@@ -30,6 +30,28 @@
     }
   }
 
+  /** Product highlights — Global/Body Medium (title) & Global/Body Small (subtext). */
+  .pdp-figma .pdp-highlight-title {
+    font-family: var(--font-sans);
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0.05px;
+    color: var(--pdp-ink, #000);
+  }
+
+  .pdp-figma .pdp-highlight-subtext {
+    margin-top: 4px;
+    font-family: var(--font-sans);
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0.05px;
+    color: var(--pdp-body, #333);
+  }
+
   /** Overview / tour summary — global/body (#tour.summary) */
   .pdp-figma .pdp-tour-summary-body {
     font-family: var(--font-sans);

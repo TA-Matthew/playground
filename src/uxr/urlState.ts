@@ -1,15 +1,23 @@
 import {
+  parseProductHighlightConciseSummary,
+  PRODUCT_HIGHLIGHT_CONCISE_SUMMARY_QUERY,
+} from '../data/productHighlightConciseSummary'
+import {
+  parseProductHighlightTopProduct,
+  PRODUCT_HIGHLIGHT_TOP_PRODUCT_QUERY,
+} from '../data/productHighlightTopProduct'
+import {
+  isProductHighlightIconStyleId,
+  parseProductHighlightIconStyle,
+  PRODUCT_HIGHLIGHT_ICON_STYLE_QUERY,
+  type ProductHighlightIconStyleId,
+} from '../data/productHighlightIconStyles'
+import {
   DEFAULT_PRODUCT_HIGHLIGHT_LAYOUT,
   isProductHighlightLayoutId,
   PRODUCT_HIGHLIGHT_LAYOUT_QUERY,
   type ProductHighlightLayoutId,
 } from '../data/productHighlightLayouts'
-import {
-  DEFAULT_PRODUCT_HIGHLIGHT_SET,
-  isProductHighlightSetId,
-  PRODUCT_HIGHLIGHT_SET_QUERY,
-  type ProductHighlightSetId,
-} from '../data/productHighlightSets'
 import type { VariantId } from '../data/variants'
 
 /** Session-only: facilitator unlocked controls while URL stays participant-safe (hideUi=1). */
@@ -62,12 +70,20 @@ export function parseHighlightLayout(searchParams: URLSearchParams): ProductHigh
   return DEFAULT_PRODUCT_HIGHLIGHT_LAYOUT
 }
 
-/** Product highlight experiment — `phSet` query; invalid or missing → default balanced set. */
-export function parseHighlightSet(searchParams: URLSearchParams): ProductHighlightSetId {
-  const v = searchParams.get(PRODUCT_HIGHLIGHT_SET_QUERY)
-  if (v && isProductHighlightSetId(v)) return v
-  return DEFAULT_PRODUCT_HIGHLIGHT_SET
+/** Product highlight — `phIconStyle` query; invalid or missing → default (`outline`). */
+export function parseHighlightIconStyle(searchParams: URLSearchParams): ProductHighlightIconStyleId {
+  return parseProductHighlightIconStyle(searchParams.get(PRODUCT_HIGHLIGHT_ICON_STYLE_QUERY))
 }
+
+export function parseHighlightConciseSummary(searchParams: URLSearchParams): boolean {
+  return parseProductHighlightConciseSummary(searchParams.get(PRODUCT_HIGHLIGHT_CONCISE_SUMMARY_QUERY))
+}
+
+export function parseHighlightTopProduct(searchParams: URLSearchParams): boolean {
+  return parseProductHighlightTopProduct(searchParams.get(PRODUCT_HIGHLIGHT_TOP_PRODUCT_QUERY))
+}
+
+export { isProductHighlightIconStyleId }
 
 /** Whether facilitator chrome (variant switcher, etc.) should show for this URL + session. */
 export function shouldShowFacilitatorChrome(
@@ -81,24 +97,33 @@ export function shouldShowFacilitatorChrome(
 /**
  * Participant-safe share link: always includes hideUi=1 and current variant.
  * (Copies URL text — not a screenshot.)
- * On the product-highlight route, pass `highlightSetId` / `highlightLayoutId` so `phSet` / `phLayout`
- * are preserved on the shared URL.
+ * On the product-highlight route, pass `highlightLayoutId` so `phLayout` is preserved on the shared URL.
  */
 export function buildParticipantUrl(
   variant: VariantId,
   extras?: {
-    highlightSetId?: ProductHighlightSetId
     highlightLayoutId?: ProductHighlightLayoutId
+    highlightIconStyleId?: ProductHighlightIconStyleId
+    highlightConciseSummary?: boolean
+    highlightTopProduct?: boolean
   },
 ): string {
   const url = new URL(window.location.origin + window.location.pathname)
   url.searchParams.set('variant', variant)
   url.searchParams.set('hideUi', '1')
-  if (extras?.highlightSetId != null) {
-    url.searchParams.set(PRODUCT_HIGHLIGHT_SET_QUERY, extras.highlightSetId)
-  }
   if (extras?.highlightLayoutId != null) {
     url.searchParams.set(PRODUCT_HIGHLIGHT_LAYOUT_QUERY, extras.highlightLayoutId)
+  }
+  if (extras?.highlightIconStyleId != null) {
+    url.searchParams.set(PRODUCT_HIGHLIGHT_ICON_STYLE_QUERY, extras.highlightIconStyleId)
+  }
+  if (extras?.highlightConciseSummary === false) {
+    url.searchParams.set(PRODUCT_HIGHLIGHT_CONCISE_SUMMARY_QUERY, '0')
+  } else if (extras?.highlightConciseSummary === true) {
+    url.searchParams.delete(PRODUCT_HIGHLIGHT_CONCISE_SUMMARY_QUERY)
+  }
+  if (extras?.highlightTopProduct === true) {
+    url.searchParams.set(PRODUCT_HIGHLIGHT_TOP_PRODUCT_QUERY, '1')
   }
   return url.toString()
 }
