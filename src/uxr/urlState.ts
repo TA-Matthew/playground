@@ -70,7 +70,7 @@ export function parseHighlightLayout(searchParams: URLSearchParams): ProductHigh
   return DEFAULT_PRODUCT_HIGHLIGHT_LAYOUT
 }
 
-/** Product highlight — `phIconStyle` query; invalid or missing → default (`outline`). */
+/** Product highlight — `phIconStyle` query; invalid or missing → default (`large`). */
 export function parseHighlightIconStyle(searchParams: URLSearchParams): ProductHighlightIconStyleId {
   return parseProductHighlightIconStyle(searchParams.get(PRODUCT_HIGHLIGHT_ICON_STYLE_QUERY))
 }
@@ -117,10 +117,8 @@ export function buildParticipantUrl(
   if (extras?.highlightIconStyleId != null) {
     url.searchParams.set(PRODUCT_HIGHLIGHT_ICON_STYLE_QUERY, extras.highlightIconStyleId)
   }
-  if (extras?.highlightConciseSummary === false) {
-    url.searchParams.set(PRODUCT_HIGHLIGHT_CONCISE_SUMMARY_QUERY, '0')
-  } else if (extras?.highlightConciseSummary === true) {
-    url.searchParams.delete(PRODUCT_HIGHLIGHT_CONCISE_SUMMARY_QUERY)
+  if (extras?.highlightConciseSummary === true) {
+    url.searchParams.set(PRODUCT_HIGHLIGHT_CONCISE_SUMMARY_QUERY, '1')
   }
   if (extras?.highlightTopProduct === true) {
     url.searchParams.set(PRODUCT_HIGHLIGHT_TOP_PRODUCT_QUERY, '1')

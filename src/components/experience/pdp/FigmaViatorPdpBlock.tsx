@@ -49,8 +49,8 @@ export function FigmaViatorPdpBlock({
     productHighlightLayoutId ? (
       <PdpProductHighlights
         layoutId={productHighlightLayoutId}
-        iconStyle={productHighlightIconStyleId ?? 'outline'}
-        conciseSummary={productHighlightConciseSummary ?? true}
+        iconStyle={productHighlightIconStyleId ?? 'large'}
+        conciseSummary={productHighlightConciseSummary ?? false}
         topProduct={productHighlightTopProduct ?? false}
       />
     ) : null

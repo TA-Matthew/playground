@@ -128,8 +128,8 @@ export function FacilitatorBar({
               <div className={PILL_GROUP_CLASS}>
                 {(
                   [
-                    { id: 'headout' as const, label: '2 column' },
                     { id: 'expedia' as const, label: '1 column' },
+                    { id: 'headout' as const, label: '2 column' },
                   ] as const
                 ).map((opt) => (
                   <button
@@ -152,8 +152,8 @@ export function FacilitatorBar({
               <div className={PILL_GROUP_CLASS}>
                 {(
                   [
-                    { id: 'klook' as const, label: 'Klook labels' },
                     { id: 'expedia' as const, label: 'Expedia rail' },
+                    { id: 'klook' as const, label: 'Klook labels' },
                     { id: 'viator' as const, label: 'Viator' },
                   ] as const
                 ).map((opt) => (
@@ -178,10 +178,10 @@ export function FacilitatorBar({
                 <div className={PILL_GROUP_CLASS}>
                   {(
                     [
+                      { id: 'large' as const, label: 'Large' },
                       { id: 'grey' as const, label: 'Grey' },
                       { id: 'outline' as const, label: 'Outline' },
                       { id: 'stylised' as const, label: 'Stylised' },
-                      { id: 'large' as const, label: 'Large' },
                     ] as const
                   ).map((opt) => (
                     <button
@@ -200,40 +200,14 @@ export function FacilitatorBar({
                 </div>
               </div>
             ) : null}
-            {highlightConciseSummaryControls ? (
-              <div className={CONTROL_GROUP_CLASS}>
-                <span className="text-[11px] font-medium text-amber-900/80">Concise summary</span>
-                <div className={PILL_GROUP_CLASS}>
-                  {(
-                    [
-                      { on: true as const, label: 'On' },
-                      { on: false as const, label: 'Off' },
-                    ] as const
-                  ).map((opt) => (
-                    <button
-                      key={opt.label}
-                      type="button"
-                      className={`rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
-                        highlightConciseSummaryControls.conciseSummary === opt.on
-                          ? 'bg-amber-600 text-white shadow-sm'
-                          : 'text-amber-950 hover:bg-amber-50'
-                      }`}
-                      onClick={() => highlightConciseSummaryControls.onConciseSummaryChange(opt.on)}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : null}
             {highlightTopProductControls ? (
               <div className={CONTROL_GROUP_CLASS}>
                 <span className="text-[11px] font-medium text-amber-900/80">Top product</span>
                 <div className={PILL_GROUP_CLASS}>
                   {(
                     [
-                      { on: true as const, label: 'On' },
                       { on: false as const, label: 'Off' },
+                      { on: true as const, label: 'On' },
                     ] as const
                   ).map((opt) => (
                     <button
@@ -252,6 +226,32 @@ export function FacilitatorBar({
                 </div>
               </div>
             ) : null}
+            {highlightConciseSummaryControls ? (
+              <div className={CONTROL_GROUP_CLASS}>
+                <span className="text-[11px] font-medium text-amber-900/80">Concise summary</span>
+                <div className={PILL_GROUP_CLASS}>
+                  {(
+                    [
+                      { on: false as const, label: 'Off' },
+                      { on: true as const, label: 'On' },
+                    ] as const
+                  ).map((opt) => (
+                    <button
+                      key={opt.label}
+                      type="button"
+                      className={`rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
+                        highlightConciseSummaryControls.conciseSummary === opt.on
+                          ? 'bg-amber-600 text-white shadow-sm'
+                          : 'text-amber-950 hover:bg-amber-50'
+                      }`}
+                      onClick={() => highlightConciseSummaryControls.onConciseSummaryChange(opt.on)}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
           ) : highlightTopProductControls ? (
@@ -263,8 +263,8 @@ export function FacilitatorBar({
             <div className={PILL_GROUP_CLASS}>
               {(
                 [
-                  { on: true as const, label: 'On' },
                   { on: false as const, label: 'Off' },
+                  { on: true as const, label: 'On' },
                 ] as const
               ).map((opt) => (
                 <button

@@ -39,7 +39,7 @@ const LAYOUT_IDS: ProductHighlightLayoutId[] = [
   'expedia-viator-rail',
 ]
 
-export const DEFAULT_PRODUCT_HIGHLIGHT_LAYOUT: ProductHighlightLayoutId = 'headout-grid'
+export const DEFAULT_PRODUCT_HIGHLIGHT_LAYOUT: ProductHighlightLayoutId = 'expedia-split'
 
 export function isProductHighlightLayoutId(v: string): v is ProductHighlightLayoutId {
   return (LAYOUT_IDS as readonly string[]).includes(v)

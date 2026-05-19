@@ -8,7 +8,7 @@ export type ProductHighlightIconStyleId = 'grey' | 'outline' | 'stylised' | 'lar
 
 const STYLE_IDS: ProductHighlightIconStyleId[] = ['grey', 'outline', 'stylised', 'large']
 
-export const DEFAULT_PRODUCT_HIGHLIGHT_ICON_STYLE: ProductHighlightIconStyleId = 'outline'
+export const DEFAULT_PRODUCT_HIGHLIGHT_ICON_STYLE: ProductHighlightIconStyleId = 'large'
 
 export function isProductHighlightIconStyleId(v: string): v is ProductHighlightIconStyleId {
   return (STYLE_IDS as readonly string[]).includes(v)
