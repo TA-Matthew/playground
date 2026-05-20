@@ -2197,15 +2197,18 @@ export function ReviewsFigmaReplica({ summaryLayout = 'a' }: ReviewsFigmaReplica
               />
             )}
 
-            <div className="w-full min-w-0 max-w-full space-y-5 sm:space-y-6">
+            <div
+              ref={reviewsFilterRef}
+              className="w-full min-w-0 max-w-full scroll-mt-[48px] space-y-5 sm:space-y-6"
+            >
               {/*
                 Mobile: count stacks below the scroll row (left-aligned). sm+: one row, count on the end.
-                When a theme is selected, the count is hidden (breakdown + list still reflect the filter).
+                Hidden when a theme is selected from the summary (breakdown + list still reflect the filter).
               */}
+              {activeTheme == null && (
               <div className="flex w-full min-w-0 max-w-full flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
                 <div
-                  ref={reviewsFilterRef}
-                  className="flex min-h-10 w-full min-w-0 flex-1 touch-pan-x items-center gap-2 overflow-x-auto pb-0.5 scroll-mt-[48px] scrollbar-hide sm:min-w-0 sm:flex-wrap sm:overflow-x-visible sm:pb-0"
+                  className="flex min-h-10 w-full min-w-0 flex-1 touch-pan-x items-center gap-2 overflow-x-auto pb-0.5 scrollbar-hide sm:min-w-0 sm:flex-wrap sm:overflow-x-visible sm:pb-0"
                 >
                   <button
                     type="button"
@@ -2237,7 +2240,6 @@ export function ReviewsFigmaReplica({ summaryLayout = 'a' }: ReviewsFigmaReplica
                     </div>
                   ))}
                 </div>
-                {activeTheme == null && (
                   <p
                     className="w-full shrink-0 text-left text-sm leading-5 text-[#333] tabular-nums sm:ml-auto sm:w-auto sm:shrink-0 sm:text-right sm:text-base sm:leading-normal"
                     style={{ fontFeatureSettings: "'lnum' 1" }}
@@ -2245,8 +2247,8 @@ export function ReviewsFigmaReplica({ summaryLayout = 'a' }: ReviewsFigmaReplica
                     {RATING_TOTAL.toLocaleString()}{' '}
                     {RATING_TOTAL === 1 ? 'review' : 'reviews'}
                   </p>
-                )}
               </div>
+              )}
               <ThemeMentionBreakdown
                 activeTheme={activeTheme}
                 sentimentFilter={sentimentFilter ?? 'positive'}
