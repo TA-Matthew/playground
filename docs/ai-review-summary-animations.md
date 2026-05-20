@@ -319,6 +319,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 're
 
 ### React — `AiSummaryBorderAnimatedFrame`
 
+{% raw %}
 ```tsx
 /** Neutral 1px ring when idle / under conic during intro */
 const AI_CARD_BORDER_DEFAULT =
@@ -434,6 +435,7 @@ function AiSummaryBorderAnimatedFrame({
   )
 }
 ```
+{% endraw %}
 
 ### Usage
 

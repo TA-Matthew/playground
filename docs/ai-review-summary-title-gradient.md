@@ -30,6 +30,7 @@ div.flex.items-center.gap-2          ← header row
 
 **Markup (reference):**
 
+{% raw %}
 ```tsx
 <div className="flex w-full min-w-0 items-center gap-2">
   <span
@@ -45,6 +46,7 @@ div.flex.items-center.gap-2          ← header row
   </p>
 </div>
 ```
+{% endraw %}
 
 Import `ai-review-animations.css` in the module that renders these classes.
 
