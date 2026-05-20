@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Variant A / Variant B
 
-This project has research variants (`a`, `a2`, `b`, `b2`, `c`) in `src/data/variants.ts` (e.g. `STOPS_A` / `STOPS_B`, `VATICAN_ROUTE` / `VATICAN_ROUTE_B`, `variants.a` / `variants.a2` / `variants.b` / `variants.b2` / `variants.c`). **`b2` is a copy of B** for “multiple meeting” UXR — keep it in sync with B unless a deliberate difference is needed. **`a2`** is A’s itinerary with triple meeting options in Meeting & Pickup only (not on map/timeline); keep meeting copy in sync with B2’s `TRIPLE_MEETING_STOPS` when it should match.
+This project has research variants (`a`, `a2`, `b`, `b2`, `c`, `c2`) in `src/data/variants.ts` (e.g. `STOPS_A` / `STOPS_B`, `VATICAN_ROUTE` / `VATICAN_ROUTE_B`, `variants.a` / `variants.a2` / `variants.b` / `variants.b2` / `variants.c` / `variants.c2`). **`b2` is a copy of B** for “multiple meeting” UXR — keep it in sync with B unless a deliberate difference is needed. **`a2`** is A’s itinerary with triple meeting options in Meeting & Pickup only (not on map/timeline); keep meeting copy in sync with B2’s `TRIPLE_MEETING_STOPS` when it should match. **`c2`** matches A2 data/behavior but places the meeting card inside Itinerary (below Read more) with no Meeting & Pickup accordion.
 
 ## When editing
 
@@ -17,7 +17,7 @@ This project has research variants (`a`, `a2`, `b`, `b2`, `c`) in `src/data/vari
 
 ## Quick reference
 
-- Variant ids: `'a' | 'a2' | 'b' | 'b2' | 'c'` — e.g. “Variant A”, “A2 (multiple meeting, card only)”, “Variant B”, “B2 (multiple meeting)”, “Variant C”.
+- Variant ids: `'a' | 'a2' | 'b' | 'b2' | 'c' | 'c2'` — e.g. “Variant A”, “A2 (multiple meeting, card only)”, “Variant B”, “B2 (multiple meeting)”, “Variant C”, “C2 (multiple meeting, inline in Itinerary)”.
 - Shared structure: same stops order and keys; B often offsets the map route slightly and may append copy for research.
 
 Do **not** silently update only one variant when the same content should match—confirm first.

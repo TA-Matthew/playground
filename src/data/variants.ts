@@ -1,6 +1,6 @@
 import { viatorListing } from './viatorListing'
 
-export type VariantId = 'a' | 'a2' | 'b' | 'b2' | 'c'
+export type VariantId = 'a' | 'a2' | 'b' | 'b2' | 'c' | 'c2'
 
 export interface Stop {
   id: string
@@ -438,6 +438,27 @@ export const variants: Record<VariantId, ExperienceVariant> = {
       bookAheadSubtitle: 'On average, booked 8 days in advance.',
     },
   },
+  c2: {
+    id: 'c2',
+    label: 'C2 (multiple meeting)',
+    tourTitle: viatorListing.tourTitle,
+    ratingLine: viatorListing.ratingLine,
+    meetingAndPickup: MEETING_AND_PICKUP_A,
+    whatToExpectIntro: ITINERARY_SECTION_INTRO,
+    whatToExpectExtra: ITINERARY_SECTION_EXTRA,
+    /** Same POI path as A — meeting choice in Itinerary (below Read more), not map/timeline. */
+    stops: STOPS_A,
+    routeLngLat: VATICAN_ROUTE,
+    booking: {
+      priceAmount: '$40.56',
+      badgeExceptionalDeal: 'Exceptional deal',
+      badgeKidsDiscount: 'Discounted rates for kids',
+      dateLabel: 'Wed, Apr 29',
+      travellers: 2,
+      bookAheadTitle: 'Book ahead!',
+      bookAheadSubtitle: 'On average, booked 8 days in advance.',
+    },
+  },
 }
 
 export const DEFAULT_VARIANT: VariantId = 'a'
@@ -447,7 +468,13 @@ export function getVariant(id: string | null | undefined): VariantId {
   if (id === 'b') return 'b'
   if (id === 'b2') return 'b2'
   if (id === 'c') return 'c'
+  if (id === 'c2') return 'c2'
   return 'a'
+}
+
+/** A2 / C2: triple meeting picker in card only — not wired to map/timeline. */
+export function isVariantTripleMeetingCardOnly(variantId: VariantId): boolean {
+  return variantId === 'a2' || variantId === 'c2'
 }
 
 /** Variant B, B2, and C share the same itinerary / map behavior (meeting + end stops, B-route offset). */

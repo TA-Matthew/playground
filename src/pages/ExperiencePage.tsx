@@ -45,6 +45,7 @@ import {
 import { viatorListing } from '../data/viatorListing'
 import {
   isVariantBLayout,
+  isVariantTripleMeetingCardOnly,
   TRIPLE_MEETING_STOPS,
   variants,
   type VariantId,
@@ -181,8 +182,8 @@ export function ExperiencePage() {
   /** B2: shared with `LogisticsBlock` so Meeting & Pickup search stays synced with map/timeline. */
   const [b2PickupId, setB2PickupId] = useState<string | null>(null)
   const [b2HoverMeetingId, setB2HoverMeetingId] = useState<string | null>(null)
-  /** A2: meeting pick is card-only — not wired to map/timeline. */
-  const [a2PickupId, setA2PickupId] = useState<string | null>(null)
+  /** A2 / C2: meeting pick is card-only — not wired to map/timeline. */
+  const [tripleMeetingCardPickupId, setTripleMeetingCardPickupId] = useState<string | null>(null)
   /** Same handler as timeline/map (`LogisticsBlock.handleB2PickupChange`). */
   const b2PickupApplyRef = useRef<((id: string | null) => void) | null>(null)
 
@@ -191,39 +192,54 @@ export function ExperiencePage() {
       setB2PickupId(null)
       setB2HoverMeetingId(null)
     }
-    if (variant !== 'a2') {
-      setA2PickupId(null)
+    if (!isVariantTripleMeetingCardOnly(variant)) {
+      setTripleMeetingCardPickupId(null)
     }
   }, [variant])
 
   usePreloadMapPinImages(data.stops)
 
-  const meetingAndPickupSection = data.meetingAndPickup ? (
-    <CollapsibleSection title="Meeting and Pickup" defaultOpen={!isVariantBLayout(variant)}>
+  const meetingAndPickupCard =
+    data.meetingAndPickup != null ? (
       <MeetingAndPickupCard
         content={data.meetingAndPickup}
         variantId={variant}
         meetings={
           variant === 'b2'
             ? data.stops.slice(0, 3)
-            : variant === 'a2'
+            : isVariantTripleMeetingCardOnly(variant)
               ? TRIPLE_MEETING_STOPS
               : undefined
         }
         b2PickupId={
-          variant === 'b2' ? b2PickupId : variant === 'a2' ? a2PickupId : undefined
+          variant === 'b2'
+            ? b2PickupId
+            : isVariantTripleMeetingCardOnly(variant)
+              ? tripleMeetingCardPickupId
+              : undefined
         }
         onB2PickupChange={
           variant === 'b2'
             ? (id) => b2PickupApplyRef.current?.(id)
-            : variant === 'a2'
-              ? setA2PickupId
+            : isVariantTripleMeetingCardOnly(variant)
+              ? setTripleMeetingCardPickupId
               : undefined
         }
         onB2MeetingHover={variant === 'b2' ? setB2HoverMeetingId : undefined}
       />
-    </CollapsibleSection>
-  ) : null
+    ) : null
+
+  const meetingAndPickupAccordion =
+    variant !== 'c2' && meetingAndPickupCard != null ? (
+      <CollapsibleSection title="Meeting and Pickup" defaultOpen={!isVariantBLayout(variant)}>
+        {meetingAndPickupCard}
+      </CollapsibleSection>
+    ) : null
+
+  const meetingAndPickupInlineInItinerary =
+    variant === 'c2' && meetingAndPickupCard != null ? (
+      <div className="mt-6">{meetingAndPickupCard}</div>
+    ) : null
 
   const showFacilitatorChrome = useMemo(
     () => shouldShowFacilitatorChrome(hideUi, unlock),
@@ -454,7 +470,7 @@ export function ExperiencePage() {
               productHighlightConciseSummary={isProductHighlight ? highlightConciseSummary : null}
               productHighlightTopProduct={isProductHighlight ? highlightTopProduct : null}
             />
-            {!isVariantBLayout(variant) && meetingAndPickupSection}
+            {!isVariantBLayout(variant) && meetingAndPickupAccordion}
 
             <CollapsibleSection title="Itinerary" defaultOpen>
               {data.whatToExpectIntro || data.whatToExpectExtra ? (
@@ -464,6 +480,8 @@ export function ExperiencePage() {
                   extra={data.whatToExpectExtra ?? ''}
                 />
               ) : null}
+
+              {meetingAndPickupInlineInItinerary}
 
               <LogisticsBlock
                 key={`logistics-${variant}`}
@@ -487,7 +505,7 @@ export function ExperiencePage() {
               />
             </CollapsibleSection>
 
-            {isVariantBLayout(variant) && meetingAndPickupSection}
+            {isVariantBLayout(variant) && meetingAndPickupAccordion}
 
             <CollapsibleSection title="Additional Info" defaultOpen>
               <AdditionalInfo />

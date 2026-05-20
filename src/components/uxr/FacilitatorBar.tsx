@@ -17,6 +17,10 @@ const FACILITATOR_VARIANT_UI: Record<
   b: { label: 'Variant B' },
   b2: { label: 'B2 (multiple meeting)', title: 'B2 (multiple meeting)' },
   c: { label: 'Variant C' },
+  c2: {
+    label: 'C2 (multiple meeting)',
+    title: 'C2 (multiple meeting — inline under Read more, no accordion)',
+  },
 }
 
 /** Pill toggle group — width hugs On/Off (or option) buttons. */

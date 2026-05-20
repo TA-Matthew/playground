@@ -16,7 +16,7 @@ export function getPoiOrderForStopIndex(
   if (stop.kind === 'passby') {
     return null
   }
-  if (variantId === 'a' || variantId === 'a2') {
+  if (variantId === 'a' || variantId === 'a2' || variantId === 'c2') {
     let n = 0
     for (let j = 0; j <= index; j++) {
       const s = stops[j]
