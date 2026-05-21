@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   B2_MEETING_TIMELINE_ROW_ID,
+  isVariantB2TripleMeeting,
   isVariantBLayout,
   type Stop,
   type VariantId,
@@ -14,9 +15,11 @@ const MOBILE_MAP_MAX_WIDTH_PX = 768
 /** Stable callback so `React.memo(Timeline)` skips re-render when only map hover state updates. */
 function noopMeetingHover() {}
 
-/** First expanded itinerary row on load: A = first stop; B/C = first numbered POI (skip meeting / pass-by legs). */
+/** First expanded itinerary row on load: A = first stop; B/C/C2 = first numbered POI (skip meeting / pass-by / end). */
 function landingDefaultExpandedStopIdForVariant(stops: Stop[], variantId: VariantId): string {
-  if (!isVariantBLayout(variantId)) {
+  const skipMeetingEndPassby =
+    isVariantBLayout(variantId) || isVariantB2TripleMeeting(variantId, stops)
+  if (!skipMeetingEndPassby) {
     return stops[0]?.id ?? ''
   }
   for (let i = 0; i < stops.length; i++) {
@@ -59,7 +62,8 @@ function getLandingStateForBlock(
       : null
   const sid = pick ?? ''
   return {
-    landingDefaultExpandedStopId: sid,
+    /** Map overview + landing teardrop: first numbered POI (not empty — avoids broken showcase / pin sync on load). */
+    landingDefaultExpandedStopId: pick ?? poiDefault,
     selectedStopId: sid,
     expandedId: B2_MEETING_TIMELINE_ROW_ID,
   }
@@ -90,6 +94,8 @@ type Props = {
   onControlledB2MeetingHover?: (id: string | null) => void
   /** Registers `handleB2PickupChange` so Meeting & Pickup can call the same path as the timeline. */
   onExposeB2PickupApply?: (handler: ((id: string | null) => void) | null) => void
+  /** C2: map meeting-pin tap — parent opens inline meeting dropdown. */
+  onC2MapMeetingPinClick?: (meetingStopId: string) => void
 }
 
 export function LogisticsBlock({
@@ -104,6 +110,7 @@ export function LogisticsBlock({
   controlledB2HoverMeetingId,
   onControlledB2MeetingHover,
   onExposeB2PickupApply,
+  onC2MapMeetingPinClick,
 }: Props) {
   const [landingDefaultExpandedStopId] = useState(() =>
     getLandingStateForBlock(stops, variantId, controlledB2PickupId).landingDefaultExpandedStopId,
@@ -128,15 +135,15 @@ export function LogisticsBlock({
   const [timelineHoverStopId, setTimelineHoverStopId] = useState<string | null>(null)
 
   const b2PickupControlled =
-    variantId === 'b2' && onControlledB2PickupChange != null
+    (variantId === 'b2' || variantId === 'c2') && onControlledB2PickupChange != null
   const b2PickupId =
-    variantId === 'b2'
+    (variantId === 'b2' || variantId === 'c2')
       ? b2PickupControlled
         ? controlledB2PickupId ?? null
         : internalB2PickupId
       : null
   const b2HoverMeetingId =
-    variantId === 'b2'
+    (variantId === 'b2' || variantId === 'c2')
       ? b2PickupControlled
         ? controlledB2HoverMeetingId ?? null
         : internalB2HoverMeetingId
@@ -167,7 +174,7 @@ export function LogisticsBlock({
   const b2PickupIdRef = useRef<string | null>(null)
   b2PickupIdRef.current = b2PickupId
   useEffect(() => {
-    if (variantId !== 'b2') {
+    if (variantId !== 'b2' && variantId !== 'c2') {
       setInternalB2PickupId(null)
       setInternalB2HoverMeetingId(null)
     }
@@ -193,7 +200,7 @@ export function LogisticsBlock({
   }, [setB2PickupId, setB2HoverMeetingId])
 
   useEffect(() => {
-    if (variantId !== 'b2' || !onExposeB2PickupApply) return
+    if ((variantId !== 'b2' && variantId !== 'c2') || !onExposeB2PickupApply) return
     onExposeB2PickupApply(handleB2PickupChange)
     return () => onExposeB2PickupApply(null)
   }, [variantId, onExposeB2PickupApply, handleB2PickupChange])
@@ -307,12 +314,13 @@ export function LogisticsBlock({
           selectedStopId={selectedStopId}
           expandedId={expandedId}
           onRowHeaderClick={handleRowHeaderClick}
-          b2PickupId={variantId === 'b2' ? b2PickupId : null}
+          b2PickupId={(variantId === 'b2' || variantId === 'c2') ? b2PickupId : null}
           onB2PickupChange={handleB2PickupChange}
-          onB2MeetingHover={variantId === 'b2' ? handleB2MeetingHover : noopMeetingHover}
+          onB2MeetingHover={(variantId === 'b2' || variantId === 'c2') ? handleB2MeetingHover : noopMeetingHover}
+          b2HoverMeetingId={(variantId === 'b2' || variantId === 'c2') ? b2HoverMeetingId : null}
           onTimelineRowHover={handleTimelineRowHover}
           onOpenB2MeetingMobileMap={
-            variantId === 'b2' ? bumpOpenB2MeetingMobileMap : undefined
+            (variantId === 'b2' || variantId === 'c2') ? bumpOpenB2MeetingMobileMap : undefined
           }
         />
       </div>
@@ -330,14 +338,14 @@ export function LogisticsBlock({
             selectedStopId !== '' &&
             (lastSelectSource === 'mapModal' ||
               (expandedId !== null && expandedId === selectedStopId) ||
-              (variantId === 'b2' &&
-                expandedId === B2_MEETING_TIMELINE_ROW_ID &&
+              ((variantId === 'b2' || variantId === 'c2') &&
+                (expandedId === B2_MEETING_TIMELINE_ROW_ID || lastSelectSource === 'b2MeetingPick') &&
                 stops.slice(0, 3).some((s) => s.id === selectedStopId)))
           }
-          b2HoverMeetingId={variantId === 'b2' ? b2HoverMeetingId : null}
-          b2CommittedPickupId={variantId === 'b2' ? b2PickupId : null}
-          onB2PickupChange={variantId === 'b2' ? handleB2PickupChange : undefined}
-          onB2MeetingHover={variantId === 'b2' ? handleB2MeetingHover : undefined}
+          b2HoverMeetingId={(variantId === 'b2' || variantId === 'c2') ? b2HoverMeetingId : null}
+          b2CommittedPickupId={(variantId === 'b2' || variantId === 'c2') ? b2PickupId : null}
+          onB2PickupChange={(variantId === 'b2' || variantId === 'c2') ? handleB2PickupChange : undefined}
+          onB2MeetingHover={(variantId === 'b2' || variantId === 'c2') ? handleB2MeetingHover : undefined}
           timelineHoverStopId={timelineHoverStopId}
           expandedStopId={expandedId}
           onSelectStop={handleSelectStop}
@@ -345,8 +353,9 @@ export function LogisticsBlock({
           onDismissMobileMapStopPanel={handleDismissMobileMapStopPanel}
           poiPopupContent={poiPopupContent}
           b2OpenMeetingModalSignal={
-            variantId === 'b2' ? b2OpenMeetingModalNonce : 0
+            (variantId === 'b2' || variantId === 'c2') ? b2OpenMeetingModalNonce : 0
           }
+          onC2MapMeetingPinClick={variantId === 'c2' ? onC2MapMeetingPinClick : undefined}
         />
       </div>
     </div>

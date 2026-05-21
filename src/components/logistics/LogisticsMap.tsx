@@ -166,10 +166,10 @@ function markerSvgForStop(
   overlapCompact: boolean,
   b2CommittedPickupId: string | null,
 ): string {
-  if (isVariantBLayout(variantId) && stop?.kind === 'meeting') {
+  if ((isVariantBLayout(variantId) || variantId === 'c2') && stop?.kind === 'meeting') {
     if (overlapCompact) return MAP_PASSBY_DOT_HTML
     const showB2DiscCheck =
-      variantId === 'b2' &&
+      (variantId === 'b2' || variantId === 'c2') &&
       b2CommittedPickupId != null &&
       stop.id === b2CommittedPickupId
     if (showB2DiscCheck) {
@@ -177,7 +177,7 @@ function markerSvgForStop(
     }
     return MAP_MEETING_VIATOR_SVG
   }
-  if (isVariantBLayout(variantId) && stop?.kind === 'end') {
+  if ((isVariantBLayout(variantId) || variantId === 'c2') && stop?.kind === 'end') {
     if (overlapCompact) return MAP_PASSBY_DOT_HTML
     return MAP_FLAG_SVG
   }
@@ -191,7 +191,10 @@ function markerSvgForStop(
 }
 
 function isVariantBMeetingOrEnd(variantId: VariantId, stop: Stop | undefined): boolean {
-  return isVariantBLayout(variantId) && (stop?.kind === 'meeting' || stop?.kind === 'end')
+  return (
+    (isVariantBLayout(variantId) || variantId === 'c2') &&
+    (stop?.kind === 'meeting' || stop?.kind === 'end')
+  )
 }
 
 /**
@@ -206,7 +209,11 @@ function dashedItineraryLineCoords(
   b2CommittedPickupId: string | null,
 ): [number, number][] {
   const core = routePolylineLngLat ?? routeLngLat
-  if (variantId !== 'b2' || b2CommittedPickupId == null || core.length < 1) {
+  if (
+    (variantId !== 'b2' && variantId !== 'c2') ||
+    b2CommittedPickupId == null ||
+    core.length < 1
+  ) {
     return core
   }
   const idx = stops.findIndex((s) => s.id === b2CommittedPickupId)
@@ -433,6 +440,19 @@ function replayMapPinTeardropIntroAnimation(el: HTMLButtonElement) {
   stack.classList.add('logistics-map-pin-in-view')
 }
 
+/** B2 desktop meeting pins: fixed hit target (tip at bottom) so hover can swap disc ↔ teardrop without flicker. */
+function mapB2MeetingMarkerShellClass(): string {
+  return 'relative flex min-h-[150px] w-20 cursor-pointer items-end justify-center border-0 bg-transparent p-0 shadow-none outline-none ring-0 focus-visible:outline focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-emerald-600'
+}
+
+function isB2DesktopMeetingMapPin(
+  stop: Stop | undefined,
+  variantId: VariantId,
+  showMapPinPhotoHead: boolean,
+): boolean {
+  return variantId === 'b2' && stop?.kind === 'meeting' && showMapPinPhotoHead
+}
+
 /** Map-only marker chrome: selected → teardrop stack (photo optional on mobile inline); else disc / compact. */
 function mapMarkerWrapperClass(
   stop: Stop | undefined,
@@ -442,9 +462,12 @@ function mapMarkerWrapperClass(
   overlapCompact: boolean,
   showMapPinPhotoHead: boolean,
 ): string {
+  if (isB2DesktopMeetingMapPin(stop, variantId, showMapPinPhotoHead)) {
+    return mapB2MeetingMarkerShellClass()
+  }
   if (isMapTeardropPin(active, stop, variantId, poiOrder, overlapCompact)) {
     const focusRing =
-      isVariantBLayout(variantId) && (stop?.kind === 'meeting' || stop?.kind === 'end')
+      isVariantBMeetingOrEnd(variantId, stop)
         ? 'focus-visible:ring-emerald-600'
         : 'focus-visible:ring-black'
     /** Literals keep Tailwind class detection; sizes match `logisticsTeardropMarkup` stack constants. */
@@ -531,7 +554,7 @@ function applyMarkerSelectedState(
   el.dataset.mapPinActive = active ? '1' : '0'
 
   const b2ShowCommittedCheck =
-    variantId === 'b2' &&
+    (variantId === 'b2' || variantId === 'c2') &&
     stop?.kind === 'meeting' &&
     teardrop &&
     b2CommittedPickupId != null &&
@@ -539,7 +562,7 @@ function applyMarkerSelectedState(
 
   const showB2MeetingDiscCheck =
     !teardrop &&
-    variantId === 'b2' &&
+    (variantId === 'b2' || variantId === 'c2') &&
     stop?.kind === 'meeting' &&
     !overlapCompact &&
     b2CommittedPickupId != null &&
@@ -567,7 +590,12 @@ function applyMarkerSelectedState(
         omitPhotoHead: !showMapPinPhotoHead,
       })
     } else {
-      el.innerHTML = markerSvgForStop(stop, variantId, poiOrder, overlapCompact, b2CommittedPickupId)
+      const svg = markerSvgForStop(stop, variantId, poiOrder, overlapCompact, b2CommittedPickupId)
+      if (isB2DesktopMeetingMapPin(stop, variantId, showMapPinPhotoHead)) {
+        el.innerHTML = `<span class="${logisticsPinButtonClass(true, active)}">${svg}</span>`
+      } else {
+        el.innerHTML = svg
+      }
     }
     el.setAttribute('data-marker-html-key', nextHtmlKey)
   }
@@ -811,7 +839,7 @@ function parseDurationAndAdmission(durationLine: string): {
 /** MW map modal bottom shelf: meetings first (B-layout), then itinerary legs, then end. */
 function getMobileMapModalShelfStops(variantId: VariantId, stops: Stop[]): Stop[] {
   if (stops.length === 0) return []
-  if (!isVariantBLayout(variantId)) return stops
+  if (!isVariantBLayout(variantId) && variantId !== 'c2') return stops
   const meetings: Stop[] = []
   const middle: Stop[] = []
   const ends: Stop[] = []
@@ -889,10 +917,10 @@ function MobileMapModalStopPanelCard({
     )
   }
 
-  const logisticsB = isVariantBLayout(variantId)
+  const logisticsB = isVariantBLayout(variantId) || variantId === 'c2'
   const selectionIsMeeting = logisticsB && stop.kind === 'meeting'
   const displayStop =
-    variantId === 'b2' &&
+    (variantId === 'b2' || variantId === 'c2') &&
     isVariantB2TripleMeeting(variantId, stops) &&
     selectionIsMeeting &&
     b2CommittedPickupId != null
@@ -1583,7 +1611,12 @@ function routeCoordsForVariantOverview(
   stops: Stop[],
   b2CommittedPickupId: string | null,
 ): [number, number][] {
-  if (variantId !== 'b2' || b2CommittedPickupId == null || stops.length === 0 || routeLngLat.length === 0) {
+  if (
+    (variantId !== 'b2' && variantId !== 'c2') ||
+    b2CommittedPickupId == null ||
+    stops.length === 0 ||
+    routeLngLat.length === 0
+  ) {
     return routeLngLat
   }
   const out: [number, number][] = []
@@ -1824,6 +1857,8 @@ type Props = {
    * (same as tapping a meeting pin). No-op on desktop or when not triple-meeting B2.
    */
   b2OpenMeetingModalSignal?: number
+  /** C2 desktop: meeting pin tap — parent opens the inline meeting dropdown. */
+  onC2MapMeetingPinClick?: (meetingStopId: string) => void
 }
 
 export function LogisticsMap({
@@ -1848,6 +1883,7 @@ export function LogisticsMap({
   timelineHoverStopId = null,
   expandedStopId = null,
   b2OpenMeetingModalSignal = 0,
+  onC2MapMeetingPinClick,
 }: Props) {
   /** Unique clipPath id for modal GPS icon SVG (avoid duplicate ids if multiple instances). */
   const mobileModalGpsIconClipId = useId().replace(/:/g, '')
@@ -1963,6 +1999,10 @@ export function LogisticsMap({
   const lastHubShelfCameraKeyRef = useRef<string | null>(null)
   const onB2MeetingHoverRef = useRef(onB2MeetingHover)
   onB2MeetingHoverRef.current = onB2MeetingHover
+  const onB2PickupChangeRef = useRef(onB2PickupChange)
+  onB2PickupChangeRef.current = onB2PickupChange
+  const onC2MapMeetingPinClickRef = useRef(onC2MapMeetingPinClick)
+  onC2MapMeetingPinClickRef.current = onC2MapMeetingPinClick
 
   interactionRef.current = { isMobile, sheetOpen: mobileSheetOpen }
 
@@ -2026,7 +2066,7 @@ export function LogisticsMap({
 
   const showB2MeetingModalPanel = useMemo(
     () =>
-      variantId === 'b2' &&
+      (variantId === 'b2' || variantId === 'c2') &&
       isVariantB2TripleMeeting(variantId, stops) &&
       onB2PickupChange != null &&
       mobileSheetOpen &&
@@ -2047,7 +2087,7 @@ export function LogisticsMap({
   /** B2 triple-meeting MW shelf (hub slide + itinerary cards) — independent of `showB2MeetingModalPanel` pin gating. */
   const b2TripleMeetingMwShelfActive = useMemo(
     () =>
-      variantId === 'b2' &&
+      (variantId === 'b2' || variantId === 'c2') &&
       isVariantB2TripleMeeting(variantId, stops) &&
       onB2PickupChange != null &&
       mobileSheetOpen &&
@@ -2082,14 +2122,14 @@ export function LogisticsMap({
     if (!mobileModalEffectiveStop) return null
     if (
       mobileModalB2MeetingPanelOpen &&
-      variantId === 'b2' &&
+      (variantId === 'b2' || variantId === 'c2') &&
       isVariantB2TripleMeeting(variantId, stops) &&
       onB2PickupChange != null
     ) {
       return null
     }
     if (
-      variantId === 'b2' &&
+      (variantId === 'b2' || variantId === 'c2') &&
       isVariantB2TripleMeeting(variantId, stops) &&
       onB2PickupChange != null &&
       mobileModalEffectiveStop.kind === 'meeting'
@@ -2163,25 +2203,27 @@ export function LogisticsMap({
     const selId = selectedStopIdRef.current
     const selIdx = stopsLocal.findIndex((s) => s.id === selId)
     const committedPickup = b2CommittedPickupIdRef.current
-    const selectedStopForFocus = selIdx >= 0 ? stopsLocal[selIdx] : undefined
-    /** Dim non-focused meeting pins when a pickup is committed or the current list/map selection is a meeting. */
+    /**
+     * Hide non-chosen meeting pins once pickup is committed (B2 timeline / C2 card).
+     * Until then, all three meeting discs stay on the map.
+     */
     let b2FocusMeetingId: string | null = null
-    if (vid === 'b2') {
+    if (vid === 'b2' || vid === 'c2') {
       if (committedPickup != null) {
         b2FocusMeetingId = committedPickup
-      } else if (selectedStopForFocus?.kind === 'meeting') {
-        b2FocusMeetingId = selectedStopForFocus.id
       }
     }
     const rawB2HoverMeetingId =
-      variantIdRef.current === 'b2' ? b2HoverMeetingIdRef.current : null
+      variantIdRef.current === 'b2' || variantIdRef.current === 'c2'
+        ? b2HoverMeetingIdRef.current
+        : null
     /**
      * MW map-modal meeting sheet: pins follow **pending** selection only — ignore timeline/list hover
      * preview so the selected meeting stays highlighted on the map.
      */
     const b2MeetingModalHighlightId =
       showB2MeetingModalPanelRef.current &&
-      variantIdRef.current === 'b2' &&
+      (variantIdRef.current === 'b2' || variantIdRef.current === 'c2') &&
       mobileB2MeetingPendingIdRef.current != null
         ? mobileB2MeetingPendingIdRef.current
         : rawB2HoverMeetingId
@@ -2256,7 +2298,7 @@ export function LogisticsMap({
     let pinSelectionIdx = effectiveSelectionIdx
     if (
       showB2MeetingModalPanelRef.current &&
-      variantIdRef.current === 'b2' &&
+      (variantIdRef.current === 'b2' || variantIdRef.current === 'c2') &&
       pinSelectionIdx >= 0
     ) {
       const st = stopsLocal[pinSelectionIdx]
@@ -2298,17 +2340,24 @@ export function LogisticsMap({
       )
       const teardrop = isMapTeardropPin(active, stopsLocal[i], vid, poiOrder, ocForMarker)
       const collapsed = el.dataset.mapPinHeadCollapsed === '1'
-      const offY = teardrop
-        ? !showMapPinPhotoHead
-          ? MAP_MAP_TEARDROP_ONLY_OFFSET_Y
-          : collapsed
-            ? MAP_MAP_PIN_COLLAPSED_OFFSET_Y
-            : MAP_POI_SELECTED_PIN_OFFSET_Y
-        : 0
+      const b2MeetingFixedShell = isB2DesktopMeetingMapPin(
+        stopsLocal[i],
+        vid,
+        showMapPinPhotoHead,
+      )
+      const offY = b2MeetingFixedShell
+        ? 0
+        : teardrop
+          ? !showMapPinPhotoHead
+            ? MAP_MAP_TEARDROP_ONLY_OFFSET_Y
+            : collapsed
+              ? MAP_MAP_PIN_COLLAPSED_OFFSET_Y
+              : MAP_POI_SELECTED_PIN_OFFSET_Y
+          : 0
       markersRef.current[i]?.setOffset([0, offY])
 
       const stopAt = stopsLocal[i]
-      if (vid === 'b2' && stopAt?.kind === 'meeting') {
+      if ((vid === 'b2' || vid === 'c2') && stopAt?.kind === 'meeting') {
         /**
          * MW map-modal meeting sheet (pending choice, not yet committed): keep **all** meeting pins on
          * the canvas — selection vs dimming comes from `applyMarkerSelectedState` / active hover idx only.
@@ -2374,7 +2423,11 @@ export function LogisticsMap({
         ocH,
       )
       if (teardropH && elH) {
-        replayMapPinTeardropIntroAnimation(elH)
+        if (isB2DesktopMeetingMapPin(stopsLocal[hoverIdx], vid, showMapPinPhotoHead)) {
+          expandMapPinHead(elH)
+        } else {
+          replayMapPinTeardropIntroAnimation(elH)
+        }
       }
     }
 
@@ -2691,7 +2744,7 @@ export function LogisticsMap({
    */
   useEffect(() => {
     if (!mobileSheetOpen || !showB2MeetingModalPanel) return
-    if (variantId !== 'b2' || !isVariantB2TripleMeeting(variantId, stops)) return
+    if ((variantId !== 'b2' && variantId !== 'c2') || !isVariantB2TripleMeeting(variantId, stops)) return
     if (mobileB2MeetingPendingId != null) return
     if (mobileB2MeetingReselectPicker && b2CommittedPickupId != null) {
       setMobileB2MeetingPendingId(b2CommittedPickupId)
@@ -3064,6 +3117,8 @@ export function LogisticsMap({
       markersRef.current = []
       markerElsRef.current = []
 
+      const showMapPinPhotoHeadAtInit = !initialMobile
+
       routeLngLat.forEach((coord, i) => {
         const markerEl = document.createElement('button')
         markerEl.type = 'button'
@@ -3076,15 +3131,18 @@ export function LogisticsMap({
           false,
           poiOrder,
           false,
-          true,
+          showMapPinPhotoHeadAtInit,
         )
         const b2c = b2CommittedPickupIdRef.current
         const initialB2DiscChk =
-          variantId === 'b2' &&
+          (variantId === 'b2' || variantId === 'c2') &&
           stopAtI?.kind === 'meeting' &&
           b2c != null &&
           stopAtI.id === b2c
-        markerEl.innerHTML = markerSvgForStop(stopAtI, variantId, poiOrder, false, b2c)
+        const initialSvg = markerSvgForStop(stopAtI, variantId, poiOrder, false, b2c)
+        markerEl.innerHTML = isB2DesktopMeetingMapPin(stopAtI, variantId, showMapPinPhotoHeadAtInit)
+          ? `<span class="${logisticsPinButtonClass(true, false)}">${initialSvg}</span>`
+          : initialSvg
         markerEl.setAttribute(
           'data-marker-html-key',
           `pl:${variantId}:${stopAtI?.id ?? ''}:${poiOrder ?? ''}:f${initialB2DiscChk ? ':b2chk' : ''}`,
@@ -3101,7 +3159,22 @@ export function LogisticsMap({
         )
 
         const stop = stopsRef.current[i]
+        if (stop?.kind === 'meeting' && (variantId === 'b2' || variantId === 'c2')) {
+          markerEl.dataset.logisticsMeetingMapPin = '1'
+        }
         if (stop) {
+          /** B2 only: map hover syncs timeline list highlight (C2 uses list → map only). */
+          if (stop.kind === 'meeting' && variantId === 'b2') {
+            markerEl.addEventListener('mouseenter', () => {
+              if (b2HoverMeetingIdRef.current === stop.id) return
+              onB2MeetingHoverRef.current?.(stop.id)
+            })
+            markerEl.addEventListener('mouseleave', () => {
+              if (b2HoverMeetingIdRef.current !== stop.id) return
+              onB2MeetingHoverRef.current?.(null)
+            })
+          }
+
           markerEl.addEventListener('click', (e) => {
             e.preventDefault()
             e.stopPropagation()
@@ -3116,7 +3189,7 @@ export function LogisticsMap({
             /** B2: triple meeting — full-screen modal shows the same picker as the timeline; inline preview map still no-op. */
             const currentStop = stopsRef.current[i]
             if (
-              variantIdRef.current === 'b2' &&
+              (variantIdRef.current === 'b2' || variantIdRef.current === 'c2') &&
               i < 3 &&
               currentStop?.kind === 'meeting'
             ) {
@@ -3157,7 +3230,20 @@ export function LogisticsMap({
                   poiPopupRef.current = null
                   return
                 }
-              } else {
+              } else if (variantIdRef.current === 'c2' && !mobile && tripleMeeting) {
+                onSelectRef.current(stop.id, 'map')
+                selectedStopIdRef.current = stop.id
+                lastSelectSourceRef.current = 'map'
+                highlightSelectedPinRef.current = true
+                onC2MapMeetingPinClickRef.current?.(stop.id)
+                syncMarkersAppearanceRef.current()
+                return
+              } else if (variantIdRef.current === 'b2' && !mobile && tripleMeeting) {
+                onB2MeetingHoverRef.current?.(null)
+                onB2PickupChangeRef.current?.(stop.id)
+                syncMarkersAppearanceRef.current()
+                return
+              } else if (variantIdRef.current === 'b2') {
                 return
               }
             }
@@ -3211,6 +3297,10 @@ export function LogisticsMap({
 
         const marker = new maplibregl.Marker({
           element: markerEl,
+          anchor:
+            isB2DesktopMeetingMapPin(stopAtI, variantId, showMapPinPhotoHeadAtInit)
+              ? 'bottom'
+              : 'center',
           /** Align HTML overlay with GL line layer (avoids integer rounding vs vector path). */
           subpixelPositioning: true,
         })
@@ -3277,6 +3367,10 @@ export function LogisticsMap({
         map.once('idle', () => {
           if (cancelled) return
           trackRecentreHintRef.current = true
+          /** C2 desktop: show Re-centre once overview has settled (not only after the user pans). */
+          if (variantId === 'c2' && !initialMobile) {
+            setShowRecentre(true)
+          }
           syncMarkersAppearanceRef.current()
         })
       })
@@ -3547,6 +3641,38 @@ export function LogisticsMap({
     }
   }, [mapReady, isMobile, mobileSheetOpen])
 
+  /** C2 desktop: tap empty map — clear meeting pin preview (not committed pickup in the card). */
+  useEffect(() => {
+    const map = mapRef.current
+    if (!mapReady || !map || isMobile) return
+
+    const clearC2MeetingMapSelection = () => {
+      if (variantIdRef.current !== 'c2') return
+      if (!isVariantB2TripleMeeting(variantIdRef.current, stopsRef.current)) return
+
+      const meetingIds = stopsRef.current.slice(0, 3).map((s) => s.id)
+      const meetingSelected = meetingIds.includes(selectedStopIdRef.current)
+      const hasMeetingHover = b2HoverMeetingIdRef.current != null
+      if (!meetingSelected && !hasMeetingHover) return
+
+      onB2MeetingHoverRef.current?.(null)
+      onSelectRef.current('', 'map')
+      selectedStopIdRef.current = ''
+      lastSelectSourceRef.current = 'map'
+      highlightSelectedPinRef.current = false
+      poiPopupRef.current?.remove()
+      poiPopupRef.current = null
+      overviewModeRef.current = true
+      setShowRecentre(true)
+      syncMarkersAppearanceRef.current()
+    }
+
+    map.on('click', clearC2MeetingMapSelection)
+    return () => {
+      map.off('click', clearC2MeetingMapSelection)
+    }
+  }, [mapReady, isMobile])
+
   /**
    * Same framing as the visible “Re-centre” control (`routeCoordsForVariantOverview` + 800ms overview).
    * Optional `syncParent: 'after'` defers `onRecentre` until after `fitRouteOverview` starts (rare debugging).
@@ -3606,7 +3732,10 @@ export function LogisticsMap({
   )
 
   fitB2MeetingListOverviewOnMapRef.current = () => {
-    if (variantIdRef.current !== 'b2' || !isVariantB2TripleMeeting(variantIdRef.current, stopsRef.current)) {
+    if (
+      (variantIdRef.current !== 'b2' && variantIdRef.current !== 'c2') ||
+      !isVariantB2TripleMeeting(variantIdRef.current, stopsRef.current)
+    ) {
       return
     }
     runRecentreLikeButton(true)
@@ -3665,7 +3794,7 @@ export function LogisticsMap({
     const map = mapRef.current
     if (!mapReady || !map) return
     if (!isMobile || !mobileSheetOpen || !showB2MeetingModalPanel) return
-    if (variantId !== 'b2' || !isVariantB2TripleMeeting(variantId, stops)) return
+    if ((variantId !== 'b2' && variantId !== 'c2') || !isVariantB2TripleMeeting(variantId, stops)) return
     if (prev == null || b2CommittedPickupId != null) return
 
     map.stop()
@@ -3725,7 +3854,7 @@ export function LogisticsMap({
       if (
         becameReselectPicker &&
         mapReady &&
-        variantId === 'b2' &&
+        (variantId === 'b2' || variantId === 'c2') &&
         isVariantB2TripleMeeting(variantId, stops)
       ) {
         const map = mapRef.current
@@ -3854,7 +3983,9 @@ export function LogisticsMap({
         poiPopupRef.current?.remove()
         poiPopupRef.current = null
         overviewModeRef.current = true
-        setShowRecentre(false)
+        if (variantId !== 'c2') {
+          setShowRecentre(false)
+        }
         ignoreMoveEndForRecentreUntilRef.current = Math.max(
           ignoreMoveEndForRecentreUntilRef.current,
           Date.now() + 850,
@@ -3874,6 +4005,9 @@ export function LogisticsMap({
           },
           programmaticOverviewCameraDepthRef,
         )
+        if (variantId === 'c2') {
+          setShowRecentre(true)
+        }
       }
       return
     }
@@ -3921,13 +4055,22 @@ export function LogisticsMap({
         const selStop = stops[idx]
         /** B2: committed meeting is framed by overview fits — never tight zoom here (avoids zoom-in then overview). */
         if (
-          variantId === 'b2' &&
+          (variantId === 'b2' || variantId === 'c2') &&
           selStop?.kind === 'meeting' &&
           b2CommittedPickupId != null &&
           selStop.id === b2CommittedPickupId
         ) {
           overviewModeRef.current = true
           setShowRecentre(false)
+          return
+        }
+        /** C2: meeting pin tap — teardrop + dropdown only; keep route overview (no `fitPoiInView`). */
+        if (
+          variantId === 'c2' &&
+          selStop?.kind === 'meeting' &&
+          lastSelectSource === 'map'
+        ) {
+          overviewModeRef.current = true
           return
         }
         const center = routeLngLat[idx]

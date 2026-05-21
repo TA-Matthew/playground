@@ -249,7 +249,20 @@ function SectionShell({ children }: { children: ReactNode }) {
 
 function ConciseSummaryIntro() {
   return (
-    <p className="max-w-prose text-sm leading-relaxed text-slate-600">{PRODUCT_HIGHLIGHT_CONCISE_SUMMARY_TEXT}</p>
+    <p
+      className="max-w-prose"
+      style={{
+        color: 'var(--Color-Neutral-20, #333)',
+        fontFamily: 'var(--Typeface-Font-Brand, Aeonik)',
+        fontSize: 'var(--Typeface-Font-size-300, 14px)',
+        fontStyle: 'normal',
+        fontWeight: 'var(--Typeface-Font-weight-Regular, 400)',
+        lineHeight: 'var(--Typeface-Line-height-300, 20px)',
+        letterSpacing: 'var(--Typeface-Letter-spacing-None, 0.05px)',
+      }}
+    >
+      {PRODUCT_HIGHLIGHT_CONCISE_SUMMARY_TEXT}
+    </p>
   )
 }
 
@@ -379,10 +392,23 @@ function LayoutHeadoutGrid({
   )
 }
 
-function ExpediaQuickFactsRail() {
+/** Expedia-style 2-col quick-facts rail. Also reused as the "Deferred" rail above the Overview section. */
+export function ExpediaQuickFactsRail({
+  topBorder = false,
+}: {
+  readonly topBorder?: boolean
+} = {}) {
   const rail = viatorListing.iconRail
   return (
-    <ul className="grid list-none grid-cols-1 gap-x-12 gap-y-5 py-8 sm:grid-cols-2" aria-label="Quick facts">
+    <ul
+      className={[
+        'grid list-none grid-cols-1 gap-x-12 gap-y-5 py-8 sm:grid-cols-2',
+        topBorder ? 'border-t border-[#d9d9d9]' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      aria-label="Quick facts"
+    >
       {rail.map((it) => (
         <li key={it.id} className="flex gap-3">
           <PdpQuickFactRailIcon kind={it.icon} />
@@ -515,6 +541,7 @@ export function PdpProductHighlights({
 
   switch (layoutId) {
     case 'expedia-klook-labels':
+    case 'expedia-deferred-rail':
       return <LayoutExpediaKlookLabels {...layoutProps} />
     case 'expedia-split':
       return <LayoutExpediaSplit {...layoutProps} />
@@ -531,6 +558,7 @@ export function PdpProductHighlights({
         />
       )
     case 'headout-grid':
+    case 'headout-deferred-rail':
     default:
       return <LayoutHeadoutGrid {...layoutProps} />
   }

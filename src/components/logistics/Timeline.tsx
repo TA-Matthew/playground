@@ -33,6 +33,8 @@ type Props = {
   onB2PickupChange?: (meetingStopId: string | null) => void
   /** B2: hover preview on map while pointing at a dropdown option */
   onB2MeetingHover?: (meetingStopId: string | null) => void
+  /** B2: map pin hover — highlights the matching timeline list option */
+  b2HoverMeetingId?: string | null
   /** List row hover — map pin matches selected teardrop + image */
   onTimelineRowHover?: (stopId: string | null) => void
   /** B2: open MW full-screen map meeting picker from timeline helper (“Show meeting points on map”). */
@@ -49,18 +51,21 @@ function TimelineComponent({
   b2PickupId = null,
   onB2PickupChange = noop,
   onB2MeetingHover = noop,
+  b2HoverMeetingId = null,
   onTimelineRowHover = noop,
   onOpenB2MeetingMobileMap,
 }: Props) {
   const logisticsB = isVariantBLayout(variantId)
   const b2Triple = isVariantB2TripleMeeting(variantId, stops)
   const b2Meetings = b2Triple ? stops.slice(0, 3) : []
-  const listStops = b2Triple ? stops.slice(3) : stops
-  const listIndexOffset = b2Triple ? 3 : 0
+  /** C2: end point stays on the map only — not listed in the itinerary timeline. */
+  const listStops = b2Triple
+    ? stops.slice(3).filter((s) => variantId !== 'c2' || s.kind !== 'end')
+    : stops
 
   return (
     <div className="flex flex-col gap-0">
-      {b2Triple ? (
+      {b2Triple && variantId !== 'c2' ? (
         <TimelineB2MeetingRow
           variantId={variantId}
           stops={stops}
@@ -71,12 +76,13 @@ function TimelineComponent({
           expandedId={expandedId}
           onRowHeaderClick={onRowHeaderClick}
           onMeetingHover={onB2MeetingHover}
+          hoverMeetingId={b2HoverMeetingId}
           onOpenMobileMap={onOpenB2MeetingMobileMap}
         />
       ) : null}
       {listStops.map((stop, i) => {
-        const index = listIndexOffset + i
-        const isLast = index === stops.length - 1
+        const index = stops.findIndex((s) => s.id === stop.id)
+        const isLast = i === listStops.length - 1
         const selected = stop.id === selectedStopId
         const isOpen = expandedId === stop.id
         const meeting = logisticsB && stop.kind === 'meeting'

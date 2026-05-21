@@ -32,6 +32,8 @@ type Props = {
   onRowHeaderClick: (id: string) => void
   /** Highlight matching map pin while pointer is over a menu option */
   onMeetingHover: (meetingStopId: string | null) => void
+  /** Map pin hover — highlights the matching list option */
+  hoverMeetingId?: string | null
   /** MW: open full-screen map with meeting picker (collapsed row, no pickup yet). */
   onOpenMobileMap?: () => void
 }
@@ -47,6 +49,7 @@ export function TimelineB2MeetingRow({
   expandedId,
   onRowHeaderClick,
   onMeetingHover,
+  hoverMeetingId = null,
   onOpenMobileMap,
 }: Props) {
   const activeMeeting = pickupId ? meetings.find((m) => m.id === pickupId) : undefined
@@ -272,7 +275,11 @@ export function TimelineB2MeetingRow({
                             role="option"
                             aria-selected={pickupId === m.id}
                             className={`flex w-full cursor-pointer px-3 py-2 text-left text-[13px] leading-snug transition ${
-                              pickupId === m.id ? 'bg-emerald-50 text-emerald-950' : 'text-stone-900 hover:bg-stone-50'
+                              pickupId === m.id
+                                ? 'bg-emerald-50 text-emerald-950'
+                                : hoverMeetingId === m.id
+                                  ? 'bg-stone-100 text-stone-900'
+                                  : 'text-stone-900 hover:bg-stone-50'
                             }`}
                             onMouseEnter={() => onMeetingHover(m.id)}
                             onFocus={() => onMeetingHover(m.id)}

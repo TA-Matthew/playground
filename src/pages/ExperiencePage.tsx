@@ -182,10 +182,12 @@ export function ExperiencePage() {
   /** B2: shared with `LogisticsBlock` so Meeting & Pickup search stays synced with map/timeline. */
   const [b2PickupId, setB2PickupId] = useState<string | null>(null)
   const [b2HoverMeetingId, setB2HoverMeetingId] = useState<string | null>(null)
-  /** A2 / C2: meeting pick is card-only — not wired to map/timeline. */
+  /** A2: card-only pickup. C2: shared with map via `b2PickupApplyRef` + `tripleMeetingCardPickupId`. */
   const [tripleMeetingCardPickupId, setTripleMeetingCardPickupId] = useState<string | null>(null)
   /** Same handler as timeline/map (`LogisticsBlock.handleB2PickupChange`). */
   const b2PickupApplyRef = useRef<((id: string | null) => void) | null>(null)
+  /** C2: increment to open meeting dropdown when a map pin is tapped. */
+  const [c2OpenMeetingPickerNonce, setC2OpenMeetingPickerNonce] = useState(0)
 
   useEffect(() => {
     if (variant !== 'b2') {
@@ -205,7 +207,7 @@ export function ExperiencePage() {
         content={data.meetingAndPickup}
         variantId={variant}
         meetings={
-          variant === 'b2'
+          (variant === 'b2' || variant === 'c2')
             ? data.stops.slice(0, 3)
             : isVariantTripleMeetingCardOnly(variant)
               ? TRIPLE_MEETING_STOPS
@@ -214,18 +216,22 @@ export function ExperiencePage() {
         b2PickupId={
           variant === 'b2'
             ? b2PickupId
-            : isVariantTripleMeetingCardOnly(variant)
+            : variant === 'c2'
               ? tripleMeetingCardPickupId
-              : undefined
+              : isVariantTripleMeetingCardOnly(variant)
+                ? tripleMeetingCardPickupId
+                : undefined
         }
         onB2PickupChange={
-          variant === 'b2'
+          (variant === 'b2' || variant === 'c2')
             ? (id) => b2PickupApplyRef.current?.(id)
             : isVariantTripleMeetingCardOnly(variant)
               ? setTripleMeetingCardPickupId
               : undefined
         }
-        onB2MeetingHover={variant === 'b2' ? setB2HoverMeetingId : undefined}
+        onB2MeetingHover={(variant === 'b2' || variant === 'c2') ? setB2HoverMeetingId : undefined}
+        b2HoverMeetingId={variant === 'c2' ? b2HoverMeetingId : undefined}
+        openMeetingPickerSignal={variant === 'c2' ? c2OpenMeetingPickerNonce : 0}
       />
     ) : null
 
@@ -491,14 +497,46 @@ export function ExperiencePage() {
                 routePolylineLngLat={data.routePolylineLngLat}
                 mapKey={`logistics-${variant}`}
                 poiPopupContent="image-only"
-                controlledB2PickupId={variant === 'b2' ? b2PickupId : undefined}
-                onControlledB2PickupChange={variant === 'b2' ? setB2PickupId : undefined}
-                controlledB2HoverMeetingId={variant === 'b2' ? b2HoverMeetingId : undefined}
-                onControlledB2MeetingHover={variant === 'b2' ? setB2HoverMeetingId : undefined}
-                onExposeB2PickupApply={
+                controlledB2PickupId={
                   variant === 'b2'
+                    ? b2PickupId
+                    : variant === 'c2'
+                      ? tripleMeetingCardPickupId
+                      : undefined
+                }
+                onControlledB2PickupChange={
+                  variant === 'b2'
+                    ? setB2PickupId
+                    : variant === 'c2'
+                      ? setTripleMeetingCardPickupId
+                      : undefined
+                }
+                controlledB2HoverMeetingId={
+                  variant === 'b2'
+                    ? b2HoverMeetingId
+                    : variant === 'c2'
+                      ? b2HoverMeetingId
+                      : undefined
+                }
+                onControlledB2MeetingHover={
+                  variant === 'b2'
+                    ? setB2HoverMeetingId
+                    : variant === 'c2'
+                      ? setB2HoverMeetingId
+                      : undefined
+                }
+                onExposeB2PickupApply={
+                  (variant === 'b2' || variant === 'c2')
                     ? (fn) => {
                         b2PickupApplyRef.current = fn
+                      }
+                    : undefined
+                }
+                onC2MapMeetingPinClick={
+                  variant === 'c2'
+                    ? (meetingStopId) => {
+                        setB2HoverMeetingId(meetingStopId)
+                        setC2OpenMeetingPickerNonce((n) => n + 1)
                       }
                     : undefined
                 }

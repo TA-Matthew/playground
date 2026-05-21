@@ -7,6 +7,9 @@ import {
   type VariantId,
 } from '../../data/variants'
 import { BenefitCheckIcon } from '../icons/BenefitCheckIcon'
+import { logisticsRailDiscClass } from '../logistics/logisticsPinButtonClass'
+import { viatorMeetingMarkSvgHtml } from '../logistics/viatorMeetingMark'
+import { mapMeetingSelectedTeardropHtml } from '../logistics/logisticsTeardropMarkup'
 
 /** C2 picker trigger — same outer height for “Show meeting points” and selected (border included). */
 const C2_PICKER_TRIGGER_HEIGHT_CLASS = 'box-border h-[48px]'
@@ -18,6 +21,8 @@ export function MeetingAndPickupCard({
   b2PickupId,
   onB2PickupChange,
   onB2MeetingHover,
+  b2HoverMeetingId,
+  openMeetingPickerSignal = 0,
 }: {
   readonly content: MeetingAndPickupContent
   readonly variantId?: VariantId
@@ -25,6 +30,10 @@ export function MeetingAndPickupCard({
   readonly b2PickupId?: string | null
   readonly onB2PickupChange?: (id: string | null) => void
   readonly onB2MeetingHover?: (id: string | null) => void
+  /** Map / card sync — highlights the matching row while a meeting pin is hovered. */
+  readonly b2HoverMeetingId?: string | null
+  /** C2: parent increments to open the meeting dropdown (e.g. map pin tap). */
+  readonly openMeetingPickerSignal?: number
 }) {
   const showB2MeetingPicker =
     (variantId === 'b2' || variantId === 'a2' || variantId === 'c2') &&
@@ -41,6 +50,8 @@ export function MeetingAndPickupCard({
         b2PickupId={b2PickupId ?? null}
         onB2PickupChange={onB2PickupChange}
         onB2MeetingHover={onB2MeetingHover}
+        b2HoverMeetingId={b2HoverMeetingId}
+        openMeetingPickerSignal={openMeetingPickerSignal}
       />
     )
   }
@@ -48,8 +59,28 @@ export function MeetingAndPickupCard({
   return (
     <div className="flex flex-col gap-0 self-stretch rounded-2xl border border-stone-200/90 bg-white px-4 py-6 md:flex-row md:items-stretch md:gap-0 md:p-6">
       <div className="min-w-0 flex-1 border-b border-stone-200/90 pb-8 md:border-b-0 md:pb-0 md:pr-8">
-        <div className="mb-4 flex items-start gap-2">
-          <PinIcon className="mt-0.5 h-6 w-6 shrink-0" />
+        <div className="mb-4 flex items-center gap-2">
+          {variantId === 'c2' ? (
+            b2PickupId ? (
+              <div
+                className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center overflow-visible"
+                dangerouslySetInnerHTML={{
+                  __html: mapMeetingSelectedTeardropHtml(),
+                }}
+              />
+            ) : (
+              <div className="relative z-10 box-border flex h-8 w-8 shrink-0 items-center justify-center rounded-full p-1 ring-4 bg-emerald-600 ring-white">
+                <span
+                  className="inline-flex items-center justify-center"
+                  dangerouslySetInnerHTML={{
+                    __html: viatorMeetingMarkSvgHtml('pointer-events-none h-[14px] w-[14px] shrink-0'),
+                  }}
+                />
+              </div>
+            )
+          ) : (
+            <PinIcon className="mt-0.5 h-6 w-6 shrink-0" />
+          )}
           <h3 className="text-[18px] font-medium leading-6 text-black">Meeting point</h3>
         </div>
         <p className="pdp-meeting-detail-text">{content.meeting.address}</p>
@@ -61,7 +92,7 @@ export function MeetingAndPickupCard({
       </div>
 
       <div className="min-w-0 flex-1 border-stone-200/90 pt-4 md:border-l md:border-t-0 md:pl-8 md:pt-0">
-        <div className="mb-4 flex items-start gap-2">
+        <div className="mb-4 flex items-center gap-2">
           <FlagIcon className="mt-0.5 h-6 w-6 shrink-0" />
           <h3 className="text-[18px] font-medium leading-6 text-black">End point</h3>
         </div>
@@ -90,6 +121,8 @@ function MeetingPickupCardB2Layout({
   b2PickupId,
   onB2PickupChange,
   onB2MeetingHover,
+  b2HoverMeetingId = null,
+  openMeetingPickerSignal = 0,
 }: {
   readonly content: MeetingAndPickupContent
   readonly variantId: VariantId
@@ -97,6 +130,8 @@ function MeetingPickupCardB2Layout({
   readonly b2PickupId: string | null
   readonly onB2PickupChange: (id: string | null) => void
   readonly onB2MeetingHover?: (id: string | null) => void
+  readonly b2HoverMeetingId?: string | null
+  readonly openMeetingPickerSignal?: number
 }) {
   const useC2Dropdown = variantId === 'c2'
   /** A2 / C2: 1px selected border + clear (X) while the option list is open. */
@@ -105,6 +140,7 @@ function MeetingPickupCardB2Layout({
   const [listOpen, setListOpen] = useState(false)
   const pickerRef = useRef<HTMLDivElement>(null)
   const blurHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastOpenMeetingPickerSignalRef = useRef(0)
 
   const selectedMeeting = useMemo(
     () => (b2PickupId ? meetings.find((m) => m.id === b2PickupId) : undefined),
@@ -126,14 +162,23 @@ function MeetingPickupCardB2Layout({
   useEffect(() => {
     if (!listOpen) return
     const close = (e: MouseEvent) => {
+      const target = e.target
+      if (!(target instanceof Node)) return
       const el = pickerRef.current
-      if (el && !el.contains(e.target as Node)) {
-        setListOpen(false)
+      if (el?.contains(target)) return
+      /** C2: tapping another meeting pin on the map only changes highlight — keep the list open. */
+      if (
+        useC2Dropdown &&
+        target instanceof Element &&
+        target.closest('[data-logistics-meeting-map-pin="1"]')
+      ) {
+        return
       }
+      setListOpen(false)
     }
     document.addEventListener('mousedown', close)
     return () => document.removeEventListener('mousedown', close)
-  }, [listOpen])
+  }, [listOpen, useC2Dropdown])
 
   useEffect(() => {
     return () => {
@@ -159,6 +204,28 @@ function MeetingPickupCardB2Layout({
     setListOpen(true)
   }
 
+  /** C2: map meeting-pin tap — open dropdown from parent signal (first tap only if already open). */
+  useEffect(() => {
+    if (!useC2Dropdown || openMeetingPickerSignal <= 0) return
+    if (openMeetingPickerSignal <= lastOpenMeetingPickerSignalRef.current) return
+    lastOpenMeetingPickerSignalRef.current = openMeetingPickerSignal
+    if (listOpen) {
+      clearBlurHide()
+      return
+    }
+    openMeetingList()
+  }, [openMeetingPickerSignal, useC2Dropdown, listOpen])
+
+  /** Keep hovered map pin’s row visible inside the open list. */
+  useEffect(() => {
+    if (!useC2Dropdown || !listOpen || !b2HoverMeetingId) return
+    requestAnimationFrame(() => {
+      document
+        .getElementById(`meeting-option-${b2HoverMeetingId}`)
+        ?.scrollIntoView({ block: 'nearest' })
+    })
+  }, [b2HoverMeetingId, listOpen, useC2Dropdown])
+
   const toggleMeetingList = () => {
     if (listOpen) {
       setListOpen(false)
@@ -170,8 +237,30 @@ function MeetingPickupCardB2Layout({
   return (
     <div className="flex flex-col gap-0 self-stretch rounded-2xl border border-stone-200/90 bg-white px-4 py-6 md:flex-row md:items-stretch md:gap-0 md:p-6">
       <div className="min-w-0 flex-1 border-b border-stone-200/90 pb-8 md:border-b-0 md:pb-0 md:pr-8">
-        <div className="mb-4 flex items-start gap-2">
-          <PinIcon className="mt-0.5 h-6 w-6 shrink-0" />
+        <div
+          className={`mb-4 flex items-center ${useC2Dropdown ? 'gap-3' : 'gap-2'}`}
+        >
+          {useC2Dropdown ? (
+            selectedMeeting ? (
+              <div
+                className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center overflow-visible"
+                dangerouslySetInnerHTML={{
+                  __html: mapMeetingSelectedTeardropHtml(),
+                }}
+              />
+            ) : (
+              <div className="relative z-10 box-border flex h-8 w-8 shrink-0 items-center justify-center rounded-full p-1 ring-4 bg-emerald-600 ring-white">
+                <span
+                  className="inline-flex items-center justify-center"
+                  dangerouslySetInnerHTML={{
+                    __html: viatorMeetingMarkSvgHtml('pointer-events-none h-[14px] w-[14px] shrink-0'),
+                  }}
+                />
+              </div>
+            )
+          ) : (
+            <PinIcon className="mt-0.5 h-6 w-6 shrink-0" />
+          )}
           <h3 className="text-[18px] font-medium leading-6 text-black">Meeting points</h3>
         </div>
 
@@ -291,9 +380,11 @@ function MeetingPickupCardB2Layout({
                     <li key={stop.id} role="presentation">
                       {useC2Dropdown ? (
                         <MeetingPickupOptionRow
+                          id={`meeting-option-${stop.id}`}
                           title={label}
                           address={stop.durationLine}
                           selected={b2PickupId === stop.id}
+                          highlighted={b2HoverMeetingId === stop.id}
                           onMouseEnter={() => onB2MeetingHover?.(stop.id)}
                           onFocus={() => onB2MeetingHover?.(stop.id)}
                           onMouseDown={(e) => {
@@ -356,8 +447,8 @@ function MeetingPickupCardB2Layout({
       </div>
 
       <div className="min-w-0 flex-1 border-stone-200/90 pt-4 md:border-l md:border-t-0 md:pl-8 md:pt-0">
-        <div className="mb-4 flex items-start gap-2">
-          <FlagIcon className="mt-0.5 h-6 w-6 shrink-0" />
+        <div className="mb-4 flex items-center gap-2">
+          <EndPointRailDiscIcon />
           <h3 className="text-[18px] font-medium leading-6 text-black">End point</h3>
         </div>
         <p className="pdp-meeting-detail-text">{content.end.placeName}</p>
@@ -371,34 +462,56 @@ function MeetingPickupCardB2Layout({
   )
 }
 
+/** B2 / C2 end point — green disc + white flag (matches timeline + map). */
+function EndPointRailDiscIcon() {
+  return (
+    <div className={logisticsRailDiscClass(true, false)}>
+      <svg
+        className="pointer-events-none h-[18px] w-[18px] shrink-0 text-white"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden
+      >
+        <path d="M5 3h2v18H5zm3 3h12v7H8z" />
+      </svg>
+    </div>
+  )
+}
+
 /**
  * C2 pickup list row — Figma Logistics frame 2977:27842.
  * 16px padding, 8px pin–text gap, 16px title + 14px address (neutral/30 #4d4d4d), 20px map pin.
  */
 function MeetingPickupOptionRow({
+  id,
   title,
   address,
   selected,
+  highlighted = false,
   onMouseEnter,
   onFocus,
   onMouseDown,
   onClick,
 }: {
+  readonly id?: string
   readonly title: string
   readonly address: string
   readonly selected: boolean
+  readonly highlighted?: boolean
   readonly onMouseEnter: () => void
   readonly onFocus: () => void
   readonly onMouseDown: (e: ReactMouseEvent<HTMLButtonElement>) => void
   readonly onClick: () => void
 }) {
+  const activeRow = selected || highlighted
   return (
     <button
       type="button"
+      id={id}
       role="option"
       aria-selected={selected}
       className={`flex w-full cursor-pointer items-start gap-2 p-4 text-left transition [word-break:break-word] ${
-        selected ? 'bg-[#e5e5e5]' : 'bg-white hover:bg-[#e5e5e5]'
+        activeRow ? 'bg-[#e5e5e5]' : 'bg-white hover:bg-[#e5e5e5]'
       }`}
       onMouseEnter={onMouseEnter}
       onFocus={onFocus}

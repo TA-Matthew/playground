@@ -10,13 +10,16 @@ export function getPoiOrderForStopIndex(
 ): number | null {
   const stop = stops[index]
   if (!stop) return null
-  if (isVariantBLayout(variantId) && (stop.kind === 'meeting' || stop.kind === 'end')) {
+  if (
+    (isVariantBLayout(variantId) || variantId === 'c2') &&
+    (stop.kind === 'meeting' || stop.kind === 'end')
+  ) {
     return null
   }
   if (stop.kind === 'passby') {
     return null
   }
-  if (variantId === 'a' || variantId === 'a2' || variantId === 'c2') {
+  if (variantId === 'a' || variantId === 'a2') {
     let n = 0
     for (let j = 0; j <= index; j++) {
       const s = stops[j]

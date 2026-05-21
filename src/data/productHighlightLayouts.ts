@@ -8,15 +8,17 @@ export type ProductHighlightLayoutId =
   | 'headout-grid'
   | 'headout-expedia-rail'
   | 'headout-viator-rail'
+  | 'headout-deferred-rail'
   | 'expedia-split'
   | 'expedia-klook-labels'
   | 'expedia-viator-rail'
+  | 'expedia-deferred-rail'
 
 /** Highlight grid chrome family (facilitator tabs). */
 export type ProductHighlightBase = 'headout' | 'expedia'
 
-/** Quick-facts presentation (facilitator icon-rail tabs). */
-export type ProductHighlightIconRail = 'klook' | 'expedia' | 'viator'
+/** Quick-facts presentation (facilitator icon-rail tabs). `deferred` = Expedia rail design rendered above Overview. */
+export type ProductHighlightIconRail = 'klook' | 'expedia' | 'viator' | 'deferred'
 
 export type ProductHighlightLayoutOptions = {
   base: ProductHighlightBase
@@ -34,9 +36,11 @@ const LAYOUT_IDS: ProductHighlightLayoutId[] = [
   'headout-grid',
   'headout-expedia-rail',
   'headout-viator-rail',
+  'headout-deferred-rail',
   'expedia-split',
   'expedia-klook-labels',
   'expedia-viator-rail',
+  'expedia-deferred-rail',
 ]
 
 export const DEFAULT_PRODUCT_HIGHLIGHT_LAYOUT: ProductHighlightLayoutId = 'expedia-split'
@@ -53,12 +57,16 @@ export function parseProductHighlightLayoutOptions(
       return { base: 'headout', iconRail: 'expedia' }
     case 'headout-viator-rail':
       return { base: 'headout', iconRail: 'viator' }
+    case 'headout-deferred-rail':
+      return { base: 'headout', iconRail: 'deferred' }
     case 'expedia-split':
       return { base: 'expedia', iconRail: 'expedia' }
     case 'expedia-klook-labels':
       return { base: 'expedia', iconRail: 'klook' }
     case 'expedia-viator-rail':
       return { base: 'expedia', iconRail: 'viator' }
+    case 'expedia-deferred-rail':
+      return { base: 'expedia', iconRail: 'deferred' }
     case 'headout-grid':
       return { base: 'headout', iconRail: 'klook' }
   }
@@ -72,10 +80,12 @@ export function productHighlightLayoutFromOptions(
   if (base === 'headout') {
     if (iconRail === 'expedia') return 'headout-expedia-rail'
     if (iconRail === 'viator') return 'headout-viator-rail'
+    if (iconRail === 'deferred') return 'headout-deferred-rail'
     return 'headout-grid'
   }
   if (iconRail === 'klook') return 'expedia-klook-labels'
   if (iconRail === 'viator') return 'expedia-viator-rail'
+  if (iconRail === 'deferred') return 'expedia-deferred-rail'
   return 'expedia-split'
 }
 
@@ -110,5 +120,17 @@ export const PRODUCT_HIGHLIGHT_LAYOUTS: ProductHighlightLayoutMeta[] = [
     id: 'expedia-viator-rail',
     facilitatorLabel: 'Expedia + Viator rail',
     reference: 'Expedia highlight rows; default standalone Viator icon rail below.',
+  },
+  {
+    id: 'headout-deferred-rail',
+    facilitatorLabel: 'Headout + Deferred rail',
+    reference:
+      'Headout highlight grid; Expedia-style quick-facts rail deferred to just above the Overview section.',
+  },
+  {
+    id: 'expedia-deferred-rail',
+    facilitatorLabel: 'Expedia + Deferred rail',
+    reference:
+      'Expedia highlight rows; Expedia-style quick-facts rail deferred to just above the Overview section.',
   },
 ]

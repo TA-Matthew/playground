@@ -185,8 +185,8 @@ export function itineraryStopUsesTeardropWhenSelected(
   poiOrder: number | null,
 ): boolean {
   if (!stop) return false
-  if (isVariantBLayout(variantId) && stop.kind === 'meeting') return true
-  if (isVariantBLayout(variantId) && stop.kind === 'end') return true
+  if ((isVariantBLayout(variantId) || variantId === 'c2') && stop.kind === 'meeting') return true
+  if ((isVariantBLayout(variantId) || variantId === 'c2') && stop.kind === 'end') return true
   if (stop.kind === 'passby') return true
   return poiOrder != null
 }
@@ -207,8 +207,11 @@ export function buildTimelineSelectedTeardropHtml(
 ): string | null {
   if (!itineraryStopUsesTeardropWhenSelected(stop, variantId, poiOrder)) return null
   let svg: string | null = null
-  if (isVariantBLayout(variantId) && stop.kind === 'meeting') svg = mapMeetingSelectedTeardropHtml()
-  else if (isVariantBLayout(variantId) && stop.kind === 'end') svg = mapEndSelectedTeardropHtml()
+  if ((isVariantBLayout(variantId) || variantId === 'c2') && stop.kind === 'meeting') {
+    svg = mapMeetingSelectedTeardropHtml()
+  } else if ((isVariantBLayout(variantId) || variantId === 'c2') && stop.kind === 'end') {
+    svg = mapEndSelectedTeardropHtml()
+  }
   else if (stop.kind === 'passby') svg = mapPassbySelectedTeardropHtml()
   else if (poiOrder != null) svg = mapPoiSelectedTeardropHtml(poiOrder)
   if (!svg) return null

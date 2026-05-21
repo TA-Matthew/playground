@@ -337,6 +337,10 @@ Continue to the Sistine Chapel, home of two of the most important frescoes of th
 
 Follow your guide into St. Peter's Basilica to see "La Pietà," another Michelangelo masterpiece, and learn about Bernini's bronze altar. You can stay inside St. Peter's Basilica after your tour ends, or head outside to St. Peter's Square, where your tour ends.`
 
+const STOPS_C2: Stop[] = [...B2_MEETING_STOPS, ...STOPS_A, STOP_B_END]
+const ROUTE_LNG_LAT_C2: [number, number][] = [...B2_MEETING_LNG_LAT, ...VATICAN_ROUTE, END_LNG_LAT_B]
+const ROUTE_POLYLINE_C2_CORE: [number, number][] = [...VATICAN_ROUTE, END_LNG_LAT_B]
+
 export const variants: Record<VariantId, ExperienceVariant> = {
   a: {
     id: 'a',
@@ -446,9 +450,10 @@ export const variants: Record<VariantId, ExperienceVariant> = {
     meetingAndPickup: MEETING_AND_PICKUP_A,
     whatToExpectIntro: ITINERARY_SECTION_INTRO,
     whatToExpectExtra: ITINERARY_SECTION_EXTRA,
-    /** Same POI path as A — meeting choice in Itinerary (below Read more), not map/timeline. */
-    stops: STOPS_A,
-    routeLngLat: VATICAN_ROUTE,
+    /** Same POI path as A but with triple meeting points on the map. */
+    stops: STOPS_C2,
+    routeLngLat: ROUTE_LNG_LAT_C2,
+    routePolylineLngLat: ROUTE_POLYLINE_C2_CORE,
     booking: {
       priceAmount: '$40.56',
       badgeExceptionalDeal: 'Exceptional deal',
@@ -482,10 +487,10 @@ export function isVariantBLayout(variantId: VariantId): boolean {
   return variantId === 'b' || variantId === 'b2' || variantId === 'c'
 }
 
-/** B2 timeline/map: three meeting stops first, then core + end */
+/** B2 and C2 timeline/map: three meeting stops first, then core + end */
 export function isVariantB2TripleMeeting(variantId: VariantId, stops: Stop[]): boolean {
   return (
-    variantId === 'b2' &&
+    (variantId === 'b2' || variantId === 'c2') &&
     stops.length >= 3 &&
     stops[0]?.kind === 'meeting' &&
     stops[1]?.kind === 'meeting' &&

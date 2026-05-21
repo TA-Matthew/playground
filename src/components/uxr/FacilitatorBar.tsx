@@ -159,6 +159,7 @@ export function FacilitatorBar({
                     { id: 'expedia' as const, label: 'Expedia rail' },
                     { id: 'klook' as const, label: 'Klook labels' },
                     { id: 'viator' as const, label: 'Viator' },
+                    { id: 'deferred' as const, label: 'Deferred' },
                   ] as const
                 ).map((opt) => (
                   <button

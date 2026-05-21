@@ -9,7 +9,7 @@ import type { BookingContent } from '../../../data/variants'
 import { PdpOverviewSection } from './PdpOverviewSection'
 import { PdpPromotedExperiences } from './PdpPromotedExperiences'
 import { PdpViatorHeroGallery } from './PdpViatorHeroGallery'
-import { PdpProductHighlights } from './PdpProductHighlights'
+import { ExpediaQuickFactsRail, PdpProductHighlights } from './PdpProductHighlights'
 import { PdpViatorIconRail } from './PdpViatorIconRail'
 import { PdpWhatsIncludedSection } from './PdpWhatsIncludedSection'
 import { PdpWhyTravelersLoved } from './PdpWhyTravelersLoved'
@@ -44,6 +44,8 @@ export function FigmaViatorPdpBlock({
   const showStandaloneIconRail =
     productHighlightLayoutId == null || layoutOpts?.iconRail === 'viator'
   const groupHighlightsWithViatorRail = layoutOpts?.iconRail === 'viator'
+  /** Deferred rail = Expedia quick-facts design rendered just above the Overview section. */
+  const showDeferredQuickFactsRail = layoutOpts?.iconRail === 'deferred'
 
   const productHighlights =
     productHighlightLayoutId ? (
@@ -83,6 +85,7 @@ export function FigmaViatorPdpBlock({
           <PdpPromotedExperiences />
           {/* gap-5 only before Overview; Whats included abuts Overview with no spacer (top rule flush). */}
           <div className="flex flex-col gap-0">
+            {showDeferredQuickFactsRail ? <ExpediaQuickFactsRail topBorder /> : null}
             <PdpOverviewSection />
             <PdpWhatsIncludedSection />
           </div>
