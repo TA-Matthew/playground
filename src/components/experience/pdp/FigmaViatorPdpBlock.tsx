@@ -44,7 +44,7 @@ export function FigmaViatorPdpBlock({
   const showStandaloneIconRail =
     productHighlightLayoutId == null || layoutOpts?.iconRail === 'viator'
   const groupHighlightsWithViatorRail = layoutOpts?.iconRail === 'viator'
-  /** Deferred rail = Expedia quick-facts design rendered just above the Overview section. */
+  /** Deferred rail = Expedia quick-facts design rendered after the Overview section. */
   const showDeferredQuickFactsRail = layoutOpts?.iconRail === 'deferred'
 
   const productHighlights =
@@ -83,10 +83,10 @@ export function FigmaViatorPdpBlock({
         />
         <div className="mt-5 flex flex-col gap-5">
           <PdpPromotedExperiences />
-          {/* gap-5 only before Overview; Whats included abuts Overview with no spacer (top rule flush). */}
+          {/* gap-5 only before Overview; deferred quick facts + What's included stack with top rules only (gap-0). */}
           <div className="flex flex-col gap-0">
-            {showDeferredQuickFactsRail ? <ExpediaQuickFactsRail topBorder /> : null}
             <PdpOverviewSection />
+            {showDeferredQuickFactsRail ? <ExpediaQuickFactsRail topBorder /> : null}
             <PdpWhatsIncludedSection />
           </div>
         </div>

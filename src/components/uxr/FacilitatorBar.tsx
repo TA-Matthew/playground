@@ -43,7 +43,7 @@ type Props = {
     onBaseChange: (base: ProductHighlightBase) => void
     onIconRailChange: (iconRail: ProductHighlightIconRail) => void
   }
-  /** Grey / Outline / Stylised / Large icon wells on highlight rows (`phIconStyle`). */
+  /** Grey / Outline / Large icon wells on highlight rows (`phIconStyle`). */
   highlightIconStyleControls?: {
     iconStyle: ProductHighlightIconStyleId
     onIconStyleChange: (iconStyle: ProductHighlightIconStyleId) => void
@@ -186,7 +186,6 @@ export function FacilitatorBar({
                       { id: 'large' as const, label: 'Large' },
                       { id: 'grey' as const, label: 'Grey' },
                       { id: 'outline' as const, label: 'Outline' },
-                      { id: 'stylised' as const, label: 'Stylised' },
                     ] as const
                   ).map((opt) => (
                     <button
@@ -207,7 +206,7 @@ export function FacilitatorBar({
             ) : null}
             {highlightTopProductControls ? (
               <div className={CONTROL_GROUP_CLASS}>
-                <span className="text-[11px] font-medium text-amber-900/80">Top product</span>
+                <span className="text-[11px] font-medium text-amber-900/80">Top 1% product</span>
                 <div className={PILL_GROUP_CLASS}>
                   {(
                     [
@@ -262,7 +261,7 @@ export function FacilitatorBar({
           ) : highlightTopProductControls ? (
             <div className="flex w-full flex-col gap-3">
           <span className="text-[11px] font-medium uppercase tracking-widest text-amber-900/90">
-            Top product
+            Top 1% product
           </span>
           <div className={CONTROL_GROUP_CLASS}>
             <div className={PILL_GROUP_CLASS}>

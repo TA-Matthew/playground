@@ -17,7 +17,7 @@ export type ProductHighlightLayoutId =
 /** Highlight grid chrome family (facilitator tabs). */
 export type ProductHighlightBase = 'headout' | 'expedia'
 
-/** Quick-facts presentation (facilitator icon-rail tabs). `deferred` = Expedia rail design rendered above Overview. */
+/** Quick-facts presentation (facilitator icon-rail tabs). `deferred` = Expedia rail design rendered after Overview. */
 export type ProductHighlightIconRail = 'klook' | 'expedia' | 'viator' | 'deferred'
 
 export type ProductHighlightLayoutOptions = {
@@ -125,12 +125,12 @@ export const PRODUCT_HIGHLIGHT_LAYOUTS: ProductHighlightLayoutMeta[] = [
     id: 'headout-deferred-rail',
     facilitatorLabel: 'Headout + Deferred rail',
     reference:
-      'Headout highlight grid; Expedia-style quick-facts rail deferred to just above the Overview section.',
+      'Headout highlight grid; Expedia-style quick-facts rail deferred to just after the Overview section.',
   },
   {
     id: 'expedia-deferred-rail',
     facilitatorLabel: 'Expedia + Deferred rail',
     reference:
-      'Expedia highlight rows; Expedia-style quick-facts rail deferred to just above the Overview section.',
+      'Expedia highlight rows; Expedia-style quick-facts rail deferred to just after the Overview section.',
   },
 ]

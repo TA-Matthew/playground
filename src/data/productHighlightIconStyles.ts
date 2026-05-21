@@ -1,12 +1,12 @@
 /**
- * Product highlight icon wells — Grey / Outline / Stylised (Figma 21601:124897–124962) / Large (32px, no well).
+ * Product highlight icon wells — Grey / Outline (Figma 21601:124897–124930) / Large (32px, no well).
  */
 
 export const PRODUCT_HIGHLIGHT_ICON_STYLE_QUERY = 'phIconStyle'
 
-export type ProductHighlightIconStyleId = 'grey' | 'outline' | 'stylised' | 'large'
+export type ProductHighlightIconStyleId = 'grey' | 'outline' | 'large'
 
-const STYLE_IDS: ProductHighlightIconStyleId[] = ['grey', 'outline', 'stylised', 'large']
+const STYLE_IDS: ProductHighlightIconStyleId[] = ['grey', 'outline', 'large']
 
 export const DEFAULT_PRODUCT_HIGHLIGHT_ICON_STYLE: ProductHighlightIconStyleId = 'large'
 
@@ -28,8 +28,6 @@ export function highlightIconWellClassName(style: ProductHighlightIconStyleId): 
   switch (style) {
     case 'grey':
       return 'bg-[#f5f5f5]'
-    case 'stylised':
-      return 'bg-[#e7e9fd]'
     case 'large':
       return ''
     case 'outline':

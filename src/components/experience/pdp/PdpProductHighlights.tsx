@@ -197,7 +197,7 @@ function PhLineIcon({ id, className = 'size-6 shrink-0 text-stone-400' }: { id: 
   }
 }
 
-/** Highlight row icon well — [Grey](https://www.figma.com/design/5lTovMIkLFFcyrjQUTRGbY?node-id=21601-124897) / [Outline](https://www.figma.com/design/5lTovMIkLFFcyrjQUTRGbY?node-id=21601-124930) / [Stylised](https://www.figma.com/design/5lTovMIkLFFcyrjQUTRGbY?node-id=21601-124962). */
+/** Highlight row icon well — [Grey](https://www.figma.com/design/5lTovMIkLFFcyrjQUTRGbY?node-id=21601-124897) / [Outline](https://www.figma.com/design/5lTovMIkLFFcyrjQUTRGbY?node-id=21601-124930). */
 function HighlightIconWell({
   iconId,
   iconStyle,
@@ -254,10 +254,10 @@ function ConciseSummaryIntro() {
       style={{
         color: 'var(--Color-Neutral-20, #333)',
         fontFamily: 'var(--Typeface-Font-Brand, Aeonik)',
-        fontSize: 'var(--Typeface-Font-size-300, 14px)',
+        fontSize: '16px',
         fontStyle: 'normal',
         fontWeight: 'var(--Typeface-Font-weight-Regular, 400)',
-        lineHeight: 'var(--Typeface-Line-height-300, 20px)',
+        lineHeight: '150%',
         letterSpacing: 'var(--Typeface-Letter-spacing-None, 0.05px)',
       }}
     >
@@ -392,7 +392,7 @@ function LayoutHeadoutGrid({
   )
 }
 
-/** Expedia-style 2-col quick-facts rail. Also reused as the "Deferred" rail above the Overview section. */
+/** Expedia-style 2-col quick-facts rail. Also reused as the "Deferred" rail after the Overview section. */
 export function ExpediaQuickFactsRail({
   topBorder = false,
 }: {
