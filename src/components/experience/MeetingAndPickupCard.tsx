@@ -175,9 +175,9 @@ function MeetingPickupCardB2Layout({
           <h3 className="text-[18px] font-medium leading-6 text-black">Meeting points</h3>
         </div>
 
-        <p className="text-[15px] font-normal leading-snug text-black">
-          {useC2Dropdown ? '3 meeting point options' : 'Select a meeting point'}
-        </p>
+        {!useC2Dropdown ? (
+          <p className="text-[15px] font-normal leading-snug text-black">Select a meeting point</p>
+        ) : null}
 
         <div ref={pickerRef} className="relative mt-3">
           <div className="relative">
@@ -238,7 +238,7 @@ function MeetingPickupCardB2Layout({
                 aria-haspopup="listbox"
                 onClick={toggleMeetingList}
               >
-                <span className="min-w-0 flex-1 truncate">Show meeting points</span>
+                <span className="min-w-0 flex-1 truncate">View 3 location options</span>
                 <ChevronDown
                   className={`h-5 w-5 shrink-0 text-stone-900 transition-transform duration-200 ${
                     listOpen ? 'rotate-180' : ''
