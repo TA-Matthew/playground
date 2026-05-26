@@ -936,7 +936,7 @@ function MobileMapModalStopPanelCard({
   const logisticsB = isVariantBLayout(variantId) || variantId === 'c2'
   const selectionIsMeeting = logisticsB && stop.kind === 'meeting'
   const displayStop =
-    (variantId === 'b2' || variantId === 'c2') &&
+    variantId === 'b2' &&
     isVariantB2TripleMeeting(variantId, stops) &&
     selectionIsMeeting &&
     b2CommittedPickupId != null
@@ -1117,6 +1117,7 @@ function MobileMapModalStopShelf({
   b2CommittedPickupId,
   shelfHubStopId = '',
   b2MeetingHubProps = null,
+  onShelfCenterChange,
 }: {
   shelfStops: Stop[]
   selectedStopId: string
@@ -1128,6 +1129,8 @@ function MobileMapModalStopShelf({
   /** When set, snapping to this slide does not run `onShelfCommitStop` (B2 hub is not a map stop). */
   shelfHubStopId?: string
   b2MeetingHubProps?: MobileMapB2MeetingHubShelfProps | null
+  /** Fired when the centered snap slide changes (scroll / settle) — C2 map pin preview. */
+  onShelfCenterChange?: (stopId: string | null) => void
 }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const suppressNextScrollIntoViewRef = useRef(false)
@@ -1192,6 +1195,16 @@ function MobileMapModalStopShelf({
     }
   }, [shelfStops, selectedStopId])
 
+  const reportShelfCenter = useCallback(() => {
+    if (!onShelfCenterChange) return
+    const el = scrollRef.current
+    if (!el || shelfStops.length === 0) {
+      onShelfCenterChange(null)
+      return
+    }
+    onShelfCenterChange(findShelfCenterStopId(el, shelfStops))
+  }, [onShelfCenterChange, shelfStops])
+
   const scheduleCommitFromScroll = useCallback(() => {
     if (programmaticScrollRef.current) return
     const el = scrollRef.current
@@ -1220,9 +1233,10 @@ function MobileMapModalStopShelf({
       syncShelfTrackHeight({ animate: true })
       correctShelfSnapToCenter(track, shelfStops, centeredId)
       programmaticScrollRef.current = false
+      reportShelfCenter()
       scheduleCommitFromScroll()
     })
-  }, [shelfStops, syncShelfTrackHeight, scheduleCommitFromScroll])
+  }, [shelfStops, syncShelfTrackHeight, scheduleCommitFromScroll, reportShelfCenter])
 
   const finishProgrammaticShelfScroll = useCallback(() => {
     const track = scrollRef.current
@@ -1235,7 +1249,8 @@ function MobileMapModalStopShelf({
     if (track) {
       correctShelfSnapToCenter(track, shelfStops, selectedStopId)
     }
-  }, [syncShelfTrackHeight, shelfStops, selectedStopId])
+    reportShelfCenter()
+  }, [syncShelfTrackHeight, shelfStops, selectedStopId, reportShelfCenter])
 
   const scrollShelfToStopId = useCallback(
     (stopId: string) => {
@@ -1287,6 +1302,10 @@ function MobileMapModalStopShelf({
     scrollShelfToStopId(selectedStopId)
   }, [selectedStopId, shelfStops, scrollShelfToStopId])
 
+  useLayoutEffect(() => {
+    reportShelfCenter()
+  }, [reportShelfCenter, shelfStops.length, selectedStopId])
+
   useEffect(() => {
     return () => {
       if (programmaticScrollReleaseTimerRef.current != null) {
@@ -1298,15 +1317,22 @@ function MobileMapModalStopShelf({
   useEffect(() => {
     const el = scrollRef.current
     if (!el) return
+    let shelfCenterRaf = 0
     const onScrollEnd = () => {
       if (scrollIdleTimerRef.current != null) {
         clearTimeout(scrollIdleTimerRef.current)
         scrollIdleTimerRef.current = null
       }
       if (programmaticScrollRef.current) return
+      reportShelfCenter()
       settleUserShelfScroll()
     }
     const onScroll = () => {
+      if (shelfCenterRaf) cancelAnimationFrame(shelfCenterRaf)
+      shelfCenterRaf = requestAnimationFrame(() => {
+        shelfCenterRaf = 0
+        reportShelfCenter()
+      })
       if (programmaticScrollRef.current) return
       userShelfScrollingRef.current = true
       if (scrollIdleTimerRef.current != null) clearTimeout(scrollIdleTimerRef.current)
@@ -1321,8 +1347,9 @@ function MobileMapModalStopShelf({
       el.removeEventListener('scrollend', onScrollEnd)
       el.removeEventListener('scroll', onScroll)
       if (scrollIdleTimerRef.current != null) clearTimeout(scrollIdleTimerRef.current)
+      if (shelfCenterRaf) cancelAnimationFrame(shelfCenterRaf)
     }
-  }, [settleUserShelfScroll])
+  }, [settleUserShelfScroll, reportShelfCenter])
 
   useLayoutEffect(() => {
     const el = scrollRef.current
@@ -2013,6 +2040,8 @@ export function LogisticsMap({
   /** B2 meeting picker hub on shelf — zoom out to all meeting pins (`runRecentreLikeButton` assigned after init). */
   const fitB2MeetingListOverviewOnMapRef = useRef<() => void>(() => {})
   const lastHubShelfCameraKeyRef = useRef<string | null>(null)
+  /** C2 MW modal: centered shelf slide — temporarily reveals non-committed meeting pins on the map. */
+  const mobileModalShelfCenteredStopIdRef = useRef<string | null>(null)
   const onB2MeetingHoverRef = useRef(onB2MeetingHover)
   onB2MeetingHoverRef.current = onB2MeetingHover
   const onB2PickupChangeRef = useRef(onB2PickupChange)
@@ -2414,11 +2443,27 @@ export function LogisticsMap({
           el.removeAttribute('aria-hidden')
         } else {
           const primaryMeetingFocusId: string | null = b2FocusMeetingId
+          const c2CommittedShelfBrowse =
+            vid === 'c2' &&
+            isMobileRef.current &&
+            mobileSheetOpenRef.current &&
+            primaryMeetingFocusId != null
+          const shelfCenterId = mobileModalShelfCenteredStopIdRef.current
+          let c2ShelfPreviewMeetingId: string | null = null
+          if (c2CommittedShelfBrowse && shelfCenterId) {
+            const centerStop = stopsLocal.find((s) => s.id === shelfCenterId)
+            if (centerStop?.kind === 'meeting') {
+              c2ShelfPreviewMeetingId = shelfCenterId
+            }
+          }
           if (primaryMeetingFocusId != null) {
             const hoverId = b2MeetingModalHighlightId
             const isFocus =
               stopAt.id === primaryMeetingFocusId ||
-              (hoverId != null && stopAt.id === hoverId)
+              (hoverId != null && stopAt.id === hoverId) ||
+              (c2ShelfPreviewMeetingId != null &&
+                c2ShelfPreviewMeetingId !== primaryMeetingFocusId &&
+                stopAt.id === c2ShelfPreviewMeetingId)
             if (isFocus) {
               el.removeAttribute('data-logistics-b2-meeting-hidden')
               el.removeAttribute('aria-hidden')
@@ -2645,6 +2690,13 @@ export function LogisticsMap({
     [focusMobileModalShelfStop],
   )
 
+  const handleMobileModalShelfCenterChange = useCallback((stopId: string | null) => {
+    if (variantIdRef.current !== 'c2') return
+    if (mobileModalShelfCenteredStopIdRef.current === stopId) return
+    mobileModalShelfCenteredStopIdRef.current = stopId
+    syncMarkersAppearanceRef.current()
+  }, [])
+
   const handleMobileB2PendingPickupChange = useCallback(
     (id: string | null) => {
       setMobileB2MeetingPendingId(id)
@@ -2782,6 +2834,7 @@ export function LogisticsMap({
       setMobileB2MeetingPendingId(null)
       setMobileB2MeetingReselectPicker(false)
       setMobileModalStopPanelDismissed(false)
+      mobileModalShelfCenteredStopIdRef.current = null
       onB2MeetingHover?.(null)
     }
   }, [mobileSheetOpen, onB2MeetingHover])
@@ -3359,6 +3412,7 @@ export function LogisticsMap({
               selectedStopIdRef.current = stop.id
               lastSelectSourceRef.current = 'mapModal'
               highlightSelectedPinRef.current = true
+              mobileModalShelfCenteredStopIdRef.current = stop.id
               syncMarkersAppearanceRef.current()
               overviewModeRef.current = true
               setShowRecentre(true)
@@ -3620,6 +3674,19 @@ export function LogisticsMap({
       if (openingMobileSheet) {
         overviewModeRef.current = true
         setShowRecentre(false)
+        if (
+          variantIdRef.current === 'c2' &&
+          b2CommittedPickupIdRef.current != null &&
+          isVariantB2TripleMeeting(variantIdRef.current, stopsRef.current)
+        ) {
+          const committedId = b2CommittedPickupIdRef.current
+          setMobileModalStopPanelDismissedRef.current(false)
+          onSelectRef.current(committedId, 'mapModal')
+          selectedStopIdRef.current = committedId
+          lastSelectSourceRef.current = 'mapModal'
+          highlightSelectedPinRef.current = true
+          mobileModalShelfCenteredStopIdRef.current = committedId
+        }
         /** Long enough to cover `fitRouteOverview` (~480ms) + resize idle so landing doesn’t flash Re-centre. */
         ignoreMoveEndForRecentreUntilRef.current = Math.max(
           ignoreMoveEndForRecentreUntilRef.current,
@@ -4482,6 +4549,9 @@ export function LogisticsMap({
                         b2TripleMeetingMwShelfActive ? MW_MAP_B2_SHELF_HUB_STOP_ID : ''
                       }
                       b2MeetingHubProps={b2MeetingHubProps}
+                      onShelfCenterChange={
+                        variantId === 'c2' ? handleMobileModalShelfCenterChange : undefined
+                      }
                     />
                   </motion.div>
                 ) : null}
