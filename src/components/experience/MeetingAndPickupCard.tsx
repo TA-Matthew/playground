@@ -9,7 +9,6 @@ import {
 import { BenefitCheckIcon } from '../icons/BenefitCheckIcon'
 import { logisticsRailDiscClass } from '../logistics/logisticsPinButtonClass'
 import { viatorMeetingMarkSvgHtml } from '../logistics/viatorMeetingMark'
-import { mapMeetingSelectedTeardropHtml } from '../logistics/logisticsTeardropMarkup'
 
 /** C2 picker trigger — same outer height for “Show meeting points” and selected (border included). */
 const C2_PICKER_TRIGGER_HEIGHT_CLASS = 'box-border h-[48px]'
@@ -61,23 +60,7 @@ export function MeetingAndPickupCard({
       <div className="min-w-0 flex-1 border-b border-stone-200/90 pb-8 md:border-b-0 md:pb-0 md:pr-8">
         <div className="mb-4 flex items-center gap-2">
           {variantId === 'c2' ? (
-            b2PickupId ? (
-              <div
-                className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center overflow-visible"
-                dangerouslySetInnerHTML={{
-                  __html: mapMeetingSelectedTeardropHtml(),
-                }}
-              />
-            ) : (
-              <div className="relative z-10 box-border flex h-8 w-8 shrink-0 items-center justify-center rounded-full p-1 ring-4 bg-emerald-600 ring-white">
-                <span
-                  className="inline-flex items-center justify-center"
-                  dangerouslySetInnerHTML={{
-                    __html: viatorMeetingMarkSvgHtml('pointer-events-none h-[14px] w-[14px] shrink-0'),
-                  }}
-                />
-              </div>
-            )
+            <C2MeetingPickupHeaderPin />
           ) : (
             <PinIcon className="mt-0.5 h-6 w-6 shrink-0" />
           )}
@@ -112,6 +95,20 @@ function buildMeetingPickerRows(meetings: readonly Stop[]) {
     stop: m,
     label: B2_MEETING_OPTION_LABELS[i] ?? `Pickup ${i + 1}`,
   }))
+}
+
+/** C2 meeting header — always the green disc (no teardrop / animation; ring stays white). */
+function C2MeetingPickupHeaderPin() {
+  return (
+    <div className={logisticsRailDiscClass(true, false)}>
+      <span
+        className="inline-flex items-center justify-center"
+        dangerouslySetInnerHTML={{
+          __html: viatorMeetingMarkSvgHtml('pointer-events-none h-[14px] w-[14px] shrink-0'),
+        }}
+      />
+    </div>
+  )
 }
 
 function MeetingPickupCardB2Layout({
@@ -241,23 +238,7 @@ function MeetingPickupCardB2Layout({
           className={`mb-4 flex items-center ${useC2Dropdown ? 'gap-3' : 'gap-2'}`}
         >
           {useC2Dropdown ? (
-            selectedMeeting ? (
-              <div
-                className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center overflow-visible"
-                dangerouslySetInnerHTML={{
-                  __html: mapMeetingSelectedTeardropHtml(),
-                }}
-              />
-            ) : (
-              <div className="relative z-10 box-border flex h-8 w-8 shrink-0 items-center justify-center rounded-full p-1 ring-4 bg-emerald-600 ring-white">
-                <span
-                  className="inline-flex items-center justify-center"
-                  dangerouslySetInnerHTML={{
-                    __html: viatorMeetingMarkSvgHtml('pointer-events-none h-[14px] w-[14px] shrink-0'),
-                  }}
-                />
-              </div>
-            )
+            <C2MeetingPickupHeaderPin />
           ) : (
             <PinIcon className="mt-0.5 h-6 w-6 shrink-0" />
           )}
