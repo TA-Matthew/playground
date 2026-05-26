@@ -2082,7 +2082,7 @@ export function LogisticsMap({
 
   const showB2MeetingModalPanel = useMemo(
     () =>
-      (variantId === 'b2' || variantId === 'c2') &&
+      variantId === 'b2' &&
       isVariantB2TripleMeeting(variantId, stops) &&
       onB2PickupChange != null &&
       mobileSheetOpen &&
@@ -2100,10 +2100,10 @@ export function LogisticsMap({
   )
   showB2MeetingModalPanelRef.current = showB2MeetingModalPanel
 
-  /** B2 triple-meeting MW shelf (hub slide + itinerary cards) — independent of `showB2MeetingModalPanel` pin gating. */
+  /** B2 triple-meeting MW shelf (hub slide + itinerary cards) — C2 uses per-meeting shelf cards instead. */
   const b2TripleMeetingMwShelfActive = useMemo(
     () =>
-      (variantId === 'b2' || variantId === 'c2') &&
+      variantId === 'b2' &&
       isVariantB2TripleMeeting(variantId, stops) &&
       onB2PickupChange != null &&
       mobileSheetOpen &&
@@ -2138,14 +2138,14 @@ export function LogisticsMap({
     if (!mobileModalEffectiveStop) return null
     if (
       mobileModalB2MeetingPanelOpen &&
-      (variantId === 'b2' || variantId === 'c2') &&
+      variantId === 'b2' &&
       isVariantB2TripleMeeting(variantId, stops) &&
       onB2PickupChange != null
     ) {
       return null
     }
     if (
-      (variantId === 'b2' || variantId === 'c2') &&
+      variantId === 'b2' &&
       isVariantB2TripleMeeting(variantId, stops) &&
       onB2PickupChange != null &&
       mobileModalEffectiveStop.kind === 'meeting'
@@ -2314,7 +2314,7 @@ export function LogisticsMap({
     let pinSelectionIdx = effectiveSelectionIdx
     if (
       showB2MeetingModalPanelRef.current &&
-      (variantIdRef.current === 'b2' || variantIdRef.current === 'c2') &&
+      variantIdRef.current === 'b2' &&
       pinSelectionIdx >= 0
     ) {
       const st = stopsLocal[pinSelectionIdx]
@@ -2329,7 +2329,7 @@ export function LogisticsMap({
      */
     const mapModalMeetingPicker =
       showB2MeetingModalPanelRef.current &&
-      (variantIdRef.current === 'b2' || variantIdRef.current === 'c2') &&
+      variantIdRef.current === 'b2' &&
       (b2CommittedPickupIdRef.current == null ||
         mobileB2MeetingReselectPickerRef.current)
 
@@ -2350,17 +2350,21 @@ export function LogisticsMap({
       const isB2Meeting =
         (vid === 'b2' || vid === 'c2') && stopAt?.kind === 'meeting'
       const meetingPickerDiscOnly = mapModalMeetingPicker && isB2Meeting
+      /** C2 MW modal: per-meeting shelf cards — keep compact green discs (same as inline PDP). */
+      const c2MobileMeetingDiscOnly =
+        vid === 'c2' && isMobileRef.current && mobileSheetOpenRef.current && isB2Meeting
       /** MW: same compact green discs as inline PDP — never overlap-shrink meeting pins. */
       const mobileB2MeetingDisc =
-        isMobileRef.current && isB2Meeting && !meetingPickerDiscOnly
-      const teardropActive = active && !meetingPickerDiscOnly
+        isMobileRef.current && isB2Meeting && !meetingPickerDiscOnly && !c2MobileMeetingDiscOnly
+      const teardropActive =
+        active && !meetingPickerDiscOnly && !c2MobileMeetingDiscOnly
       const discHighlighted = active
       const poiOrder = getPoiOrderForStopIndex(stopsLocal, vid, i)
       const oc = useOverlapCompact ? (overlap[i] ?? false) : false
       const isTimelineRowHoverPin = timelineHoverPinActive
       /** Map overlap → compact dots when clustered (`useOverlapCompact`). Active pin always full teardrop. MW inline skips compact. */
       const ocForMarker =
-        meetingPickerDiscOnly || mobileB2MeetingDisc
+        meetingPickerDiscOnly || c2MobileMeetingDiscOnly || mobileB2MeetingDisc
           ? false
           : teardropActive
             ? false
@@ -3263,17 +3267,19 @@ export function LogisticsMap({
 
             /** B2: triple meeting — full-screen modal shows the same picker as the timeline; inline preview map still no-op. */
             const currentStop = stopsRef.current[i]
+            const tripleMeeting =
+              stopsRef.current.length >= 3 &&
+              stopsRef.current[0]?.kind === 'meeting' &&
+              stopsRef.current[1]?.kind === 'meeting' &&
+              stopsRef.current[2]?.kind === 'meeting'
+
             if (
-              (variantIdRef.current === 'b2' || variantIdRef.current === 'c2') &&
+              variantIdRef.current === 'b2' &&
               i < 3 &&
-              currentStop?.kind === 'meeting'
+              currentStop?.kind === 'meeting' &&
+              tripleMeeting
             ) {
-              const tripleMeeting =
-                stopsRef.current.length >= 3 &&
-                stopsRef.current[0]?.kind === 'meeting' &&
-                stopsRef.current[1]?.kind === 'meeting' &&
-                stopsRef.current[2]?.kind === 'meeting'
-              if (mobile && sheetOpen && tripleMeeting) {
+              if (mobile && sheetOpen) {
                 const committedId = b2CommittedPickupIdRef.current
                 const reselectPickerActive = mobileB2MeetingReselectPickerRef.current
                 /**
@@ -3305,22 +3311,60 @@ export function LogisticsMap({
                   poiPopupRef.current = null
                   return
                 }
-              } else if (variantIdRef.current === 'c2' && !mobile && tripleMeeting) {
-                onSelectRef.current(stop.id, 'map')
-                selectedStopIdRef.current = stop.id
-                lastSelectSourceRef.current = 'map'
-                highlightSelectedPinRef.current = true
-                onC2MapMeetingPinClickRef.current?.(stop.id)
-                syncMarkersAppearanceRef.current()
-                return
-              } else if (variantIdRef.current === 'b2' && !mobile && tripleMeeting) {
+              } else if (!mobile) {
                 onB2MeetingHoverRef.current?.(null)
                 onB2PickupChangeRef.current?.(stop.id)
                 syncMarkersAppearanceRef.current()
                 return
-              } else if (variantIdRef.current === 'b2') {
+              } else {
                 return
               }
+            }
+
+            /** C2 desktop: meeting pins also open the inline meeting dropdown. */
+            if (
+              variantIdRef.current === 'c2' &&
+              !mobile &&
+              i < 3 &&
+              currentStop?.kind === 'meeting' &&
+              tripleMeeting
+            ) {
+              onSelectRef.current(stop.id, 'map')
+              selectedStopIdRef.current = stop.id
+              lastSelectSourceRef.current = 'map'
+              highlightSelectedPinRef.current = true
+              onC2MapMeetingPinClickRef.current?.(stop.id)
+              syncMarkersAppearanceRef.current()
+              return
+            }
+
+            /**
+             * C2 MW modal: each meeting has its own shelf card — select + show details (no B2 hub / picker).
+             * Skip tight POI zoom so all meeting discs stay in context.
+             */
+            if (
+              variantIdRef.current === 'c2' &&
+              mobile &&
+              sheetOpen &&
+              tripleMeeting &&
+              i < 3 &&
+              currentStop?.kind === 'meeting'
+            ) {
+              setMobileModalStopPanelDismissedRef.current(false)
+              setMobileModalB2MeetingPanelOpenRef.current(false)
+              setMobileB2MeetingReselectPickerRef.current(false)
+              setMobileB2MeetingPendingIdRef.current(null)
+              onB2MeetingHoverRef.current?.(null)
+              onSelectRef.current(stop.id, 'mapModal')
+              selectedStopIdRef.current = stop.id
+              lastSelectSourceRef.current = 'mapModal'
+              highlightSelectedPinRef.current = true
+              syncMarkersAppearanceRef.current()
+              overviewModeRef.current = true
+              setShowRecentre(true)
+              poiPopupRef.current?.remove()
+              poiPopupRef.current = null
+              return
             }
 
             // Mobile sheet: teardrop + bottom detail panel (no floating popup — avoids duplicate with overlay).
