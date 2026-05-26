@@ -449,8 +449,15 @@ function isB2DesktopMeetingMapPin(
   stop: Stop | undefined,
   variantId: VariantId,
   showMapPinPhotoHead: boolean,
+  isMobileViewport: boolean,
 ): boolean {
-  return variantId === 'b2' && stop?.kind === 'meeting' && showMapPinPhotoHead
+  /** Desktop only — MW modal uses the same compact green discs as the inline PDP map. */
+  return (
+    variantId === 'b2' &&
+    stop?.kind === 'meeting' &&
+    showMapPinPhotoHead &&
+    !isMobileViewport
+  )
 }
 
 /** Map-only marker chrome: selected → teardrop stack (photo optional on mobile inline); else disc / compact. */
@@ -461,11 +468,15 @@ function mapMarkerWrapperClass(
   poiOrder: number | null,
   overlapCompact: boolean,
   showMapPinPhotoHead: boolean,
+  isMobileViewport: boolean,
+  discHighlighted: boolean = active,
 ): string {
-  if (isB2DesktopMeetingMapPin(stop, variantId, showMapPinPhotoHead)) {
+  if (isB2DesktopMeetingMapPin(stop, variantId, showMapPinPhotoHead, isMobileViewport)) {
     return mapB2MeetingMarkerShellClass()
   }
-  if (isMapTeardropPin(active, stop, variantId, poiOrder, overlapCompact)) {
+  const teardrop = isMapTeardropPin(active, stop, variantId, poiOrder, overlapCompact)
+  const discSelected = teardrop ? active : discHighlighted
+  if (teardrop) {
     const focusRing =
       isVariantBMeetingOrEnd(variantId, stop)
         ? 'focus-visible:ring-emerald-600'
@@ -476,16 +487,16 @@ function mapMarkerWrapperClass(
   }
   if (overlapCompact) {
     if (isVariantBMeetingOrEnd(variantId, stop)) {
-      return logisticsCompactGreenPinButtonClass(active)
+      return logisticsCompactGreenPinButtonClass(discSelected)
     }
     if (stop?.kind === 'passby' || poiOrder != null) {
-      return logisticsPassbyPinButtonClass(active)
+      return logisticsPassbyPinButtonClass(discSelected)
     }
   }
   if (stop?.kind === 'passby') {
-    return logisticsPassbyPinButtonClass(active)
+    return logisticsPassbyPinButtonClass(discSelected)
   }
-  return logisticsPinButtonClass(isVariantBMeetingOrEnd(variantId, stop), active)
+  return logisticsPinButtonClass(isVariantBMeetingOrEnd(variantId, stop), discSelected)
 }
 
 /** HTML markers share one layer; selected pin + popup stack above other pins. */
@@ -544,6 +555,9 @@ function applyMarkerSelectedState(
   isTimelineRowHoverPin = false,
   markerIndex = 0,
   stopCount = 1,
+  /** Disc ring / z-index when MW B2 meeting picker keeps teardrop off (`active` false) but one row is highlighted. */
+  discHighlighted: boolean = active,
+  isMobileViewport = false,
 ) {
   /** MapLibre adds `maplibregl-marker` (position:absolute;inset 0) and anchor classes. Replacing
    * `className` wholesale removes them and breaks alignment with the GL route line. */
@@ -551,7 +565,7 @@ function applyMarkerSelectedState(
   const teardrop = isMapTeardropPin(active, stop, variantId, poiOrder, overlapCompact)
 
   const wasActive = el.dataset.mapPinActive === '1'
-  el.dataset.mapPinActive = active ? '1' : '0'
+  el.dataset.mapPinActive = discHighlighted ? '1' : '0'
 
   const b2ShowCommittedCheck =
     (variantId === 'b2' || variantId === 'c2') &&
@@ -591,8 +605,8 @@ function applyMarkerSelectedState(
       })
     } else {
       const svg = markerSvgForStop(stop, variantId, poiOrder, overlapCompact, b2CommittedPickupId)
-      if (isB2DesktopMeetingMapPin(stop, variantId, showMapPinPhotoHead)) {
-        el.innerHTML = `<span class="${logisticsPinButtonClass(true, active)}">${svg}</span>`
+      if (isB2DesktopMeetingMapPin(stop, variantId, showMapPinPhotoHead, isMobileViewport)) {
+        el.innerHTML = `<span class="${logisticsPinButtonClass(true, discHighlighted)}">${svg}</span>`
       } else {
         el.innerHTML = svg
       }
@@ -615,15 +629,17 @@ function applyMarkerSelectedState(
     poiOrder,
     overlapCompact,
     showMapPinPhotoHead,
+    isMobileViewport,
+    discHighlighted,
   )
   if (teardrop && el.dataset.mapPinHeadCollapsed === '1') {
     cls += ' logistics-map-marker-head-collapsed'
   }
-  if (active && !wasActive && !teardrop) {
+  if (discHighlighted && !wasActive && !teardrop) {
     cls += ' animate-logistics-map-pin-disc-in'
   }
   el.className = [...maplibreglClasses, cls].join(' ')
-  el.style.zIndex = active
+  el.style.zIndex = discHighlighted
     ? isTimelineRowHoverPin
       ? MAP_MARKER_Z_TIMELINE_HOVER
       : MAP_MARKER_Z_SELECTED
@@ -2307,6 +2323,16 @@ export function LogisticsMap({
       }
     }
 
+    /**
+     * MW B2 triple-meeting picker: all three stops stay **green discs** (overview) — not teardrops.
+     * Teardrops defer on `logistics-map-pin-in-view` and read as “missing” on first modal open.
+     */
+    const mapModalMeetingPicker =
+      showB2MeetingModalPanelRef.current &&
+      (variantIdRef.current === 'b2' || variantIdRef.current === 'c2') &&
+      (b2CommittedPickupIdRef.current == null ||
+        mobileB2MeetingReselectPickerRef.current)
+
     markerElsRef.current.forEach((el, i) => {
       /** Modal/desktop: selection drives teardrops; MW modal uses `pinSelectionIdx` (with landing fallback). MW inline: only `landingShowcaseIdx` is active (fixed). */
       const selectedPinActive = syncInlineMapPinsWithTimeline
@@ -2320,14 +2346,28 @@ export function LogisticsMap({
         syncInlineMapPinsWithTimeline && hoverIdx >= 0 && i === hoverIdx
       const active =
         selectedPinActive || timelineHoverPinActive || b2MeetingHoverPinActive
+      const stopAt = stopsLocal[i]
+      const isB2Meeting =
+        (vid === 'b2' || vid === 'c2') && stopAt?.kind === 'meeting'
+      const meetingPickerDiscOnly = mapModalMeetingPicker && isB2Meeting
+      /** MW: same compact green discs as inline PDP — never overlap-shrink meeting pins. */
+      const mobileB2MeetingDisc =
+        isMobileRef.current && isB2Meeting && !meetingPickerDiscOnly
+      const teardropActive = active && !meetingPickerDiscOnly
+      const discHighlighted = active
       const poiOrder = getPoiOrderForStopIndex(stopsLocal, vid, i)
       const oc = useOverlapCompact ? (overlap[i] ?? false) : false
       const isTimelineRowHoverPin = timelineHoverPinActive
       /** Map overlap → compact dots when clustered (`useOverlapCompact`). Active pin always full teardrop. MW inline skips compact. */
-      const ocForMarker = active ? false : oc
+      const ocForMarker =
+        meetingPickerDiscOnly || mobileB2MeetingDisc
+          ? false
+          : teardropActive
+            ? false
+            : oc
       applyMarkerSelectedState(
         el,
-        active,
+        teardropActive,
         stopsLocal[i],
         vid,
         poiOrder,
@@ -2337,13 +2377,16 @@ export function LogisticsMap({
         isTimelineRowHoverPin,
         i,
         stopsLocal.length,
+        discHighlighted,
+        isMobileRef.current,
       )
-      const teardrop = isMapTeardropPin(active, stopsLocal[i], vid, poiOrder, ocForMarker)
+      const teardrop = isMapTeardropPin(teardropActive, stopsLocal[i], vid, poiOrder, ocForMarker)
       const collapsed = el.dataset.mapPinHeadCollapsed === '1'
       const b2MeetingFixedShell = isB2DesktopMeetingMapPin(
         stopsLocal[i],
         vid,
         showMapPinPhotoHead,
+        isMobileRef.current,
       )
       const offY = b2MeetingFixedShell
         ? 0
@@ -2356,18 +2399,12 @@ export function LogisticsMap({
           : 0
       markersRef.current[i]?.setOffset([0, offY])
 
-      const stopAt = stopsLocal[i]
       if ((vid === 'b2' || vid === 'c2') && stopAt?.kind === 'meeting') {
         /**
          * MW map-modal meeting sheet (pending choice, not yet committed): keep **all** meeting pins on
          * the canvas — selection vs dimming comes from `applyMarkerSelectedState` / active hover idx only.
          * `data-logistics-b2-meeting-hidden` is for timeline-committed pickup (hide non-chosen meetings).
          */
-        const mapModalMeetingPicker =
-          showB2MeetingModalPanelRef.current &&
-          (b2CommittedPickupIdRef.current == null ||
-            mobileB2MeetingReselectPickerRef.current)
-
         if (mapModalMeetingPicker) {
           el.removeAttribute('data-logistics-b2-meeting-hidden')
           el.removeAttribute('aria-hidden')
@@ -2423,7 +2460,14 @@ export function LogisticsMap({
         ocH,
       )
       if (teardropH && elH) {
-        if (isB2DesktopMeetingMapPin(stopsLocal[hoverIdx], vid, showMapPinPhotoHead)) {
+        if (
+          isB2DesktopMeetingMapPin(
+            stopsLocal[hoverIdx],
+            vid,
+            showMapPinPhotoHead,
+            isMobileRef.current,
+          )
+        ) {
           expandMapPinHead(elH)
         } else {
           replayMapPinTeardropIntroAnimation(elH)
@@ -2488,7 +2532,7 @@ export function LogisticsMap({
     markerInViewAnimCleanupRef.current?.()
     const { cleanup, flushDeferred } = attachMarkerTeardropInViewAnimation(
       markerElsRef,
-      () => mapWrapInViewportRef.current,
+      () => mapWrapInViewportRef.current || mobileSheetOpenRef.current,
     )
     deferredPinIntroFlushRef.current = flushDeferred
     markerInViewAnimCleanupRef.current = () => {
@@ -2829,6 +2873,31 @@ export function LogisticsMap({
     poiPopupRef.current = null
   }, [isMobile, mobileSheetOpen])
 
+  /**
+   * MW full-screen map modal: first open can mount while the dialog layout is still settling (0×0 → real size).
+   * If we compute overlap-compaction during that window, meeting pins can render as compact dots until some
+   * later interaction triggers a re-sync. Force a resize + marker refresh across two frames.
+   */
+  useEffect(() => {
+    const map = mapRef.current
+    if (!mapReady || !map || !isMobile || !mobileSheetOpen) return
+
+    let raf1 = 0
+    let raf2 = 0
+    const run = () => {
+      map.resize()
+      syncMarkersAppearanceRef.current()
+    }
+    raf1 = requestAnimationFrame(() => {
+      run()
+      raf2 = requestAnimationFrame(run)
+    })
+    return () => {
+      if (raf1) cancelAnimationFrame(raf1)
+      if (raf2) cancelAnimationFrame(raf2)
+    }
+  }, [mapReady, isMobile, mobileSheetOpen])
+
   useEffect(() => {
     const map = mapRef.current
     if (!mapReady || !map) return
@@ -3132,6 +3201,7 @@ export function LogisticsMap({
           poiOrder,
           false,
           showMapPinPhotoHeadAtInit,
+          initialMobile,
         )
         const b2c = b2CommittedPickupIdRef.current
         const initialB2DiscChk =
@@ -3140,7 +3210,12 @@ export function LogisticsMap({
           b2c != null &&
           stopAtI.id === b2c
         const initialSvg = markerSvgForStop(stopAtI, variantId, poiOrder, false, b2c)
-        markerEl.innerHTML = isB2DesktopMeetingMapPin(stopAtI, variantId, showMapPinPhotoHeadAtInit)
+        markerEl.innerHTML = isB2DesktopMeetingMapPin(
+          stopAtI,
+          variantId,
+          showMapPinPhotoHeadAtInit,
+          initialMobile,
+        )
           ? `<span class="${logisticsPinButtonClass(true, false)}">${initialSvg}</span>`
           : initialSvg
         markerEl.setAttribute(
@@ -3298,7 +3373,12 @@ export function LogisticsMap({
         const marker = new maplibregl.Marker({
           element: markerEl,
           anchor:
-            isB2DesktopMeetingMapPin(stopAtI, variantId, showMapPinPhotoHeadAtInit)
+            isB2DesktopMeetingMapPin(
+              stopAtI,
+              variantId,
+              showMapPinPhotoHeadAtInit,
+              initialMobile,
+            )
               ? 'bottom'
               : 'center',
           /** Align HTML overlay with GL line layer (avoids integer rounding vs vector path). */
@@ -3492,6 +3572,7 @@ export function LogisticsMap({
       }
       syncMapInteractions(map, 'mobile-sheet')
       map.resize()
+      syncMarkersAppearanceRef.current()
       if (openingMobileSheet) {
         overviewModeRef.current = true
         setShowRecentre(false)
@@ -3504,7 +3585,9 @@ export function LogisticsMap({
           variantIdRef.current,
           routeCoordsRef.current,
           stopsRef.current,
-          b2CommittedPickupIdRef.current,
+          mobileB2MeetingReselectPickerRef.current
+            ? null
+            : b2CommittedPickupIdRef.current,
         )
         const mapEl = sheetHost
         const panelEl = mobileModalStopPanelMotionRef.current
@@ -3521,6 +3604,13 @@ export function LogisticsMap({
           },
           programmaticOverviewCameraDepthRef,
         )
+        const refreshMarkersAfterModalOpen = () => {
+          map.resize()
+          syncMarkersAppearanceRef.current()
+          deferredPinIntroFlushRef.current?.()
+        }
+        requestAnimationFrame(refreshMarkersAfterModalOpen)
+        map.once('idle', refreshMarkersAfterModalOpen)
       }
       prevMobileSheetOpenRef.current = mobileSheetOpen
       return
