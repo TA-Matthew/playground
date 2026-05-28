@@ -89,7 +89,12 @@ export function ParticipantLinkModal({
       onCopied?.()
       window.setTimeout(() => setCopyFeedback(false), 3000)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not create link')
+      const message = e instanceof Error ? e.message : 'Could not create link'
+      setError(
+        message.includes('SHARE_LINK_SECRET')
+          ? 'Share links are not configured on the server. Locally: add SHARE_LINK_SECRET to .env and restart npm run dev. On Railway: add the variable in your service settings.'
+          : message,
+      )
     } finally {
       setLoading(false)
     }
