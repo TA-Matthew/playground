@@ -1,3 +1,4 @@
+import type { RefObject } from 'react'
 import type { ProductHighlightIconStyleId } from '../../data/productHighlightIconStyles'
 import type { ProductHighlightBase, ProductHighlightIconRail } from '../../data/productHighlightLayouts'
 import type { VariantId } from '../../data/variants'
@@ -34,8 +35,8 @@ type Props = {
   /** Which variants appear in the facilitator strip (order preserved). */
   allowedVariants: VariantId[]
   onVariantChange: (v: VariantId) => void
-  onCopyParticipantLink: () => void
-  copyFeedback: boolean
+  onOpenParticipantLinkModal: () => void
+  participantLinkButtonRef?: RefObject<HTMLButtonElement | null>
   /** Product highlight project only — base tab + icon-rail toggles (encoded as `phLayout`). */
   highlightLayoutControls?: {
     base: ProductHighlightBase
@@ -64,8 +65,8 @@ export function FacilitatorBar({
   variant,
   allowedVariants,
   onVariantChange,
-  onCopyParticipantLink,
-  copyFeedback,
+  onOpenParticipantLinkModal,
+  participantLinkButtonRef,
   highlightLayoutControls,
   highlightIconStyleControls,
   highlightConciseSummaryControls,
@@ -76,11 +77,12 @@ export function FacilitatorBar({
   const copyButton = (
     <div className="order-2 w-full shrink-0 md:absolute md:right-0 md:top-0 md:order-none md:w-auto">
       <button
+        ref={participantLinkButtonRef}
         type="button"
         className="inline-flex w-full items-center justify-center rounded-xl border border-amber-300 bg-white px-4 py-2.5 text-sm font-medium text-amber-950 shadow-sm transition hover:bg-amber-50 hover:shadow active:scale-[0.99] md:w-auto"
-        onClick={onCopyParticipantLink}
+        onClick={onOpenParticipantLinkModal}
       >
-        {copyFeedback ? 'Copied to clipboard' : 'Copy participant link'}
+        Copy participant link
       </button>
     </div>
   )

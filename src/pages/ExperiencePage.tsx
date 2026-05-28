@@ -14,7 +14,9 @@ import { PdpViatorTitleMeta } from '../components/experience/pdp/PdpViatorTitleM
 import { ViatorPdpBlock } from '../components/experience/pdp/ViatorPdpBlock'
 import { LogisticsBlock } from '../components/logistics/LogisticsBlock'
 import { FacilitatorBar } from '../components/uxr/FacilitatorBar'
+import { ParticipantLinkModal } from '../components/uxr/ParticipantLinkModal'
 import { SecretUnlock } from '../components/uxr/SecretUnlock'
+import { ShareLinkGate } from '../components/uxr/ShareLinkGate'
 import {
   LOGISTICS_FACILITATOR_VARIANTS,
   PRODUCT_HIGHLIGHT_FACILITATOR_VARIANTS,
@@ -50,8 +52,8 @@ import {
   variants,
   type VariantId,
 } from '../data/variants'
+import type { ParticipantLinkExtras } from '../uxr/shareLink'
 import {
-  buildParticipantUrl,
   parseHideUi,
   parseHighlightConciseSummary,
   parseHighlightIconStyle,
@@ -67,7 +69,8 @@ export function ExperiencePage() {
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const [unlock, setUnlock] = useState(() => readFacilitatorUnlock())
-  const [copyFeedback, setCopyFeedback] = useState(false)
+  const [participantLinkModalOpen, setParticipantLinkModalOpen] = useState(false)
+  const participantLinkButtonRef = useRef<HTMLButtonElement>(null)
 
   const isProductHighlight = location.pathname === PRODUCT_HIGHLIGHT_PROJECT_PATH
   const parsedVariant = parseVariant(searchParams)
@@ -338,44 +341,34 @@ export function ExperiencePage() {
     [setSearchParams],
   )
 
-  const copyParticipantLink = useCallback(async () => {
-    const url = buildParticipantUrl(
-      variant,
-      isProductHighlight && highlightLayoutId != null
-        ? {
-            highlightLayoutId,
-            highlightIconStyleId: highlightIconStyleId ?? undefined,
-            highlightConciseSummary: highlightConciseSummary ?? undefined,
-            highlightTopProduct: highlightTopProduct ?? undefined,
-          }
-        : undefined,
-    )
-    try {
-      await navigator.clipboard.writeText(url)
-      setFacilitatorUnlock(false)
-      setUnlock(false)
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev)
-          next.set('hideUi', '1')
-          return next
-        },
-        { replace: true },
-      )
-      setCopyFeedback(true)
-      window.setTimeout(() => setCopyFeedback(false), 2000)
-    } catch {
-      setCopyFeedback(false)
+  const participantLinkExtras = useMemo((): ParticipantLinkExtras | undefined => {
+    if (!isProductHighlight || highlightLayoutId == null) return undefined
+    return {
+      highlightLayoutId,
+      highlightIconStyleId: highlightIconStyleId ?? undefined,
+      highlightConciseSummary: highlightConciseSummary ?? undefined,
+      highlightTopProduct: highlightTopProduct ?? undefined,
     }
   }, [
-    variant,
-    setSearchParams,
     isProductHighlight,
     highlightLayoutId,
     highlightIconStyleId,
     highlightConciseSummary,
     highlightTopProduct,
   ])
+
+  const applyParticipantViewToFacilitator = useCallback(() => {
+    setFacilitatorUnlock(false)
+    setUnlock(false)
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        next.set('hideUi', '1')
+        return next
+      },
+      { replace: true },
+    )
+  }, [setSearchParams])
 
   const toggleSecretUnlock = useCallback(() => {
     const next = !readFacilitatorUnlock()
@@ -384,6 +377,12 @@ export function ExperiencePage() {
   }, [])
 
   return (
+    <>
+    <ShareLinkGate
+      path={location.pathname}
+      searchParams={searchParams}
+      facilitatorUnlocked={unlock}
+    >
     <div className="min-h-screen bg-white text-stone-900">
       <div className="mx-auto w-full max-w-[1308px] px-4 pb-14 pt-8 sm:px-6 md:pb-20 md:pt-10 lg:px-8 xl:px-0">
         {!hideUi ? (
@@ -405,8 +404,8 @@ export function ExperiencePage() {
             variant={variant}
             allowedVariants={facilitatorVariants}
             onVariantChange={setVariant}
-            onCopyParticipantLink={copyParticipantLink}
-            copyFeedback={copyFeedback}
+            onOpenParticipantLinkModal={() => setParticipantLinkModalOpen(true)}
+            participantLinkButtonRef={participantLinkButtonRef}
             highlightLayoutControls={
               isProductHighlight && highlightLayoutId
                 ? {
@@ -565,8 +564,21 @@ export function ExperiencePage() {
         <PdpCustomersAlsoBought />
       </div>
 
-      <SecretUnlock onToggleUnlock={toggleSecretUnlock} />
     </div>
+    </ShareLinkGate>
+
+      <SecretUnlock onToggleUnlock={toggleSecretUnlock} />
+
+      <ParticipantLinkModal
+        open={participantLinkModalOpen}
+        onClose={() => setParticipantLinkModalOpen(false)}
+        path={location.pathname}
+        variant={variant}
+        extras={participantLinkExtras}
+        onCopied={applyParticipantViewToFacilitator}
+        returnFocusRef={participantLinkButtonRef}
+      />
+    </>
   )
 }
 

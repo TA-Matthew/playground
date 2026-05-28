@@ -20,6 +20,8 @@ import {
 } from '../data/productHighlightLayouts'
 import type { VariantId } from '../data/variants'
 
+export { hasShareSignature, parseShareExpiry, SHARE_EXP_QUERY, SHARE_SIG_QUERY } from './shareLink'
+
 /** Session-only: facilitator unlocked controls while URL stays participant-safe (hideUi=1). */
 export const FACILITATOR_UNLOCK_KEY = 'uxr_facilitator_unlock'
 
