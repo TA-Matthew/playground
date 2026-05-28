@@ -210,22 +210,8 @@ Note that the museum requires visitors to observe silence and a dress code (knee
   },
 ]
 
-/** Variant B core POIs — same itinerary, alternate phrasing for UXR comparisons */
-const STOPS_B_CORE: Stop[] = STOPS_A.map((s, i) =>
-  i === 0
-    ? {
-        ...s,
-        description: `${s.description}
-
-(Variant B: same Borgo start, alternate emphasis for research sessions.)`,
-      }
-    : s.kind === 'passby'
-      ? s
-      : {
-          ...s,
-          description: `${s.description} (Variant B wording: same stops, alternate emphasis for research sessions.)`,
-        },
-)
+/** Variant B core POIs — same itinerary copy as variant A */
+const STOPS_B_CORE: Stop[] = [...STOPS_A]
 
 /** Via Plauto meeting point — start of route on map (Borgo Pio area) */
 const MEETING_LNG_LAT_B: [number, number] = [12.4583, 41.9027]
