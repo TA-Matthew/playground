@@ -2,6 +2,7 @@ import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 
 import {
   isVariantB2TripleMeeting,
   isVariantBLayout,
+  isVariantC2OrD2MapLayout,
   type Stop,
   type VariantId,
 } from '../../data/variants'
@@ -55,7 +56,7 @@ function TimelineComponent({
   onTimelineRowHover = noop,
   onOpenB2MeetingMobileMap,
 }: Props) {
-  const logisticsB = isVariantBLayout(variantId)
+  const logisticsB = isVariantBLayout(variantId) || isVariantC2OrD2MapLayout(variantId)
   const b2Triple = isVariantB2TripleMeeting(variantId, stops)
   const b2Meetings = b2Triple ? stops.slice(0, 3) : []
   /** C2: end point stays on the map only — not listed in the itinerary timeline. */
@@ -65,7 +66,7 @@ function TimelineComponent({
 
   return (
     <div className="flex flex-col gap-0">
-      {b2Triple && variantId !== 'c2' ? (
+      {b2Triple && variantId !== 'c2' && variantId !== 'd2' ? (
         <TimelineB2MeetingRow
           variantId={variantId}
           stops={stops}

@@ -210,7 +210,7 @@ export function ExperiencePage() {
         content={data.meetingAndPickup}
         variantId={variant}
         meetings={
-          (variant === 'b2' || variant === 'c2')
+          (variant === 'b2' || variant === 'c2' || variant === 'd2')
             ? data.stops.slice(0, 3)
             : isVariantTripleMeetingCardOnly(variant)
               ? TRIPLE_MEETING_STOPS
@@ -219,35 +219,45 @@ export function ExperiencePage() {
         b2PickupId={
           variant === 'b2'
             ? b2PickupId
-            : variant === 'c2'
+            : (variant === 'c2' || variant === 'd2')
               ? tripleMeetingCardPickupId
               : isVariantTripleMeetingCardOnly(variant)
                 ? tripleMeetingCardPickupId
                 : undefined
         }
         onB2PickupChange={
-          (variant === 'b2' || variant === 'c2')
+          (variant === 'b2' || variant === 'c2' || variant === 'd2')
             ? (id) => b2PickupApplyRef.current?.(id)
             : isVariantTripleMeetingCardOnly(variant)
               ? setTripleMeetingCardPickupId
               : undefined
         }
-        onB2MeetingHover={(variant === 'b2' || variant === 'c2') ? setB2HoverMeetingId : undefined}
-        b2HoverMeetingId={variant === 'c2' ? b2HoverMeetingId : undefined}
-        openMeetingPickerSignal={variant === 'c2' ? c2OpenMeetingPickerNonce : 0}
+        onB2MeetingHover={(variant === 'b2' || variant === 'c2' || variant === 'd2') ? setB2HoverMeetingId : undefined}
+        b2HoverMeetingId={(variant === 'c2' || variant === 'd2') ? b2HoverMeetingId : undefined}
+        openMeetingPickerSignal={(variant === 'c2' || variant === 'd2') ? c2OpenMeetingPickerNonce : 0}
       />
     ) : null
 
   const meetingAndPickupAccordion =
-    variant !== 'c2' && meetingAndPickupCard != null ? (
+    variant !== 'c2' && variant !== 'd2' && meetingAndPickupCard != null ? (
       <CollapsibleSection title="Meeting and Pickup" defaultOpen={!isVariantBLayout(variant)}>
         {meetingAndPickupCard}
       </CollapsibleSection>
     ) : null
 
   const meetingAndPickupInlineInItinerary =
-    variant === 'c2' && meetingAndPickupCard != null ? (
-      <div className="mt-6">{meetingAndPickupCard}</div>
+    (variant === 'c2' || variant === 'd2') && meetingAndPickupCard != null ? (
+      /**
+       * C2 / D2: meeting card sits inline before LogisticsBlock inside the Itinerary section.
+       * D2 desktop only — mobile uses timeline meeting row + dropdown in LogisticsBlock sandwich.
+       */
+      <div
+        className={`mt-6 max-md:relative max-md:z-[70] max-md:overflow-visible ${
+          variant === 'd2' ? 'max-md:hidden' : ''
+        }`}
+      >
+        {meetingAndPickupCard}
+      </div>
     ) : null
 
   const showFacilitatorChrome = useMemo(
@@ -499,46 +509,43 @@ export function ExperiencePage() {
                 controlledB2PickupId={
                   variant === 'b2'
                     ? b2PickupId
-                    : variant === 'c2'
+                    : (variant === 'c2' || variant === 'd2')
                       ? tripleMeetingCardPickupId
                       : undefined
                 }
                 onControlledB2PickupChange={
                   variant === 'b2'
                     ? setB2PickupId
-                    : variant === 'c2'
+                    : (variant === 'c2' || variant === 'd2')
                       ? setTripleMeetingCardPickupId
                       : undefined
                 }
                 controlledB2HoverMeetingId={
-                  variant === 'b2'
+                  (variant === 'b2' || variant === 'c2' || variant === 'd2')
                     ? b2HoverMeetingId
-                    : variant === 'c2'
-                      ? b2HoverMeetingId
-                      : undefined
+                    : undefined
                 }
                 onControlledB2MeetingHover={
-                  variant === 'b2'
+                  (variant === 'b2' || variant === 'c2' || variant === 'd2')
                     ? setB2HoverMeetingId
-                    : variant === 'c2'
-                      ? setB2HoverMeetingId
-                      : undefined
+                    : undefined
                 }
                 onExposeB2PickupApply={
-                  (variant === 'b2' || variant === 'c2')
+                  (variant === 'b2' || variant === 'c2' || variant === 'd2')
                     ? (fn) => {
                         b2PickupApplyRef.current = fn
                       }
                     : undefined
                 }
                 onC2MapMeetingPinClick={
-                  variant === 'c2'
+                  (variant === 'c2' || variant === 'd2')
                     ? (meetingStopId) => {
                         setB2HoverMeetingId(meetingStopId)
                         setC2OpenMeetingPickerNonce((n) => n + 1)
                       }
                     : undefined
                 }
+                openMeetingPickerSignal={variant === 'd2' ? c2OpenMeetingPickerNonce : 0}
               />
             </CollapsibleSection>
 

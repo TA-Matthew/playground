@@ -1,6 +1,6 @@
 import { viatorListing } from './viatorListing'
 
-export type VariantId = 'a' | 'a2' | 'b' | 'b2' | 'c' | 'c2'
+export type VariantId = 'a' | 'a2' | 'b' | 'b2' | 'c' | 'c2' | 'd2'
 
 export interface Stop {
   id: string
@@ -327,7 +327,34 @@ const STOPS_C2: Stop[] = [...B2_MEETING_STOPS, ...STOPS_A, STOP_B_END]
 const ROUTE_LNG_LAT_C2: [number, number][] = [...B2_MEETING_LNG_LAT, ...VATICAN_ROUTE, END_LNG_LAT_B]
 const ROUTE_POLYLINE_C2_CORE: [number, number][] = [...VATICAN_ROUTE, END_LNG_LAT_B]
 
+/** D2 shares the same stop data / route as C2 — layout difference is mobile-only. */
+const STOPS_D2 = STOPS_C2
+const ROUTE_LNG_LAT_D2 = ROUTE_LNG_LAT_C2
+const ROUTE_POLYLINE_D2_CORE = ROUTE_POLYLINE_C2_CORE
+
 export const variants: Record<VariantId, ExperienceVariant> = {
+  d2: {
+    id: 'd2',
+    label: 'D2 (sandwich)',
+    tourTitle: viatorListing.tourTitle,
+    ratingLine: viatorListing.ratingLine,
+    meetingAndPickup: MEETING_AND_PICKUP_A,
+    whatToExpectIntro: ITINERARY_SECTION_INTRO,
+    whatToExpectExtra: ITINERARY_SECTION_EXTRA,
+    /** Same stop/route data as C2 — desktop identical; mobile sandwiches map between meeting row and POI list. */
+    stops: STOPS_D2,
+    routeLngLat: ROUTE_LNG_LAT_D2,
+    routePolylineLngLat: ROUTE_POLYLINE_D2_CORE,
+    booking: {
+      priceAmount: '$40.56',
+      badgeExceptionalDeal: 'Exceptional deal',
+      badgeKidsDiscount: 'Discounted rates for kids',
+      dateLabel: 'Wed, Apr 29',
+      travellers: 2,
+      bookAheadTitle: 'Book ahead!',
+      bookAheadSubtitle: 'On average, booked 8 days in advance.',
+    },
+  },
   a: {
     id: 'a',
     label: 'Variant A',
@@ -460,12 +487,28 @@ export function getVariant(id: string | null | undefined): VariantId {
   if (id === 'b2') return 'b2'
   if (id === 'c') return 'c'
   if (id === 'c2') return 'c2'
+  if (id === 'd2') return 'd2'
   return 'a'
 }
 
-/** A2 / C2: triple meeting picker in card only — not wired to map/timeline. */
+/** A2 / C2 / D2: triple meeting picker in card — D2 mobile uses timeline sandwich row + dropdown instead. */
 export function isVariantTripleMeetingCardOnly(variantId: VariantId): boolean {
-  return variantId === 'a2' || variantId === 'c2'
+  return variantId === 'a2' || variantId === 'c2' || variantId === 'd2'
+}
+
+/** D2: mobile sandwiches map between the meeting-dropdown row and POI list; desktop identical to C2. */
+export function isVariantD2Sandwich(variantId: VariantId): boolean {
+  return variantId === 'd2'
+}
+
+/** C2 / D2: meeting + end use green map pins; end stays off the itinerary timeline list. */
+export function isVariantC2OrD2MapLayout(variantId: VariantId): boolean {
+  return variantId === 'c2' || variantId === 'd2'
+}
+
+/** B2 / C2 / D2: committed triple-meeting pickup drives map pin visibility and hover. */
+export function isVariantTripleMeetingMapPickup(variantId: VariantId): boolean {
+  return variantId === 'b2' || variantId === 'c2' || variantId === 'd2'
 }
 
 /** Variant B, B2, and C share the same itinerary / map behavior (meeting + end stops, B-route offset). */
@@ -473,10 +516,10 @@ export function isVariantBLayout(variantId: VariantId): boolean {
   return variantId === 'b' || variantId === 'b2' || variantId === 'c'
 }
 
-/** B2 and C2 timeline/map: three meeting stops first, then core + end */
+/** B2 / C2 / D2 timeline/map: three meeting stops first, then core + end */
 export function isVariantB2TripleMeeting(variantId: VariantId, stops: Stop[]): boolean {
   return (
-    (variantId === 'b2' || variantId === 'c2') &&
+    (variantId === 'b2' || variantId === 'c2' || variantId === 'd2') &&
     stops.length >= 3 &&
     stops[0]?.kind === 'meeting' &&
     stops[1]?.kind === 'meeting' &&

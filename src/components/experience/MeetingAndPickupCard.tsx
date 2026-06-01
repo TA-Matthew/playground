@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   B2_MEETING_OPTION_LABELS,
   isVariantTripleMeetingCardOnly,
@@ -7,11 +7,9 @@ import {
   type VariantId,
 } from '../../data/variants'
 import { BenefitCheckIcon } from '../icons/BenefitCheckIcon'
+import { MeetingPointDropdownPicker } from '../logistics/MeetingPointDropdownPicker'
 import { logisticsRailDiscClass } from '../logistics/logisticsPinButtonClass'
 import { viatorMeetingMarkSvgHtml } from '../logistics/viatorMeetingMark'
-
-/** C2 picker trigger — same outer height for “Show meeting points” and selected (border included). */
-const C2_PICKER_TRIGGER_HEIGHT_CLASS = 'box-border h-[48px]'
 
 export function MeetingAndPickupCard({
   content,
@@ -35,7 +33,7 @@ export function MeetingAndPickupCard({
   readonly openMeetingPickerSignal?: number
 }) {
   const showB2MeetingPicker =
-    (variantId === 'b2' || variantId === 'a2' || variantId === 'c2') &&
+    (variantId === 'b2' || variantId === 'a2' || variantId === 'c2' || variantId === 'd2') &&
     meetings != null &&
     meetings.length >= 3 &&
     onB2PickupChange != null
@@ -130,19 +128,23 @@ function MeetingPickupCardB2Layout({
   readonly b2HoverMeetingId?: string | null
   readonly openMeetingPickerSignal?: number
 }) {
-  const useC2Dropdown = variantId === 'c2'
+  const useC2Dropdown = variantId === 'c2' || variantId === 'd2'
   /** A2 / C2: 1px selected border + clear (X) while the option list is open. */
   const showClearOnListOpen = isVariantTripleMeetingCardOnly(variantId)
   const [query, setQuery] = useState('')
   const [listOpen, setListOpen] = useState(false)
   const pickerRef = useRef<HTMLDivElement>(null)
   const blurHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const lastOpenMeetingPickerSignalRef = useRef(0)
 
   const selectedMeeting = useMemo(
     () => (b2PickupId ? meetings.find((m) => m.id === b2PickupId) : undefined),
     [b2PickupId, meetings],
   )
+  const selectedMeetingLabel = useMemo(() => {
+    if (!b2PickupId) return undefined
+    const idx = meetings.findIndex((m) => m.id === b2PickupId)
+    return idx >= 0 ? (B2_MEETING_OPTION_LABELS[idx] ?? `Pickup ${idx + 1}`) : undefined
+  }, [b2PickupId, meetings])
 
   const filteredRows = useMemo(() => {
     const rows = buildMeetingPickerRows(meetings)
@@ -157,20 +159,12 @@ function MeetingPickupCardB2Layout({
   }, [meetings, query, useC2Dropdown])
 
   useEffect(() => {
-    if (!listOpen) return
+    if (useC2Dropdown || !listOpen) return
     const close = (e: MouseEvent) => {
       const target = e.target
       if (!(target instanceof Node)) return
       const el = pickerRef.current
       if (el?.contains(target)) return
-      /** C2: tapping another meeting pin on the map only changes highlight — keep the list open. */
-      if (
-        useC2Dropdown &&
-        target instanceof Element &&
-        target.closest('[data-logistics-meeting-map-pin="1"]')
-      ) {
-        return
-      }
       setListOpen(false)
     }
     document.addEventListener('mousedown', close)
@@ -201,36 +195,6 @@ function MeetingPickupCardB2Layout({
     setListOpen(true)
   }
 
-  /** C2: map meeting-pin tap — open dropdown from parent signal (first tap only if already open). */
-  useEffect(() => {
-    if (!useC2Dropdown || openMeetingPickerSignal <= 0) return
-    if (openMeetingPickerSignal <= lastOpenMeetingPickerSignalRef.current) return
-    lastOpenMeetingPickerSignalRef.current = openMeetingPickerSignal
-    if (listOpen) {
-      clearBlurHide()
-      return
-    }
-    openMeetingList()
-  }, [openMeetingPickerSignal, useC2Dropdown, listOpen])
-
-  /** Keep hovered map pin’s row visible inside the open list. */
-  useEffect(() => {
-    if (!useC2Dropdown || !listOpen || !b2HoverMeetingId) return
-    requestAnimationFrame(() => {
-      document
-        .getElementById(`meeting-option-${b2HoverMeetingId}`)
-        ?.scrollIntoView({ block: 'nearest' })
-    })
-  }, [b2HoverMeetingId, listOpen, useC2Dropdown])
-
-  const toggleMeetingList = () => {
-    if (listOpen) {
-      setListOpen(false)
-      return
-    }
-    openMeetingList()
-  }
-
   return (
     <div className="flex flex-col gap-0 self-stretch rounded-2xl border border-stone-200/90 bg-white px-4 py-6 md:flex-row md:items-stretch md:gap-0 md:p-6">
       <div className="min-w-0 flex-1 border-b border-stone-200/90 pb-8 md:border-b-0 md:pb-0 md:pr-8">
@@ -249,137 +213,78 @@ function MeetingPickupCardB2Layout({
           <p className="text-[15px] font-normal leading-snug text-black">Select a meeting point</p>
         ) : null}
 
-        <div ref={pickerRef} className="relative mt-3">
-          <div className="relative">
-            {selectedMeeting ? (
-              <button
-                type="button"
-                className={`flex w-full cursor-pointer rounded-lg border border-[#008768] bg-white text-left outline-none transition hover:bg-emerald-50/40 focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-0 ${
-                  useC2Dropdown
-                    ? `${C2_PICKER_TRIGGER_HEIGHT_CLASS} items-center justify-between gap-3 pl-4 pr-4 text-[16px] font-normal leading-normal`
-                    : `gap-2 pl-3 pr-12 text-[15px] leading-snug ${
-                        variantId === 'b2'
-                          ? 'items-start border-2 py-2.5'
-                          : 'items-start py-2.5'
-                      }`
-                }`}
-                aria-expanded={listOpen}
-                aria-controls="meeting-point-options-meeting-pickup-card"
-                aria-haspopup="listbox"
-                onClick={useC2Dropdown ? toggleMeetingList : () => openMeetingList()}
-              >
-                <span className={`min-w-0 flex-1 ${useC2Dropdown ? 'truncate' : ''}`}>
-                  <MeetingAddressConfirmedText line={selectedMeeting.durationLine} />
-                </span>
-                {showClearOnListOpen && listOpen ? (
-                  <button
-                    type="button"
-                    className={
-                      useC2Dropdown
-                        ? 'flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-sm text-stone-900 transition hover:bg-stone-100 hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-emerald-600'
-                        : 'absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 cursor-pointer items-center justify-center rounded-sm text-stone-900 transition hover:bg-stone-100 hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-emerald-600'
-                    }
-                    aria-label="Clear meeting point selection"
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onB2PickupChange(null)
-                      onB2MeetingHover?.(null)
-                      setListOpen(false)
-                      setQuery('')
-                    }}
-                  >
-                    <ClearSelectionIcon className="h-4 w-4 shrink-0" />
-                  </button>
-                ) : useC2Dropdown ? (
-                  <BenefitCheckIcon className="h-5 w-5 shrink-0" />
-                ) : (
-                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
-                    <BenefitCheckIcon className="h-5 w-5 shrink-0" />
-                  </span>
-                )}
-              </button>
-            ) : useC2Dropdown ? (
-              <button
-                type="button"
-                className={`${C2_PICKER_TRIGGER_HEIGHT_CLASS} flex w-full cursor-pointer items-center justify-between gap-3 rounded-lg border border-[#d1d5db] bg-white pl-4 pr-4 text-left text-[16px] font-normal leading-normal text-[#6b7280] outline-none transition hover:bg-stone-50/80 focus-visible:ring-2 focus-visible:ring-stone-200/80 focus-visible:ring-offset-0`}
-                aria-expanded={listOpen}
-                aria-controls="meeting-point-options-meeting-pickup-card"
-                aria-haspopup="listbox"
-                onClick={toggleMeetingList}
-              >
-                <span className="min-w-0 flex-1 truncate">View 3 location options</span>
-                <ChevronDown
-                  className={`h-5 w-5 shrink-0 text-stone-900 transition-transform duration-200 ${
-                    listOpen ? 'rotate-180' : ''
+        {useC2Dropdown ? (
+          <MeetingPointDropdownPicker
+            meetings={meetings}
+            pickupId={b2PickupId}
+            onPickupChange={onB2PickupChange}
+            onMeetingHover={onB2MeetingHover}
+            hoverMeetingId={b2HoverMeetingId}
+            openMeetingPickerSignal={openMeetingPickerSignal}
+            showClearOnListOpen={showClearOnListOpen}
+            listboxId="meeting-point-options-meeting-pickup-card"
+          />
+        ) : (
+          <div ref={pickerRef} className="relative mt-3">
+            <div className="relative">
+              {selectedMeeting ? (
+                <button
+                  type="button"
+                  className={`flex w-full cursor-pointer items-start gap-2 rounded-lg border border-[#008768] bg-white py-2.5 pl-3 pr-12 text-left text-[15px] leading-snug outline-none transition hover:bg-emerald-50/40 focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-0 ${
+                    variantId === 'b2' ? 'border-2' : ''
                   }`}
-                />
-              </button>
-            ) : (
-              <>
-                <input
-                  type="search"
-                  autoComplete="off"
-                  placeholder="Type to search"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  onFocus={() => {
-                    clearBlurHide()
-                    setListOpen(true)
-                  }}
-                  onBlur={scheduleBlurHide}
-                  className="w-full rounded-lg border border-[#d1d5db] bg-white py-2.5 pl-3 pr-10 text-[15px] leading-snug text-stone-900 placeholder:text-[#9ca3af] outline-none transition focus:border-stone-400 focus:ring-2 focus:ring-stone-200/80"
                   aria-expanded={listOpen}
                   aria-controls="meeting-point-options-meeting-pickup-card"
                   aria-haspopup="listbox"
-                />
-                <SearchIcon className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-900" />
-              </>
-            )}
-          </div>
+                  onClick={() => openMeetingList()}
+                >
+                  <span className="min-w-0 flex-1">
+                    <MeetingAddressConfirmedText line={selectedMeeting.durationLine} label={selectedMeetingLabel} />
+                  </span>
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+                    <BenefitCheckIcon className="h-5 w-5 shrink-0" />
+                  </span>
+                </button>
+              ) : (
+                <>
+                  <input
+                    type="search"
+                    autoComplete="off"
+                    placeholder="Type to search"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onFocus={() => {
+                      clearBlurHide()
+                      setListOpen(true)
+                    }}
+                    onBlur={scheduleBlurHide}
+                    className="w-full rounded-lg border border-[#d1d5db] bg-white py-2.5 pl-3 pr-10 text-[15px] leading-snug text-stone-900 placeholder:text-[#9ca3af] outline-none transition focus:border-stone-400 focus:ring-2 focus:ring-stone-200/80"
+                    aria-expanded={listOpen}
+                    aria-controls="meeting-point-options-meeting-pickup-card"
+                    aria-haspopup="listbox"
+                  />
+                  <SearchIcon className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-900" />
+                </>
+              )}
+            </div>
 
-          {listOpen ? (
-            <div className="absolute left-0 right-0 top-full z-20 mt-1">
-              <p id="meeting-point-options-label-mp" className="sr-only">
-                Pickup location — choose one option
-              </p>
-              <ul
-                id="meeting-point-options-meeting-pickup-card"
-                role="listbox"
-                aria-labelledby="meeting-point-options-label-mp"
-                className={
-                  useC2Dropdown
-                    ? 'max-h-[min(320px,50vh)] overflow-y-auto rounded-lg border border-[#d1d5db] bg-white shadow-md'
-                    : 'max-h-[min(280px,40vh)] overflow-y-auto rounded-lg border border-stone-200 bg-white py-1 shadow-md'
-                }
-                onMouseLeave={() => onB2MeetingHover?.(null)}
-              >
-                {filteredRows.length === 0 ? (
-                  <li className="px-3 py-2 text-[13px] text-stone-500">No matches</li>
-                ) : (
-                  filteredRows.map(({ stop, label }) => (
-                    <li key={stop.id} role="presentation">
-                      {useC2Dropdown ? (
-                        <MeetingPickupOptionRow
-                          id={`meeting-option-${stop.id}`}
-                          title={label}
-                          address={stop.durationLine}
-                          selected={b2PickupId === stop.id}
-                          highlighted={b2HoverMeetingId === stop.id}
-                          onMouseEnter={() => onB2MeetingHover?.(stop.id)}
-                          onFocus={() => onB2MeetingHover?.(stop.id)}
-                          onMouseDown={(e) => {
-                            e.preventDefault()
-                            clearBlurHide()
-                          }}
-                          onClick={() => {
-                            onB2PickupChange(stop.id)
-                            onB2MeetingHover?.(null)
-                            setListOpen(false)
-                            setQuery('')
-                          }}
-                        />
-                      ) : (
+            {listOpen ? (
+              <div className="absolute left-0 right-0 top-full z-20 mt-1">
+                <p id="meeting-point-options-label-mp" className="sr-only">
+                  Pickup location — choose one option
+                </p>
+                <ul
+                  id="meeting-point-options-meeting-pickup-card"
+                  role="listbox"
+                  aria-labelledby="meeting-point-options-label-mp"
+                  className="max-h-[min(280px,40vh)] overflow-y-auto rounded-lg border border-stone-200 bg-white py-1 shadow-md"
+                  onMouseLeave={() => onB2MeetingHover?.(null)}
+                >
+                  {filteredRows.length === 0 ? (
+                    <li className="px-3 py-2 text-[13px] text-stone-500">No matches</li>
+                  ) : (
+                    filteredRows.map(({ stop, label }) => (
+                      <li key={stop.id} role="presentation">
                         <button
                           type="button"
                           role="option"
@@ -404,14 +309,14 @@ function MeetingPickupCardB2Layout({
                         >
                           {label}
                         </button>
-                      )}
-                    </li>
-                  ))
-                )}
-              </ul>
-            </div>
-          ) : null}
-        </div>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </div>
+            ) : null}
+          </div>
+        )}
 
         {selectedMeeting ? (
           <>
@@ -460,58 +365,19 @@ function EndPointRailDiscIcon() {
 }
 
 /**
- * C2 pickup list row — Figma Logistics frame 2977:27842.
- * 16px padding, 8px pin–text gap, 16px title + 14px address (neutral/30 #4d4d4d), 20px map pin.
+ * Confirmed meeting address line.
+ * When `label` is provided (multi-meeting variants): **Ottaviano**, Via Ottaviano, 00192…
+ * Otherwise: bold through first comma — **Via Ottaviano,** 00192 Roma RM, Italy
  */
-function MeetingPickupOptionRow({
-  id,
-  title,
-  address,
-  selected,
-  highlighted = false,
-  onMouseEnter,
-  onFocus,
-  onMouseDown,
-  onClick,
-}: {
-  readonly id?: string
-  readonly title: string
-  readonly address: string
-  readonly selected: boolean
-  readonly highlighted?: boolean
-  readonly onMouseEnter: () => void
-  readonly onFocus: () => void
-  readonly onMouseDown: (e: ReactMouseEvent<HTMLButtonElement>) => void
-  readonly onClick: () => void
-}) {
-  const activeRow = selected || highlighted
-  return (
-    <button
-      type="button"
-      id={id}
-      role="option"
-      aria-selected={selected}
-      className={`flex w-full cursor-pointer items-start gap-2 p-4 text-left transition [word-break:break-word] ${
-        activeRow ? 'bg-[#e5e5e5]' : 'bg-white hover:bg-[#e5e5e5]'
-      }`}
-      onMouseEnter={onMouseEnter}
-      onFocus={onFocus}
-      onMouseDown={onMouseDown}
-      onClick={onClick}
-    >
-      <MeetingPickupListPinIcon className="h-5 w-5 shrink-0" />
-      <span className="flex min-w-0 flex-1 flex-col gap-0">
-        <span className="w-full text-[16px] font-normal leading-[1.5] text-black">{title}</span>
-        <span className="w-full text-[14px] font-normal leading-[1.5] text-[#4d4d4d]">
-          {address}
-        </span>
+function MeetingAddressConfirmedText({ line, label }: { readonly line: string; readonly label?: string }) {
+  if (label) {
+    return (
+      <span className="flex w-full min-w-0 flex-nowrap items-baseline gap-x-1">
+        <span className="shrink-0 font-medium text-black">{label},</span>
+        <span className="min-w-0 flex-1 truncate font-normal text-stone-600">{line}</span>
       </span>
-    </button>
-  )
-}
-
-/** Bold through first comma (street-style lead); remainder neutral gray, single-line ellipsis. */
-function MeetingAddressConfirmedText({ line }: { readonly line: string }) {
+    )
+  }
   const comma = line.indexOf(',')
   if (comma === -1) {
     return <span className="block truncate font-medium text-black">{line}</span>
@@ -525,36 +391,6 @@ function MeetingAddressConfirmedText({ line }: { readonly line: string }) {
         <span className="min-w-0 flex-1 truncate font-normal text-stone-600">{tail}</span>
       ) : null}
     </span>
-  )
-}
-
-/** Stroked map pin for C2 pickup list rows (primary/20 #008768). */
-function MeetingPickupListPinIcon({ className }: { readonly className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden
-    >
-      <path
-        d="M11.4991 21.8082C11.4991 21.8082 11.4993 21.8084 12 21.25C12.5007 21.8084 12.5014 21.8078 12.5014 21.8078C12.2165 22.0632 11.784 22.0636 11.4991 21.8082Z"
-        fill="#008768"
-      />
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M12 5.5C10.067 5.5 8.5 7.067 8.5 9C8.5 10.933 10.067 12.5 12 12.5C13.933 12.5 15.5 10.933 15.5 9C15.5 7.067 13.933 5.5 12 5.5ZM10 9C10 7.89543 10.8954 7 12 7C13.1046 7 14 7.89543 14 9C14 10.1046 13.1046 11 12 11C10.8954 11 10 10.1046 10 9Z"
-        fill="#008768"
-      />
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M11.4991 21.8082L12 21.25L12.5014 21.8078L12.5074 21.8023L12.5245 21.7869L12.5884 21.7286C12.6437 21.6779 12.7239 21.6037 12.8255 21.5081C13.0285 21.3171 13.3173 21.0403 13.6631 20.6944C14.354 20.0035 15.2772 19.0328 16.2025 17.916C17.1257 16.8019 18.0641 15.5267 18.7751 14.2272C19.4791 12.9405 20 11.5591 20 10.25C20 8.03563 19.1017 6.06142 17.6393 4.49577C16.1529 2.90448 14.1256 2 12 2C9.87438 2 7.84708 2.90448 6.36074 4.49577C4.89834 6.06142 4 8.03562 4 10.25C4 11.5591 4.52084 12.9405 5.22486 14.2272C5.9359 15.5267 6.87433 16.8019 7.79748 17.916C8.72279 19.0328 9.64599 20.0035 10.3369 20.6944C10.6827 21.0403 10.9715 21.3171 11.1745 21.5081C11.2761 21.6037 11.3563 21.6779 11.4116 21.7286L11.4755 21.7869L11.4926 21.8023L11.4973 21.8066L11.4991 21.8082ZM7.45693 5.51967C8.6711 4.21977 10.3065 3.5 12 3.5C13.6935 3.5 15.3289 4.21977 16.5431 5.51967C17.7812 6.8452 18.5 8.46437 18.5 10.25C18.5 11.1909 18.1146 12.3095 17.4592 13.5072C16.8109 14.6921 15.9368 15.8856 15.0475 16.959C14.1603 18.0297 13.271 18.9652 12.6025 19.6337C12.3717 19.8645 12.1678 20.0629 12 20.2235C11.8322 20.0629 11.6283 19.8645 11.3975 19.6337C10.729 18.9652 9.8397 18.0297 8.95251 16.959C8.06316 15.8856 7.18909 14.6921 6.54075 13.5072C5.8854 12.3095 5.5 11.1909 5.5 10.25C5.5 8.46438 6.2188 6.84521 7.45693 5.51967Z"
-        fill="#008768"
-      />
-    </svg>
   )
 }
 
@@ -618,36 +454,6 @@ function ChevronRight({ className }: { readonly className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
-/** C2 — clear selection while the picker list is open. */
-function ClearSelectionIcon({ className }: { readonly className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M6 6l12 12M18 6L6 18"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-/** Figma Select / Chevron — downward caret on C2 meeting dropdown trigger. */
-function ChevronDown({ className }: { readonly className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M6 9l6 6 6-6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
     </svg>
   )
 }

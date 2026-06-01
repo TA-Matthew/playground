@@ -3,9 +3,11 @@ import '../ai-review/ai-review-animations.css'
 import {
   B2_MEETING_OPTION_LABELS,
   B2_MEETING_TIMELINE_ROW_ID,
+  isVariantTripleMeetingCardOnly,
   type Stop,
   type VariantId,
 } from '../../data/variants'
+import { MeetingPointDropdownPicker } from './MeetingPointDropdownPicker'
 import { getPoiOrderForStopIndex } from './poiOrder'
 import { viatorMeetingMarkSvgHtml } from './viatorMeetingMark'
 import { logisticsRailDiscClass } from './logisticsPinButtonClass'
@@ -36,6 +38,12 @@ type Props = {
   hoverMeetingId?: string | null
   /** MW: open full-screen map with meeting picker (collapsed row, no pickup yet). */
   onOpenMobileMap?: () => void
+  /** D2 sandwich / C2-style: dropdown trigger instead of inline list menu. */
+  pickerUI?: 'list' | 'dropdown'
+  /** D2 MW: meeting row above map — picker always visible, no row expand/collapse. */
+  sandwichMode?: boolean
+  /** Map pin tap — open dropdown (parent increments signal). */
+  openMeetingPickerSignal?: number
 }
 
 /** One itinerary row (same chrome as variant B meeting) + inline meeting list; hover previews pins on the map. */
@@ -51,9 +59,13 @@ export function TimelineB2MeetingRow({
   onMeetingHover,
   hoverMeetingId = null,
   onOpenMobileMap,
+  pickerUI = 'list',
+  sandwichMode = false,
+  openMeetingPickerSignal = 0,
 }: Props) {
   const activeMeeting = pickupId ? meetings.find((m) => m.id === pickupId) : undefined
-  const isOpen = expandedId === B2_MEETING_TIMELINE_ROW_ID
+  const isOpen = sandwichMode || expandedId === B2_MEETING_TIMELINE_ROW_ID
+  const useDropdownPicker = pickerUI === 'dropdown'
 
   const [isMw, setIsMw] = useState(false)
   useEffect(() => {
@@ -69,10 +81,12 @@ export function TimelineB2MeetingRow({
    * only “Show meeting points on map” opens the full-screen map.
    */
   const mwDisableHeaderExpand =
-    isMw &&
-    onOpenMobileMap != null &&
-    !isOpen &&
-    pickupId == null
+    sandwichMode ||
+    (isMw &&
+      onOpenMobileMap != null &&
+      !isOpen &&
+      pickupId == null &&
+      !useDropdownPicker)
 
   /** After choosing a pickup, list fades out and stays hidden until “Select a different…”. */
   const [meetingListDismissed, setMeetingListDismissed] = useState(false)
@@ -114,6 +128,7 @@ export function TimelineB2MeetingRow({
    * Once a pickup exists and we’re not fading the list away, hide it — avoids stacking list + long description.
    */
   const showMeetingList =
+    !useDropdownPicker &&
     isOpen &&
     (pickupId == null || listFadeOut) &&
     (!meetingListDismissed || listFadeOut)
@@ -129,6 +144,20 @@ export function TimelineB2MeetingRow({
       setHeadingSwapKey((k) => k + 1)
     }
   }, [meetAtHeadingActive])
+
+  const handleDropdownPickupChange = (id: string | null) => {
+    if (id != null) {
+      onPickupChange(id)
+      onMeetingHover(null)
+      if (!useDropdownPicker) return
+      setMeetingListDismissed(true)
+      return
+    }
+    onPickupChange(null)
+    onMeetingHover(null)
+    setMeetingListDismissed(false)
+    setListFadeOut(false)
+  }
 
   const openPickerAgain = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
@@ -166,6 +195,68 @@ export function TimelineB2MeetingRow({
   const rowHeaderHint = mwDisableHeaderExpand
     ? `${rowAriaTitle}. Use “Show meeting points on map” to open the map.`
     : `${rowAriaTitle}. ${isOpen ? 'Collapse' : 'Expand'} details`
+
+  if (sandwichMode) {
+    return (
+      <div
+        id={`poi-${B2_MEETING_TIMELINE_ROW_ID}`}
+        className="w-full text-left"
+        aria-label={rowAriaTitle}
+      >
+        <div className="mb-3 flex items-center gap-3">
+          <div
+            className={logisticsRailDiscClass(true, pickupId != null && selectedStopId === pickupId)}
+            aria-hidden
+          >
+            <span
+              className="inline-flex items-center justify-center"
+              dangerouslySetInnerHTML={{
+                __html: viatorMeetingMarkSvgHtml('pointer-events-none h-[14px] w-[14px] shrink-0'),
+              }}
+            />
+          </div>
+          <div
+            key={headingSwapKey}
+            className={`min-w-0 flex-1 ${headingSwapKey > 0 ? 'ai-summary-body-fade-in' : ''}`}
+          >
+            {meetAtHeadingActive ? (
+              <h3 className="text-[18px] font-medium leading-6 text-black">
+                <span className="inline-flex max-w-full flex-wrap items-center gap-1.5">
+                  <span className="min-w-0">Meet at — {selectedPickupLabel}</span>
+                  <PickupChosenCheckIcon className="h-[18px] w-[18px] shrink-0 text-emerald-600" />
+                </span>
+              </h3>
+            ) : (
+              <h3 className="text-[18px] font-medium leading-6 text-black">3 meeting point options</h3>
+            )}
+          </div>
+        </div>
+
+        <MeetingPointDropdownPicker
+          meetings={meetings}
+          pickupId={pickupId}
+          onPickupChange={handleDropdownPickupChange}
+          onMeetingHover={onMeetingHover}
+          hoverMeetingId={hoverMeetingId}
+          openMeetingPickerSignal={openMeetingPickerSignal}
+          showClearOnListOpen={isVariantTripleMeetingCardOnly(variantId)}
+          listboxId="meeting-point-options-timeline-b2"
+          className="relative w-full"
+          emptyTriggerLabel="Show meeting points"
+        />
+
+        {pickupId != null && activeMeeting ? (
+          <p className="mt-3 text-[15px] leading-snug text-stone-600">{activeMeeting.durationLine}</p>
+        ) : null}
+
+        {revealPickupDetails ? (
+          <div className="mt-4">
+            <MeetingBody meeting={activeMeeting ?? meetings[0]} pickupChosen={revealPickupDetails} />
+          </div>
+        ) : null}
+      </div>
+    )
+  }
 
   return (
     <div
@@ -211,7 +302,7 @@ export function TimelineB2MeetingRow({
         <div className="mt-0 min-h-[36px] w-1 flex-1 rounded-full bg-stone-900 sm:w-[5px]" />
       </div>
 
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 overflow-visible">
         <div className="pr-0 pt-0.5 sm:pr-1">
           <div className="px-1 py-1">
             <div className="flex items-start justify-between gap-3">
@@ -234,7 +325,7 @@ export function TimelineB2MeetingRow({
               </div>
               <span
                 className={`mt-0.5 h-8 w-8 shrink-0 items-center justify-center rounded-md text-stone-400 md:flex ${
-                  mwDisableHeaderExpand ? 'hidden' : 'flex'
+                  mwDisableHeaderExpand || sandwichMode ? 'hidden' : 'flex'
                 }`}
                 aria-hidden
               >
@@ -244,6 +335,19 @@ export function TimelineB2MeetingRow({
 
             {isOpen ? (
               <>
+                {useDropdownPicker ? (
+                  <MeetingPointDropdownPicker
+                    meetings={meetings}
+                    pickupId={pickupId}
+                    onPickupChange={handleDropdownPickupChange}
+                    onMeetingHover={onMeetingHover}
+                    hoverMeetingId={hoverMeetingId}
+                    openMeetingPickerSignal={openMeetingPickerSignal}
+                    showClearOnListOpen={isVariantTripleMeetingCardOnly(variantId)}
+                    listboxId="meeting-point-options-timeline-b2"
+                    className="relative mt-2"
+                  />
+                ) : null}
                 {showMeetingList ? (
                   <div
                     className={`relative mt-2 transition-opacity ease-out motion-reduce:transition-none motion-reduce:duration-0 ${
@@ -304,15 +408,21 @@ export function TimelineB2MeetingRow({
                     </ul>
                   </div>
                 ) : null}
-                <p className="mt-1.5 text-[13px] leading-snug text-stone-500">
-                  {activeMeeting?.durationLine ?? 'Hover to show on map'}
-                </p>
+                {!useDropdownPicker ? (
+                  <p className="mt-1.5 text-[13px] leading-snug text-stone-500">
+                    {activeMeeting?.durationLine ?? 'Hover to show on map'}
+                  </p>
+                ) : pickupId != null && activeMeeting ? (
+                  <p className="mt-1.5 text-[13px] leading-snug text-stone-500">
+                    {activeMeeting.durationLine}
+                  </p>
+                ) : null}
               </>
             ) : pickupId != null && activeMeeting ? (
               <p className="mt-1.5 text-[13px] leading-snug text-stone-500">
                 {activeMeeting.durationLine}
               </p>
-            ) : onOpenMobileMap ? (
+            ) : onOpenMobileMap && !useDropdownPicker ? (
               <button
                 type="button"
                 className="mt-1.5 flex min-h-[44px] w-full cursor-pointer items-center text-left text-[14px] leading-snug text-stone-900 underline decoration-stone-900 underline-offset-[3px] transition hover:decoration-stone-900 md:min-h-0 md:items-start md:text-[13px] md:text-stone-500 md:decoration-stone-300 md:underline-offset-2 md:hover:text-stone-600 md:hover:decoration-stone-400"
@@ -358,7 +468,7 @@ export function TimelineB2MeetingRow({
                 onPointerDown={(e) => e.stopPropagation()}
               >
                 <MeetingBody meeting={activeMeeting ?? meetings[0]} pickupChosen={revealPickupDetails} />
-                {isOpen && meetAtHeadingActive && revealPickupDetails ? (
+                {isOpen && meetAtHeadingActive && revealPickupDetails && !useDropdownPicker ? (
                   <button
                     type="button"
                     className="mt-4 inline-flex w-full items-center gap-1.5 text-left text-[13px] leading-snug text-stone-500 underline decoration-stone-300 underline-offset-4 transition hover:text-stone-600 hover:decoration-stone-400 sm:w-auto"

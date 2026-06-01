@@ -1,4 +1,4 @@
-import { isVariantBLayout, type Stop, type VariantId } from '../../data/variants'
+import { isVariantBLayout, isVariantC2OrD2MapLayout, type Stop, type VariantId } from '../../data/variants'
 
 /**
  * Teardrop SVG is shared by timeline + map pin tail.
@@ -185,8 +185,8 @@ export function itineraryStopUsesTeardropWhenSelected(
   poiOrder: number | null,
 ): boolean {
   if (!stop) return false
-  if ((isVariantBLayout(variantId) || variantId === 'c2') && stop.kind === 'meeting') return true
-  if ((isVariantBLayout(variantId) || variantId === 'c2') && stop.kind === 'end') return true
+  if ((isVariantBLayout(variantId) || isVariantC2OrD2MapLayout(variantId)) && stop.kind === 'meeting') return true
+  if ((isVariantBLayout(variantId) || isVariantC2OrD2MapLayout(variantId)) && stop.kind === 'end') return true
   if (stop.kind === 'passby') return true
   return poiOrder != null
 }
@@ -207,9 +207,9 @@ export function buildTimelineSelectedTeardropHtml(
 ): string | null {
   if (!itineraryStopUsesTeardropWhenSelected(stop, variantId, poiOrder)) return null
   let svg: string | null = null
-  if ((isVariantBLayout(variantId) || variantId === 'c2') && stop.kind === 'meeting') {
+  if ((isVariantBLayout(variantId) || isVariantC2OrD2MapLayout(variantId)) && stop.kind === 'meeting') {
     svg = mapMeetingSelectedTeardropHtml()
-  } else if ((isVariantBLayout(variantId) || variantId === 'c2') && stop.kind === 'end') {
+  } else if ((isVariantBLayout(variantId) || isVariantC2OrD2MapLayout(variantId)) && stop.kind === 'end') {
     svg = mapEndSelectedTeardropHtml()
   }
   else if (stop.kind === 'passby') svg = mapPassbySelectedTeardropHtml()

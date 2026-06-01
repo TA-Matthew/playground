@@ -3,11 +3,13 @@ import {
   B2_MEETING_TIMELINE_ROW_ID,
   isVariantB2TripleMeeting,
   isVariantBLayout,
+  isVariantD2Sandwich,
   type Stop,
   type VariantId,
 } from '../../data/variants'
 import { LogisticsMap } from './LogisticsMap'
 import { Timeline, type SelectSource } from './Timeline'
+import { TimelineB2MeetingRow } from './TimelineB2MeetingRow'
 
 /** Match `LogisticsMap` mobile layout — used to avoid list scroll when interacting with the map. */
 const MOBILE_MAP_MAX_WIDTH_PX = 768
@@ -96,6 +98,8 @@ type Props = {
   onExposeB2PickupApply?: (handler: ((id: string | null) => void) | null) => void
   /** C2: map meeting-pin tap — parent opens inline meeting dropdown. */
   onC2MapMeetingPinClick?: (meetingStopId: string) => void
+  /** D2 MW sandwich: parent increments to open timeline dropdown (map pin tap). */
+  openMeetingPickerSignal?: number
 }
 
 export function LogisticsBlock({
@@ -111,6 +115,7 @@ export function LogisticsBlock({
   onControlledB2MeetingHover,
   onExposeB2PickupApply,
   onC2MapMeetingPinClick,
+  openMeetingPickerSignal = 0,
 }: Props) {
   const [landingDefaultExpandedStopId] = useState(() =>
     getLandingStateForBlock(stops, variantId, controlledB2PickupId).landingDefaultExpandedStopId,
@@ -133,17 +138,30 @@ export function LogisticsBlock({
   const [internalB2HoverMeetingId, setInternalB2HoverMeetingId] = useState<string | null>(null)
   /** Itinerary row hover — map pin shows full teardrop + image like the selected stop. */
   const [timelineHoverStopId, setTimelineHoverStopId] = useState<string | null>(null)
+  const [isMw, setIsMw] = useState(() =>
+    typeof globalThis.matchMedia === 'function'
+      ? globalThis.matchMedia(`(max-width: ${MOBILE_MAP_MAX_WIDTH_PX}px)`).matches
+      : false,
+  )
+
+  useEffect(() => {
+    const mq = globalThis.matchMedia(`(max-width: ${MOBILE_MAP_MAX_WIDTH_PX}px)`)
+    const sync = () => setIsMw(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
 
   const b2PickupControlled =
-    (variantId === 'b2' || variantId === 'c2') && onControlledB2PickupChange != null
+    (variantId === 'b2' || variantId === 'c2' || variantId === 'd2') && onControlledB2PickupChange != null
   const b2PickupId =
-    (variantId === 'b2' || variantId === 'c2')
+    (variantId === 'b2' || variantId === 'c2' || variantId === 'd2')
       ? b2PickupControlled
         ? controlledB2PickupId ?? null
         : internalB2PickupId
       : null
   const b2HoverMeetingId =
-    (variantId === 'b2' || variantId === 'c2')
+    (variantId === 'b2' || variantId === 'c2' || variantId === 'd2')
       ? b2PickupControlled
         ? controlledB2HoverMeetingId ?? null
         : internalB2HoverMeetingId
@@ -174,7 +192,7 @@ export function LogisticsBlock({
   const b2PickupIdRef = useRef<string | null>(null)
   b2PickupIdRef.current = b2PickupId
   useEffect(() => {
-    if (variantId !== 'b2' && variantId !== 'c2') {
+    if (variantId !== 'b2' && variantId !== 'c2' && variantId !== 'd2') {
       setInternalB2PickupId(null)
       setInternalB2HoverMeetingId(null)
     }
@@ -200,7 +218,7 @@ export function LogisticsBlock({
   }, [setB2PickupId, setB2HoverMeetingId])
 
   useEffect(() => {
-    if ((variantId !== 'b2' && variantId !== 'c2') || !onExposeB2PickupApply) return
+    if ((variantId !== 'b2' && variantId !== 'c2' && variantId !== 'd2') || !onExposeB2PickupApply) return
     onExposeB2PickupApply(handleB2PickupChange)
     return () => onExposeB2PickupApply(null)
   }, [variantId, onExposeB2PickupApply, handleB2PickupChange])
@@ -304,27 +322,59 @@ export function LogisticsBlock({
     setLastSelectSource('list')
   }, [])
 
+  const isB2orC2orD2 = variantId === 'b2' || variantId === 'c2' || variantId === 'd2'
+  const isD2 = isVariantD2Sandwich(variantId)
+  const isD2SandwichMw = isD2 && isMw
+  const b2Meetings = isVariantB2TripleMeeting(variantId, stops) ? stops.slice(0, 3) : []
+
   return (
-    <div className="mt-8 flex flex-col gap-2 md:grid md:grid-cols-[minmax(0,1fr)_minmax(280px,1fr)] md:items-start md:gap-6">
+    <div
+      className={`mt-8 flex flex-col md:grid md:grid-cols-[minmax(0,1fr)_minmax(280px,1fr)] md:items-start md:gap-6 ${
+        isD2 ? 'max-md:gap-0' : 'gap-2'
+      }`}
+    >
+      {isD2SandwichMw ? (
+        <div className="relative z-20 order-0 min-w-0 overflow-visible">
+          <TimelineB2MeetingRow
+            variantId={variantId}
+            stops={stops}
+            meetings={b2Meetings}
+            pickupId={b2PickupId}
+            onPickupChange={handleB2PickupChange}
+            selectedStopId={selectedStopId}
+            expandedId={B2_MEETING_TIMELINE_ROW_ID}
+            onRowHeaderClick={handleRowHeaderClick}
+            onMeetingHover={handleB2MeetingHover}
+            hoverMeetingId={b2HoverMeetingId}
+            pickerUI="dropdown"
+            sandwichMode
+            openMeetingPickerSignal={openMeetingPickerSignal}
+          />
+        </div>
+      ) : null}
       {/* Mobile: map first, then timeline; md+: timeline (left) | map (right) */}
-      <div className="order-2 min-w-0 md:order-1">
+      <div className={`order-2 min-w-0 md:order-1 ${isD2 ? 'max-md:mt-2' : ''}`}>
         <Timeline
           variantId={variantId}
           stops={stops}
           selectedStopId={selectedStopId}
           expandedId={expandedId}
           onRowHeaderClick={handleRowHeaderClick}
-          b2PickupId={(variantId === 'b2' || variantId === 'c2') ? b2PickupId : null}
+          b2PickupId={isB2orC2orD2 ? b2PickupId : null}
           onB2PickupChange={handleB2PickupChange}
-          onB2MeetingHover={(variantId === 'b2' || variantId === 'c2') ? handleB2MeetingHover : noopMeetingHover}
-          b2HoverMeetingId={(variantId === 'b2' || variantId === 'c2') ? b2HoverMeetingId : null}
+          onB2MeetingHover={isB2orC2orD2 ? handleB2MeetingHover : noopMeetingHover}
+          b2HoverMeetingId={isB2orC2orD2 ? b2HoverMeetingId : null}
           onTimelineRowHover={handleTimelineRowHover}
           onOpenB2MeetingMobileMap={
             (variantId === 'b2' || variantId === 'c2') ? bumpOpenB2MeetingMobileMap : undefined
           }
         />
       </div>
-      <div className="order-1 min-h-0 min-w-0 w-full md:order-2 md:sticky md:top-8 md:z-[1] md:self-start">
+      <div
+        className={`order-1 min-h-0 min-w-0 w-full md:order-2 md:sticky md:top-8 md:z-[1] md:self-start ${
+          isD2 ? 'max-md:mt-6' : ''
+        } ${isD2SandwichMw ? 'relative z-[1]' : ''}`}
+      >
         <LogisticsMap
           variantId={variantId}
           routeLngLat={routeLngLat}
@@ -338,14 +388,14 @@ export function LogisticsBlock({
             selectedStopId !== '' &&
             (lastSelectSource === 'mapModal' ||
               (expandedId !== null && expandedId === selectedStopId) ||
-              ((variantId === 'b2' || variantId === 'c2') &&
+              (isB2orC2orD2 &&
                 (expandedId === B2_MEETING_TIMELINE_ROW_ID || lastSelectSource === 'b2MeetingPick') &&
                 stops.slice(0, 3).some((s) => s.id === selectedStopId)))
           }
-          b2HoverMeetingId={(variantId === 'b2' || variantId === 'c2') ? b2HoverMeetingId : null}
-          b2CommittedPickupId={(variantId === 'b2' || variantId === 'c2') ? b2PickupId : null}
-          onB2PickupChange={(variantId === 'b2' || variantId === 'c2') ? handleB2PickupChange : undefined}
-          onB2MeetingHover={(variantId === 'b2' || variantId === 'c2') ? handleB2MeetingHover : undefined}
+          b2HoverMeetingId={isB2orC2orD2 ? b2HoverMeetingId : null}
+          b2CommittedPickupId={isB2orC2orD2 ? b2PickupId : null}
+          onB2PickupChange={isB2orC2orD2 ? handleB2PickupChange : undefined}
+          onB2MeetingHover={isB2orC2orD2 ? handleB2MeetingHover : undefined}
           timelineHoverStopId={timelineHoverStopId}
           expandedStopId={expandedId}
           onSelectStop={handleSelectStop}
@@ -355,7 +405,7 @@ export function LogisticsBlock({
           b2OpenMeetingModalSignal={
             (variantId === 'b2' || variantId === 'c2') ? b2OpenMeetingModalNonce : 0
           }
-          onC2MapMeetingPinClick={variantId === 'c2' ? onC2MapMeetingPinClick : undefined}
+          onC2MapMeetingPinClick={(variantId === 'c2' || variantId === 'd2') ? onC2MapMeetingPinClick : undefined}
         />
       </div>
     </div>

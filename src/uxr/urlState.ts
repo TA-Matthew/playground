@@ -53,6 +53,7 @@ export function parseVariant(searchParams: URLSearchParams): VariantId {
   if (v === 'b2') return 'b2'
   if (v === 'c') return 'c'
   if (v === 'c2') return 'c2'
+  if (v === 'd2') return 'd2'
   return 'a'
 }
 

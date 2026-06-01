@@ -11,12 +11,15 @@ import {
   type MouseEvent,
   type MutableRefObject,
 } from 'react'
+import { createPortal } from 'react-dom'
 import { AnimatePresence, animate, LayoutGroup, motion } from 'framer-motion'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import {
   isVariantB2TripleMeeting,
   isVariantBLayout,
+  isVariantC2OrD2MapLayout,
+  isVariantTripleMeetingMapPickup,
   type Stop,
   type VariantId,
 } from '../../data/variants'
@@ -166,10 +169,10 @@ function markerSvgForStop(
   overlapCompact: boolean,
   b2CommittedPickupId: string | null,
 ): string {
-  if ((isVariantBLayout(variantId) || variantId === 'c2') && stop?.kind === 'meeting') {
+  if ((isVariantBLayout(variantId) || isVariantC2OrD2MapLayout(variantId)) && stop?.kind === 'meeting') {
     if (overlapCompact) return MAP_PASSBY_DOT_HTML
     const showB2DiscCheck =
-      (variantId === 'b2' || variantId === 'c2') &&
+      isVariantTripleMeetingMapPickup(variantId) &&
       b2CommittedPickupId != null &&
       stop.id === b2CommittedPickupId
     if (showB2DiscCheck) {
@@ -177,7 +180,7 @@ function markerSvgForStop(
     }
     return MAP_MEETING_VIATOR_SVG
   }
-  if ((isVariantBLayout(variantId) || variantId === 'c2') && stop?.kind === 'end') {
+  if ((isVariantBLayout(variantId) || isVariantC2OrD2MapLayout(variantId)) && stop?.kind === 'end') {
     if (overlapCompact) return MAP_PASSBY_DOT_HTML
     return MAP_FLAG_SVG
   }
@@ -192,7 +195,7 @@ function markerSvgForStop(
 
 function isVariantBMeetingOrEnd(variantId: VariantId, stop: Stop | undefined): boolean {
   return (
-    (isVariantBLayout(variantId) || variantId === 'c2') &&
+    (isVariantBLayout(variantId) || isVariantC2OrD2MapLayout(variantId)) &&
     (stop?.kind === 'meeting' || stop?.kind === 'end')
   )
 }
@@ -210,7 +213,7 @@ function dashedItineraryLineCoords(
 ): [number, number][] {
   const core = routePolylineLngLat ?? routeLngLat
   if (
-    (variantId !== 'b2' && variantId !== 'c2') ||
+    !isVariantTripleMeetingMapPickup(variantId) ||
     b2CommittedPickupId == null ||
     core.length < 1
   ) {
@@ -568,7 +571,7 @@ function applyMarkerSelectedState(
   el.dataset.mapPinActive = discHighlighted ? '1' : '0'
 
   const b2ShowCommittedCheck =
-    (variantId === 'b2' || variantId === 'c2') &&
+    isVariantTripleMeetingMapPickup(variantId) &&
     stop?.kind === 'meeting' &&
     teardrop &&
     b2CommittedPickupId != null &&
@@ -576,7 +579,7 @@ function applyMarkerSelectedState(
 
   const showB2MeetingDiscCheck =
     !teardrop &&
-    (variantId === 'b2' || variantId === 'c2') &&
+    isVariantTripleMeetingMapPickup(variantId) &&
     stop?.kind === 'meeting' &&
     !overlapCompact &&
     b2CommittedPickupId != null &&
@@ -855,7 +858,7 @@ function parseDurationAndAdmission(durationLine: string): {
 /** MW map modal bottom shelf: meetings first (B-layout), then itinerary legs, then end. */
 function getMobileMapModalShelfStops(variantId: VariantId, stops: Stop[]): Stop[] {
   if (stops.length === 0) return []
-  if (!isVariantBLayout(variantId) && variantId !== 'c2') return stops
+  if (!isVariantBLayout(variantId) && !isVariantC2OrD2MapLayout(variantId)) return stops
   const meetings: Stop[] = []
   const middle: Stop[] = []
   const ends: Stop[] = []
@@ -933,7 +936,7 @@ function MobileMapModalStopPanelCard({
     )
   }
 
-  const logisticsB = isVariantBLayout(variantId) || variantId === 'c2'
+  const logisticsB = isVariantBLayout(variantId) || isVariantC2OrD2MapLayout(variantId)
   const selectionIsMeeting = logisticsB && stop.kind === 'meeting'
   const displayStop =
     variantId === 'b2' &&
@@ -1645,8 +1648,8 @@ function expandBoundsGeographic(bounds: maplibregl.LngLatBounds, padFactor = 0.2
 }
 
 /**
- * B2 + committed pickup: overview framing uses only the chosen meeting plus POI / pass-by / end legs —
- * not the two alternate meeting locations (they’re hidden on the map anyway).
+ * B2 / C2 + committed pickup: overview framing uses only the chosen meeting plus POI / pass-by / end legs.
+ * D2 keeps all three meeting coords in the overview (all meeting pins stay on the map).
  */
 function routeCoordsForVariantOverview(
   variantId: VariantId,
@@ -1655,7 +1658,8 @@ function routeCoordsForVariantOverview(
   b2CommittedPickupId: string | null,
 ): [number, number][] {
   if (
-    (variantId !== 'b2' && variantId !== 'c2') ||
+    !isVariantTripleMeetingMapPickup(variantId) ||
+    variantId === 'd2' ||
     b2CommittedPickupId == null ||
     stops.length === 0 ||
     routeLngLat.length === 0
@@ -2250,16 +2254,16 @@ export function LogisticsMap({
     const committedPickup = b2CommittedPickupIdRef.current
     /**
      * Hide non-chosen meeting pins once pickup is committed (B2 timeline / C2 card).
-     * Until then, all three meeting discs stay on the map.
+     * D2: keep all three meeting discs visible after selection.
      */
     let b2FocusMeetingId: string | null = null
-    if (vid === 'b2' || vid === 'c2') {
+    if (isVariantTripleMeetingMapPickup(vid) && vid !== 'd2') {
       if (committedPickup != null) {
         b2FocusMeetingId = committedPickup
       }
     }
     const rawB2HoverMeetingId =
-      variantIdRef.current === 'b2' || variantIdRef.current === 'c2'
+      isVariantTripleMeetingMapPickup(variantIdRef.current)
         ? b2HoverMeetingIdRef.current
         : null
     /**
@@ -2268,7 +2272,7 @@ export function LogisticsMap({
      */
     const b2MeetingModalHighlightId =
       showB2MeetingModalPanelRef.current &&
-      (variantIdRef.current === 'b2' || variantIdRef.current === 'c2') &&
+      isVariantTripleMeetingMapPickup(variantIdRef.current) &&
       mobileB2MeetingPendingIdRef.current != null
         ? mobileB2MeetingPendingIdRef.current
         : rawB2HoverMeetingId
@@ -2377,7 +2381,7 @@ export function LogisticsMap({
         selectedPinActive || timelineHoverPinActive || b2MeetingHoverPinActive
       const stopAt = stopsLocal[i]
       const isB2Meeting =
-        (vid === 'b2' || vid === 'c2') && stopAt?.kind === 'meeting'
+        isVariantTripleMeetingMapPickup(vid) && stopAt?.kind === 'meeting'
       const meetingPickerDiscOnly = mapModalMeetingPicker && isB2Meeting
       /** C2 MW modal: per-meeting shelf cards — keep compact green discs (same as inline PDP). */
       const c2MobileMeetingDiscOnly =
@@ -2432,11 +2436,11 @@ export function LogisticsMap({
           : 0
       markersRef.current[i]?.setOffset([0, offY])
 
-      if ((vid === 'b2' || vid === 'c2') && stopAt?.kind === 'meeting') {
+      if (isVariantTripleMeetingMapPickup(vid) && stopAt?.kind === 'meeting') {
         /**
          * MW map-modal meeting sheet (pending choice, not yet committed): keep **all** meeting pins on
          * the canvas — selection vs dimming comes from `applyMarkerSelectedState` / active hover idx only.
-         * `data-logistics-b2-meeting-hidden` is for timeline-committed pickup (hide non-chosen meetings).
+         * `data-logistics-b2-meeting-hidden` is for B2/C2 committed pickup (hide non-chosen meetings; not D2).
          */
         if (mapModalMeetingPicker) {
           el.removeAttribute('data-logistics-b2-meeting-hidden')
@@ -2845,7 +2849,7 @@ export function LogisticsMap({
    */
   useEffect(() => {
     if (!mobileSheetOpen || !showB2MeetingModalPanel) return
-    if ((variantId !== 'b2' && variantId !== 'c2') || !isVariantB2TripleMeeting(variantId, stops)) return
+    if (!isVariantTripleMeetingMapPickup(variantId) || !isVariantB2TripleMeeting(variantId, stops)) return
     if (mobileB2MeetingPendingId != null) return
     if (mobileB2MeetingReselectPicker && b2CommittedPickupId != null) {
       setMobileB2MeetingPendingId(b2CommittedPickupId)
@@ -3262,7 +3266,7 @@ export function LogisticsMap({
         )
         const b2c = b2CommittedPickupIdRef.current
         const initialB2DiscChk =
-          (variantId === 'b2' || variantId === 'c2') &&
+          isVariantTripleMeetingMapPickup(variantId) &&
           stopAtI?.kind === 'meeting' &&
           b2c != null &&
           stopAtI.id === b2c
@@ -3291,7 +3295,7 @@ export function LogisticsMap({
         )
 
         const stop = stopsRef.current[i]
-        if (stop?.kind === 'meeting' && (variantId === 'b2' || variantId === 'c2')) {
+        if (stop?.kind === 'meeting' && isVariantTripleMeetingMapPickup(variantId)) {
           markerEl.dataset.logisticsMeetingMapPin = '1'
         }
         if (stop) {
@@ -3312,13 +3316,6 @@ export function LogisticsMap({
             e.stopPropagation()
             const { isMobile: mobile, sheetOpen } = interactionRef.current
 
-            // Mobile inline map: pins only open the sheet (same as tapping the basemap) — no zoom / no selection.
-            if (mobile && !sheetOpen) {
-              setMobileSheetOpen(true)
-              return
-            }
-
-            /** B2: triple meeting — full-screen modal shows the same picker as the timeline; inline preview map still no-op. */
             const currentStop = stopsRef.current[i]
             const tripleMeeting =
               stopsRef.current.length >= 3 &&
@@ -3326,6 +3323,32 @@ export function LogisticsMap({
               stopsRef.current[1]?.kind === 'meeting' &&
               stopsRef.current[2]?.kind === 'meeting'
 
+            /** D2 MW inline: meeting pin opens sandwich dropdown (not the full-screen map sheet). */
+            if (
+              variantIdRef.current === 'd2' &&
+              mobile &&
+              !sheetOpen &&
+              i < 3 &&
+              currentStop?.kind === 'meeting' &&
+              tripleMeeting
+            ) {
+              onB2MeetingHoverRef.current?.(stop.id)
+              onSelectRef.current(stop.id, 'map')
+              selectedStopIdRef.current = stop.id
+              lastSelectSourceRef.current = 'map'
+              highlightSelectedPinRef.current = true
+              onC2MapMeetingPinClickRef.current?.(stop.id)
+              syncMarkersAppearanceRef.current()
+              return
+            }
+
+            // Mobile inline map: pins only open the sheet (same as tapping the basemap) — no zoom / no selection.
+            if (mobile && !sheetOpen) {
+              setMobileSheetOpen(true)
+              return
+            }
+
+            /** B2: triple meeting — full-screen modal shows the same picker as the timeline; inline preview map still no-op. */
             if (
               variantIdRef.current === 'b2' &&
               i < 3 &&
@@ -3374,9 +3397,9 @@ export function LogisticsMap({
               }
             }
 
-            /** C2 desktop: meeting pins also open the inline meeting dropdown. */
+            /** C2 / D2 desktop: meeting pins open the inline meeting dropdown. */
             if (
-              variantIdRef.current === 'c2' &&
+              isVariantC2OrD2MapLayout(variantIdRef.current) &&
               !mobile &&
               i < 3 &&
               currentStop?.kind === 'meeting' &&
@@ -3934,7 +3957,7 @@ export function LogisticsMap({
 
   fitB2MeetingListOverviewOnMapRef.current = () => {
     if (
-      (variantIdRef.current !== 'b2' && variantIdRef.current !== 'c2') ||
+      (variantIdRef.current !== 'b2' && !isVariantC2OrD2MapLayout(variantIdRef.current)) ||
       !isVariantB2TripleMeeting(variantIdRef.current, stopsRef.current)
     ) {
       return
@@ -3995,7 +4018,7 @@ export function LogisticsMap({
     const map = mapRef.current
     if (!mapReady || !map) return
     if (!isMobile || !mobileSheetOpen || !showB2MeetingModalPanel) return
-    if ((variantId !== 'b2' && variantId !== 'c2') || !isVariantB2TripleMeeting(variantId, stops)) return
+    if (!isVariantTripleMeetingMapPickup(variantId) || !isVariantB2TripleMeeting(variantId, stops)) return
     if (prev == null || b2CommittedPickupId != null) return
 
     map.stop()
@@ -4055,7 +4078,7 @@ export function LogisticsMap({
       if (
         becameReselectPicker &&
         mapReady &&
-        (variantId === 'b2' || variantId === 'c2') &&
+        isVariantTripleMeetingMapPickup(variantId) &&
         isVariantB2TripleMeeting(variantId, stops)
       ) {
         const map = mapRef.current
@@ -4256,7 +4279,7 @@ export function LogisticsMap({
         const selStop = stops[idx]
         /** B2: committed meeting is framed by overview fits — never tight zoom here (avoids zoom-in then overview). */
         if (
-          (variantId === 'b2' || variantId === 'c2') &&
+          isVariantTripleMeetingMapPickup(variantId) &&
           selStop?.kind === 'meeting' &&
           b2CommittedPickupId != null &&
           selStop.id === b2CommittedPickupId
@@ -4453,6 +4476,9 @@ export function LogisticsMap({
         ) : null}
       </div>
 
+      {typeof document !== 'undefined'
+        ? createPortal(
+            <>
       <AnimatePresence>
         {isMobile && mobileSheetOpen ? (
             <motion.div
@@ -4689,6 +4715,10 @@ export function LogisticsMap({
           </>
         ) : null}
       </AnimatePresence>
+            </>,
+            document.body,
+          )
+        : null}
     </>
   )
 }

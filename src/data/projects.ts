@@ -9,7 +9,7 @@ export type Project = {
 }
 
 /** Facilitator variant buttons on `/projects/logistics` (matches historical PDP experiment set). */
-export const LOGISTICS_FACILITATOR_VARIANTS: VariantId[] = ['a', 'a2', 'b', 'b2', 'c2']
+export const LOGISTICS_FACILITATOR_VARIANTS: VariantId[] = ['a', 'a2', 'b', 'b2', 'c2', 'd2']
 
 /** Product highlight study: Variant A PDP only — no A2 / B / B2 (or C) in UI or URL. */
 export const PRODUCT_HIGHLIGHT_FACILITATOR_VARIANTS: VariantId[] = ['a']

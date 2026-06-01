@@ -22,6 +22,10 @@ const FACILITATOR_VARIANT_UI: Record<
     label: 'C2 (multiple meeting)',
     title: 'C2 (multiple meeting — inline under Read more, no accordion)',
   },
+  d2: {
+    label: 'D2 (sandwich)',
+    title: 'D2 (sandwich — mobile: meeting dropdown above map, map between meeting and POIs)',
+  },
 }
 
 /** Pill toggle group — width hugs On/Off (or option) buttons. */
