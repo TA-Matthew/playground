@@ -40,6 +40,10 @@ type Props = {
   onTimelineRowHover?: (stopId: string | null) => void
   /** B2: open MW full-screen map meeting picker from timeline helper (“Show meeting points on map”). */
   onOpenB2MeetingMobileMap?: () => void
+  /** D2 sandwich uses meeting row in LogisticsBlock on MW only; desktop uses inline row like B2. */
+  layoutIsMobile?: boolean
+  /** D2: map pin tap opens timeline dropdown (desktop row or MW sandwich). */
+  openMeetingPickerSignal?: number
 }
 
 /** Reference UI: dark rail + charcoal disc with white pin; meta in muted gray; chevron for expand. */
@@ -55,18 +59,24 @@ function TimelineComponent({
   b2HoverMeetingId = null,
   onTimelineRowHover = noop,
   onOpenB2MeetingMobileMap,
+  layoutIsMobile = false,
+  openMeetingPickerSignal = 0,
 }: Props) {
   const logisticsB = isVariantBLayout(variantId) || isVariantC2OrD2MapLayout(variantId)
   const b2Triple = isVariantB2TripleMeeting(variantId, stops)
   const b2Meetings = b2Triple ? stops.slice(0, 3) : []
-  /** C2: end point stays on the map only — not listed in the itinerary timeline. */
+  /** C2: end in card/map only — not in timeline. B2 / D2: end row in timeline (incl. D2 MW). */
   const listStops = b2Triple
-    ? stops.slice(3).filter((s) => variantId !== 'c2' || s.kind !== 'end')
+    ? stops.slice(3).filter((s) => !(variantId === 'c2' && s.kind === 'end'))
     : stops
+  const showInlineB2MeetingRow =
+    b2Triple &&
+    variantId !== 'c2' &&
+    (variantId === 'b2' || (variantId === 'd2' && !layoutIsMobile))
 
   return (
     <div className="flex flex-col gap-0">
-      {b2Triple && variantId !== 'c2' && variantId !== 'd2' ? (
+      {showInlineB2MeetingRow ? (
         <TimelineB2MeetingRow
           variantId={variantId}
           stops={stops}
@@ -79,6 +89,11 @@ function TimelineComponent({
           onMeetingHover={onB2MeetingHover}
           hoverMeetingId={b2HoverMeetingId}
           onOpenMobileMap={onOpenB2MeetingMobileMap}
+          pickerUI={variantId === 'd2' && !layoutIsMobile ? 'dropdown' : 'list'}
+          staticMeetingPicker={variantId === 'd2' && !layoutIsMobile}
+          openMeetingPickerSignal={
+            variantId === 'd2' ? openMeetingPickerSignal : undefined
+          }
         />
       ) : null}
       {listStops.map((stop, i) => {

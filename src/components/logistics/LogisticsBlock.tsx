@@ -365,6 +365,8 @@ export function LogisticsBlock({
           onB2MeetingHover={isB2orC2orD2 ? handleB2MeetingHover : noopMeetingHover}
           b2HoverMeetingId={isB2orC2orD2 ? b2HoverMeetingId : null}
           onTimelineRowHover={handleTimelineRowHover}
+          layoutIsMobile={isMw}
+          openMeetingPickerSignal={variantId === 'd2' ? openMeetingPickerSignal : 0}
           onOpenB2MeetingMobileMap={
             (variantId === 'b2' || variantId === 'c2') ? bumpOpenB2MeetingMobileMap : undefined
           }

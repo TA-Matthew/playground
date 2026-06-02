@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
-import { B2_MEETING_OPTION_LABELS, type Stop } from '../../data/variants'
+import { B2_MEETING_OPTION_LABELS, type Stop, type VariantId } from '../../data/variants'
 import { BenefitCheckIcon } from '../icons/BenefitCheckIcon'
 
 /** C2 picker trigger — same outer height for “Show meeting points” and selected (border included). */
@@ -26,6 +26,7 @@ type Props = {
   readonly className?: string
   /** Unselected trigger label (default: “View 3 location options”). */
   readonly emptyTriggerLabel?: string
+  readonly variantId?: VariantId
 }
 
 /** C2 / D2 meeting dropdown — “View 3 location options” trigger + floating option list. */
@@ -40,6 +41,7 @@ export function MeetingPointDropdownPicker({
   listboxId = 'meeting-point-options-dropdown',
   className = 'relative mt-3',
   emptyTriggerLabel = 'View 3 location options',
+  variantId,
 }: Props) {
   const [listOpen, setListOpen] = useState(false)
   const pickerRef = useRef<HTMLDivElement>(null)
@@ -136,7 +138,7 @@ export function MeetingPointDropdownPicker({
             onClick={toggleMeetingList}
           >
             <span className="min-w-0 flex-1 truncate">
-              <MeetingAddressConfirmedText line={selectedMeeting.durationLine} label={selectedMeetingLabel} />
+              <MeetingAddressConfirmedText line={selectedMeeting.durationLine} label={selectedMeetingLabel} boldLabel={variantId !== 'd2'} />
             </span>
             {showClearOnListOpen && listOpen ? (
               <button
@@ -264,11 +266,11 @@ function MeetingPickupOptionRow({
   )
 }
 
-function MeetingAddressConfirmedText({ line, label }: { readonly line: string; readonly label?: string }) {
+function MeetingAddressConfirmedText({ line, label, boldLabel = true }: { readonly line: string; readonly label?: string; readonly boldLabel?: boolean }) {
   if (label) {
     return (
       <span className="flex w-full min-w-0 flex-nowrap items-baseline gap-x-1">
-        <span className="shrink-0 font-medium text-black">{label},</span>
+        <span className={`shrink-0 text-black ${boldLabel ? 'font-medium' : 'font-normal'}`}>{label},</span>
         <span className="min-w-0 flex-1 truncate font-normal text-stone-600">{line}</span>
       </span>
     )
@@ -281,7 +283,7 @@ function MeetingAddressConfirmedText({ line, label }: { readonly line: string; r
   const tail = line.slice(comma + 1).trim()
   return (
     <span className="flex w-full min-w-0 flex-nowrap items-baseline gap-x-1">
-      <span className="shrink-0 font-medium text-black">{lead}</span>
+      <span className={`shrink-0 text-black ${boldLabel ? 'font-medium' : 'font-normal'}`}>{lead}</span>
       {tail ? (
         <span className="min-w-0 flex-1 truncate font-normal text-stone-600">{tail}</span>
       ) : null}

@@ -42,6 +42,8 @@ type Props = {
   pickerUI?: 'list' | 'dropdown'
   /** D2 MW: meeting row above map — picker always visible, no row expand/collapse. */
   sandwichMode?: boolean
+  /** D2 desktop: dropdown always visible, no chevron / row expand/collapse. */
+  staticMeetingPicker?: boolean
   /** Map pin tap — open dropdown (parent increments signal). */
   openMeetingPickerSignal?: number
 }
@@ -61,11 +63,13 @@ export function TimelineB2MeetingRow({
   onOpenMobileMap,
   pickerUI = 'list',
   sandwichMode = false,
+  staticMeetingPicker = false,
   openMeetingPickerSignal = 0,
 }: Props) {
   const activeMeeting = pickupId ? meetings.find((m) => m.id === pickupId) : undefined
-  const isOpen = sandwichMode || expandedId === B2_MEETING_TIMELINE_ROW_ID
   const useDropdownPicker = pickerUI === 'dropdown'
+  const rowAlwaysOpen = sandwichMode || staticMeetingPicker
+  const isOpen = rowAlwaysOpen || expandedId === B2_MEETING_TIMELINE_ROW_ID
 
   const [isMw, setIsMw] = useState(false)
   useEffect(() => {
@@ -82,6 +86,7 @@ export function TimelineB2MeetingRow({
    */
   const mwDisableHeaderExpand =
     sandwichMode ||
+    staticMeetingPicker ||
     (isMw &&
       onOpenMobileMap != null &&
       !isOpen &&
@@ -220,14 +225,16 @@ export function TimelineB2MeetingRow({
             className={`min-w-0 flex-1 ${headingSwapKey > 0 ? 'ai-summary-body-fade-in' : ''}`}
           >
             {meetAtHeadingActive ? (
-              <h3 className="text-[18px] font-medium leading-6 text-black">
+              <h3 className="text-[15px] font-medium leading-snug text-stone-900 sm:text-base">
                 <span className="inline-flex max-w-full flex-wrap items-center gap-1.5">
                   <span className="min-w-0">Meet at — {selectedPickupLabel}</span>
-                  <PickupChosenCheckIcon className="h-[18px] w-[18px] shrink-0 text-emerald-600" />
+                  {!sandwichMode ? (
+                    <PickupChosenCheckIcon className="h-[18px] w-[18px] shrink-0 text-emerald-600" />
+                  ) : null}
                 </span>
               </h3>
             ) : (
-              <h3 className="text-[18px] font-medium leading-6 text-black">3 meeting point options</h3>
+              <h3 className="text-[15px] font-medium leading-snug text-stone-900 sm:text-base">3 meeting point options</h3>
             )}
           </div>
         </div>
@@ -243,10 +250,17 @@ export function TimelineB2MeetingRow({
           listboxId="meeting-point-options-timeline-b2"
           className="relative w-full"
           emptyTriggerLabel="Show meeting points"
+          variantId={variantId}
         />
 
         {pickupId != null && activeMeeting ? (
-          <p className="mt-3 text-[15px] leading-snug text-stone-600">{activeMeeting.durationLine}</p>
+          <button
+            type="button"
+            className="mt-3 inline-flex cursor-pointer items-center gap-1 border-0 bg-transparent p-0 text-left text-[15px] font-medium text-stone-900 underline decoration-stone-300 underline-offset-[3px] transition hover:decoration-stone-500"
+          >
+            Open in Google Maps
+            <ChevronRightIcon className="h-4 w-4 shrink-0" aria-hidden />
+          </button>
         ) : null}
 
         {revealPickupDetails ? (
@@ -267,8 +281,8 @@ export function TimelineB2MeetingRow({
           : 'cursor-pointer hover:bg-stone-50/90'
       } ${rowSelected ? 'bg-white' : ''}`}
       tabIndex={mwDisableHeaderExpand ? -1 : 0}
-      aria-expanded={isOpen}
-      aria-controls={`poi-details-${B2_MEETING_TIMELINE_ROW_ID}`}
+      aria-expanded={staticMeetingPicker ? undefined : isOpen}
+      aria-controls={staticMeetingPicker ? undefined : `poi-details-${B2_MEETING_TIMELINE_ROW_ID}`}
       aria-label={rowHeaderHint}
       onClick={() => {
         if (mwDisableHeaderExpand) return
@@ -312,10 +326,14 @@ export function TimelineB2MeetingRow({
               >
                 {meetAtHeadingActive ? (
                   <h3 className="text-[15px] font-medium leading-snug text-stone-900 sm:text-base">
-                    <span className="inline-flex max-w-full flex-wrap items-center gap-1.5">
+                    {staticMeetingPicker ? (
                       <span className="min-w-0">Meet at — {selectedPickupLabel}</span>
-                      <PickupChosenCheckIcon className="h-[18px] w-[18px] shrink-0 text-emerald-600" />
-                    </span>
+                    ) : (
+                      <span className="inline-flex max-w-full flex-wrap items-center gap-1.5">
+                        <span className="min-w-0">Meet at — {selectedPickupLabel}</span>
+                        <PickupChosenCheckIcon className="h-[18px] w-[18px] shrink-0 text-emerald-600" />
+                      </span>
+                    )}
                   </h3>
                 ) : (
                   <h3 className="text-[15px] font-medium leading-snug text-stone-900 sm:text-base">
@@ -323,14 +341,16 @@ export function TimelineB2MeetingRow({
                   </h3>
                 )}
               </div>
-              <span
-                className={`mt-0.5 h-8 w-8 shrink-0 items-center justify-center rounded-md text-stone-400 md:flex ${
-                  mwDisableHeaderExpand || sandwichMode ? 'hidden' : 'flex'
-                }`}
-                aria-hidden
-              >
-                <ChevronRow up={isOpen} />
-              </span>
+              {!staticMeetingPicker ? (
+                <span
+                  className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-stone-400 ${
+                    mwDisableHeaderExpand || sandwichMode ? 'hidden' : ''
+                  }`}
+                  aria-hidden
+                >
+                  <ChevronRow up={isOpen} />
+                </span>
+              ) : null}
             </div>
 
             {isOpen ? (
@@ -346,6 +366,8 @@ export function TimelineB2MeetingRow({
                     showClearOnListOpen={isVariantTripleMeetingCardOnly(variantId)}
                     listboxId="meeting-point-options-timeline-b2"
                     className="relative mt-2"
+                    emptyTriggerLabel="View 3 location options"
+                    variantId={variantId}
                   />
                 ) : null}
                 {showMeetingList ? (
@@ -412,13 +434,13 @@ export function TimelineB2MeetingRow({
                   <p className="mt-1.5 text-[13px] leading-snug text-stone-500">
                     {activeMeeting?.durationLine ?? 'Hover to show on map'}
                   </p>
-                ) : pickupId != null && activeMeeting ? (
+                ) : pickupId != null && activeMeeting && !staticMeetingPicker ? (
                   <p className="mt-1.5 text-[13px] leading-snug text-stone-500">
                     {activeMeeting.durationLine}
                   </p>
                 ) : null}
               </>
-            ) : pickupId != null && activeMeeting ? (
+            ) : pickupId != null && activeMeeting && !staticMeetingPicker ? (
               <p className="mt-1.5 text-[13px] leading-snug text-stone-500">
                 {activeMeeting.durationLine}
               </p>
@@ -455,7 +477,7 @@ export function TimelineB2MeetingRow({
 
           <div
             className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none motion-reduce:duration-0 ${
-              isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+              rowAlwaysOpen || isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
             }`}
           >
             <div className="min-h-0 overflow-hidden">
@@ -468,7 +490,11 @@ export function TimelineB2MeetingRow({
                 onPointerDown={(e) => e.stopPropagation()}
               >
                 <MeetingBody meeting={activeMeeting ?? meetings[0]} pickupChosen={revealPickupDetails} />
-                {isOpen && meetAtHeadingActive && revealPickupDetails && !useDropdownPicker ? (
+                {isOpen &&
+                meetAtHeadingActive &&
+                revealPickupDetails &&
+                !useDropdownPicker &&
+                !staticMeetingPicker ? (
                   <button
                     type="button"
                     className="mt-4 inline-flex w-full items-center gap-1.5 text-left text-[13px] leading-snug text-stone-500 underline decoration-stone-300 underline-offset-4 transition hover:text-stone-600 hover:decoration-stone-400 sm:w-auto"
@@ -562,6 +588,14 @@ function ChevronRow({ up }: { up: boolean }) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </svg>
+  )
+}
+
+function ChevronRightIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }

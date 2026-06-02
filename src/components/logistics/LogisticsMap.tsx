@@ -1,14 +1,12 @@
 import {
   useCallback,
   useEffect,
-  useId,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type ComponentProps,
   type CSSProperties,
-  type MouseEvent,
   type MutableRefObject,
 } from 'react'
 import { createPortal } from 'react-dom'
@@ -1932,8 +1930,6 @@ export function LogisticsMap({
   b2OpenMeetingModalSignal = 0,
   onC2MapMeetingPinClick,
 }: Props) {
-  /** Unique clipPath id for modal GPS icon SVG (avoid duplicate ids if multiple instances). */
-  const mobileModalGpsIconClipId = useId().replace(/:/g, '')
   const wrapRef = useRef<HTMLDivElement>(null)
   const previewMapHostRef = useRef<HTMLDivElement>(null)
   const sheetMapHostRef = useRef<HTMLDivElement>(null)
@@ -4128,43 +4124,6 @@ export function LogisticsMap({
     routeLngLat,
   ])
 
-  /** MW modal: GPS / my-location — fly to device position, or Re-centre itinerary if unavailable. */
-  const handleMobileModalGpsClick = useCallback(
-    (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault()
-      e.stopPropagation()
-      const map = mapRef.current
-      if (!map) return
-      overviewModeRef.current = false
-      setShowRecentre(true)
-      ignoreMoveEndForRecentreUntilRef.current = Math.max(
-        ignoreMoveEndForRecentreUntilRef.current,
-        Date.now() + 200,
-      )
-      const geo = globalThis.navigator?.geolocation
-      if (geo) {
-        geo.getCurrentPosition(
-          (pos) => {
-            const m = mapRef.current
-            if (!m) return
-            m.flyTo({
-              center: [pos.coords.longitude, pos.coords.latitude],
-              zoom: Math.max(m.getZoom(), 15),
-              duration: 700,
-              essential: true,
-            })
-          },
-          () => {
-            runRecentreLikeButton(true)
-          },
-          { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 },
-        )
-      } else {
-        runRecentreLikeButton(true)
-      }
-    },
-    [runRecentreLikeButton],
-  )
 
   useEffect(() => {
     const map = mapRef.current
@@ -4581,79 +4540,6 @@ export function LogisticsMap({
                     />
                   </motion.div>
                 ) : null}
-                <motion.div
-                  layout
-                  className="flex w-full shrink-0 justify-end"
-                  transition={{ layout: mwShelfLayoutTransition }}
-                >
-                  <button
-                    type="button"
-                    disabled={!mapReady}
-                    className={`pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full border border-stone-200/90 bg-white/95 text-stone-900 shadow-md shadow-stone-900/10 ring-1 ring-stone-200/80 backdrop-blur-sm transition hover:bg-stone-50 active:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40 ${MAP_CHROME_ABOVE_MARKERS_CLASS}`}
-                    onClick={handleMobileModalGpsClick}
-                    aria-label="My location"
-                  >
-                    <svg
-                      width={20}
-                      height={20}
-                      viewBox="0 0 20 20"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="shrink-0"
-                      aria-hidden
-                    >
-                      <g clipPath={`url(#${mobileModalGpsIconClipId})`}>
-                        <path
-                          d="M10 15.9466C13.2841 15.9466 15.9464 13.2843 15.9464 10.0001C15.9464 6.71602 13.2841 4.05371 10 4.05371C6.7159 4.05371 4.05359 6.71602 4.05359 10.0001C4.05359 13.2843 6.7159 15.9466 10 15.9466Z"
-                          stroke="currentColor"
-                          strokeWidth={1.5}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M10 10.6608C10.3649 10.6608 10.6607 10.365 10.6607 10.0001C10.6607 9.63517 10.3649 9.33936 10 9.33936C9.63511 9.33936 9.33929 9.63517 9.33929 10.0001C9.33929 10.365 9.63511 10.6608 10 10.6608Z"
-                          stroke="currentColor"
-                          strokeWidth={1.5}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M10 4.0535V1.41064"
-                          stroke="currentColor"
-                          strokeWidth={1.5}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M10 18.5891V15.9463"
-                          stroke="currentColor"
-                          strokeWidth={1.5}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M15.9464 10H18.5893"
-                          stroke="currentColor"
-                          strokeWidth={1.5}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M1.41071 10H4.05356"
-                          stroke="currentColor"
-                          strokeWidth={1.5}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </g>
-                      <defs>
-                        <clipPath id={mobileModalGpsIconClipId}>
-                          <rect width={20} height={20} fill="white" />
-                        </clipPath>
-                      </defs>
-                    </svg>
-                  </button>
-                </motion.div>
               </div>
               </LayoutGroup>
             </div>

@@ -248,12 +248,12 @@ export function ExperiencePage() {
   const meetingAndPickupInlineInItinerary =
     (variant === 'c2' || variant === 'd2') && meetingAndPickupCard != null ? (
       /**
-       * C2 / D2: meeting card sits inline before LogisticsBlock inside the Itinerary section.
-       * D2 desktop only — mobile uses timeline meeting row + dropdown in LogisticsBlock sandwich.
+       * C2: meeting card inline before LogisticsBlock.
+       * D2 uses timeline meeting row (MW sandwich + desktop dropdown) — card hidden.
        */
       <div
         className={`mt-6 max-md:relative max-md:z-[70] max-md:overflow-visible ${
-          variant === 'd2' ? 'max-md:hidden' : ''
+          variant === 'd2' ? 'hidden' : ''
         }`}
       >
         {meetingAndPickupCard}
