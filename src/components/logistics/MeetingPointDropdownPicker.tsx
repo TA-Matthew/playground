@@ -197,6 +197,7 @@ export function MeetingPointDropdownPicker({
                   title={label}
                   address={stop.durationLine}
                   selected={pickupId === stop.id}
+                  showSelectedCheck={variantId === 'd2' && pickupId != null}
                   highlighted={hoverMeetingId === stop.id}
                   onMouseEnter={() => onMeetingHover?.(stop.id)}
                   onFocus={() => onMeetingHover?.(stop.id)}
@@ -224,6 +225,7 @@ function MeetingPickupOptionRow({
   title,
   address,
   selected,
+  showSelectedCheck = false,
   highlighted = false,
   onMouseEnter,
   onFocus,
@@ -234,13 +236,14 @@ function MeetingPickupOptionRow({
   readonly title: string
   readonly address: string
   readonly selected: boolean
+  readonly showSelectedCheck?: boolean
   readonly highlighted?: boolean
   readonly onMouseEnter: () => void
   readonly onFocus: () => void
   readonly onMouseDown: (e: ReactMouseEvent<HTMLButtonElement>) => void
   readonly onClick: () => void
 }) {
-  const activeRow = selected || highlighted
+  const activeRow = showSelectedCheck ? highlighted : selected || highlighted
   return (
     <button
       type="button"
@@ -257,11 +260,14 @@ function MeetingPickupOptionRow({
     >
       <MeetingPickupListPinIcon className="h-5 w-5 shrink-0" />
       <span className="flex min-w-0 flex-1 flex-col gap-0">
-        <span className="w-full text-[16px] font-normal leading-[1.5] text-black">{title}</span>
+        <span className="text-[16px] font-normal leading-[1.5] text-black">{title}</span>
         <span className="w-full text-[14px] font-normal leading-[1.5] text-[#4d4d4d]">
           {address}
         </span>
       </span>
+      {selected && showSelectedCheck ? (
+        <BenefitCheckIcon className="h-5 w-5 shrink-0 self-center" />
+      ) : null}
     </button>
   )
 }

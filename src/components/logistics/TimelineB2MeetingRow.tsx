@@ -318,7 +318,7 @@ export function TimelineB2MeetingRow({
 
       <div className="min-w-0 flex-1 overflow-visible">
         <div className="pr-0 pt-0.5 sm:pr-1">
-          <div className="px-1 py-1">
+          <div className={`px-1 py-1${staticMeetingPicker ? ' flex flex-col gap-4' : ''}`}>
             <div className="flex items-start justify-between gap-3">
               <div
                 key={headingSwapKey}
@@ -365,7 +365,7 @@ export function TimelineB2MeetingRow({
                     openMeetingPickerSignal={openMeetingPickerSignal}
                     showClearOnListOpen={isVariantTripleMeetingCardOnly(variantId)}
                     listboxId="meeting-point-options-timeline-b2"
-                    className="relative mt-2"
+                    className={staticMeetingPicker ? 'relative' : 'relative mt-2'}
                     emptyTriggerLabel="View 3 location options"
                     variantId={variantId}
                   />
@@ -473,40 +473,52 @@ export function TimelineB2MeetingRow({
                 Show meeting points on map
               </p>
             )}
-          </div>
 
-          <div
-            className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none motion-reduce:duration-0 ${
-              rowAlwaysOpen || isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-            }`}
-          >
-            <div className="min-h-0 overflow-hidden">
+            {staticMeetingPicker && revealPickupDetails ? (
               <div
                 id={`poi-details-${B2_MEETING_TIMELINE_ROW_ID}`}
-                className="mt-4 px-1 sm:px-1"
-                aria-hidden={!isOpen}
-                inert={!isOpen}
                 onClick={(e) => e.stopPropagation()}
                 onPointerDown={(e) => e.stopPropagation()}
               >
                 <MeetingBody meeting={activeMeeting ?? meetings[0]} pickupChosen={revealPickupDetails} />
-                {isOpen &&
-                meetAtHeadingActive &&
-                revealPickupDetails &&
-                !useDropdownPicker &&
-                !staticMeetingPicker ? (
-                  <button
-                    type="button"
-                    className="mt-4 inline-flex w-full items-center gap-1.5 text-left text-[13px] leading-snug text-stone-500 underline decoration-stone-300 underline-offset-4 transition hover:text-stone-600 hover:decoration-stone-400 sm:w-auto"
-                    onClick={openPickerAgain}
-                  >
-                    <ChangeMeetingIcon className="h-4 w-4 shrink-0 text-stone-500" />
-                    See other meeting points
-                  </button>
-                ) : null}
+              </div>
+            ) : null}
+          </div>
+
+          {!staticMeetingPicker ? (
+            <div
+              className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none motion-reduce:duration-0 ${
+                rowAlwaysOpen || isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+              }`}
+            >
+              <div className="min-h-0 overflow-hidden">
+                <div
+                  id={`poi-details-${B2_MEETING_TIMELINE_ROW_ID}`}
+                  className="mt-4 px-1 sm:px-1"
+                  aria-hidden={!isOpen}
+                  inert={!isOpen}
+                  onClick={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                >
+                  <MeetingBody meeting={activeMeeting ?? meetings[0]} pickupChosen={revealPickupDetails} />
+                  {isOpen &&
+                  meetAtHeadingActive &&
+                  revealPickupDetails &&
+                  !useDropdownPicker &&
+                  !staticMeetingPicker ? (
+                    <button
+                      type="button"
+                      className="mt-4 inline-flex w-full items-center gap-1.5 text-left text-[13px] leading-snug text-stone-500 underline decoration-stone-300 underline-offset-4 transition hover:text-stone-600 hover:decoration-stone-400 sm:w-auto"
+                      onClick={openPickerAgain}
+                    >
+                      <ChangeMeetingIcon className="h-4 w-4 shrink-0 text-stone-500" />
+                      See other meeting points
+                    </button>
+                  ) : null}
+                </div>
               </div>
             </div>
-          </div>
+          ) : null}
         </div>
       </div>
     </div>
