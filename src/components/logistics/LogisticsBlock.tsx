@@ -100,6 +100,8 @@ type Props = {
   onC2MapMeetingPinClick?: (meetingStopId: string) => void
   /** D2 MW sandwich: parent increments to open timeline dropdown (map pin tap). */
   openMeetingPickerSignal?: number
+  /** Facilitator: hero image on map teardrop pins. */
+  mapPinPhotoThumbnail?: boolean
 }
 
 export function LogisticsBlock({
@@ -116,6 +118,7 @@ export function LogisticsBlock({
   onExposeB2PickupApply,
   onC2MapMeetingPinClick,
   openMeetingPickerSignal = 0,
+  mapPinPhotoThumbnail = true,
 }: Props) {
   const [landingDefaultExpandedStopId] = useState(() =>
     getLandingStateForBlock(stops, variantId, controlledB2PickupId).landingDefaultExpandedStopId,
@@ -408,6 +411,7 @@ export function LogisticsBlock({
             (variantId === 'b2' || variantId === 'c2') ? b2OpenMeetingModalNonce : 0
           }
           onC2MapMeetingPinClick={(variantId === 'c2' || variantId === 'd2') ? onC2MapMeetingPinClick : undefined}
+          mapPinPhotoThumbnail={mapPinPhotoThumbnail}
         />
       </div>
     </div>

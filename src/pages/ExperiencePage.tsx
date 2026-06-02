@@ -54,6 +54,10 @@ import {
 } from '../data/variants'
 import type { ParticipantLinkExtras } from '../uxr/shareLink'
 import {
+  readMapPinPhotoThumbnail,
+  setMapPinPhotoThumbnail,
+} from '../uxr/mapPinPhotoThumbnail'
+import {
   parseHideUi,
   parseHighlightConciseSummary,
   parseHighlightIconStyle,
@@ -69,6 +73,9 @@ export function ExperiencePage() {
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const [unlock, setUnlock] = useState(() => readFacilitatorUnlock())
+  const [mapPinPhotoThumbnail, setMapPinPhotoThumbnailState] = useState(() =>
+    readMapPinPhotoThumbnail(),
+  )
   const [participantLinkModalOpen, setParticipantLinkModalOpen] = useState(false)
   const participantLinkButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -259,6 +266,11 @@ export function ExperiencePage() {
         {meetingAndPickupCard}
       </div>
     ) : null
+
+  const handleMapPinPhotoThumbnailChange = useCallback((enabled: boolean) => {
+    setMapPinPhotoThumbnailState(enabled)
+    setMapPinPhotoThumbnail(enabled)
+  }, [])
 
   const showFacilitatorChrome = useMemo(
     () => shouldShowFacilitatorChrome(hideUi, unlock),
@@ -457,6 +469,14 @@ export function ExperiencePage() {
                   }
                 : undefined
             }
+            mapPinPhotoThumbnailControls={
+              !isProductHighlight
+                ? {
+                    enabled: mapPinPhotoThumbnail,
+                    onEnabledChange: handleMapPinPhotoThumbnailChange,
+                  }
+                : undefined
+            }
           />
         ) : null}
 
@@ -505,6 +525,7 @@ export function ExperiencePage() {
                 routeLngLat={data.routeLngLat}
                 routePolylineLngLat={data.routePolylineLngLat}
                 mapKey={`logistics-${variant}`}
+                mapPinPhotoThumbnail={mapPinPhotoThumbnail}
                 poiPopupContent="image-only"
                 controlledB2PickupId={
                   variant === 'b2'

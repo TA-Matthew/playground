@@ -63,6 +63,11 @@ type Props = {
     topProduct: boolean
     onTopProductChange: (on: boolean) => void
   }
+  /** Logistics map — hero image above teardrop on selected / hovered pins. */
+  mapPinPhotoThumbnailControls?: {
+    enabled: boolean
+    onEnabledChange: (enabled: boolean) => void
+  }
 }
 
 export function FacilitatorBar({
@@ -75,6 +80,7 @@ export function FacilitatorBar({
   highlightIconStyleControls,
   highlightConciseSummaryControls,
   highlightTopProductControls,
+  mapPinPhotoThumbnailControls,
 }: Props) {
   const singleVariant = allowedVariants.length === 1
 
@@ -126,6 +132,40 @@ export function FacilitatorBar({
           </div>
         </div>
       ) : null}
+
+          {mapPinPhotoThumbnailControls ? (
+            <div className={`flex flex-col gap-2 ${singleVariant ? '' : 'mt-5'}`}>
+              <span className="text-[11px] font-medium uppercase tracking-widest text-amber-900/90">
+                Map pin thumbnails
+              </span>
+              <div className={PILL_GROUP_CLASS}>
+                {(
+                  [
+                    { on: true as const, label: 'On' },
+                    { on: false as const, label: 'Off' },
+                  ] as const
+                ).map((opt) => (
+                  <button
+                    key={opt.label}
+                    type="button"
+                    title={
+                      opt.on
+                        ? 'Square photo above teardrop on hover / selection'
+                        : 'Teardrop only — no photo thumbnail'
+                    }
+                    className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                      mapPinPhotoThumbnailControls.enabled === opt.on
+                        ? 'bg-amber-600 text-white shadow-sm'
+                        : 'text-amber-950 hover:bg-amber-50'
+                    }`}
+                    onClick={() => mapPinPhotoThumbnailControls.onEnabledChange(opt.on)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
 
           {highlightLayoutControls ? (
             <div className={`flex w-full flex-col gap-3 ${singleVariant ? '' : 'mt-5'}`}>

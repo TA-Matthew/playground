@@ -511,14 +511,14 @@ function mapB2MeetingMarkerShellClass(): string {
 function isB2DesktopMeetingMapPin(
   stop: Stop | undefined,
   variantId: VariantId,
-  showMapPinPhotoHead: boolean,
+  mapPinHeadSync: boolean,
   isMobileViewport: boolean,
 ): boolean {
   /** Desktop only — MW modal uses the same compact green discs as the inline PDP map. */
   return (
     variantId === 'b2' &&
     stop?.kind === 'meeting' &&
-    showMapPinPhotoHead &&
+    mapPinHeadSync &&
     !isMobileViewport
   )
 }
@@ -545,10 +545,13 @@ function mapMarkerWrapperClass(
   active: boolean,
   poiOrder: number | null,
   overlapCompact: boolean,
-  showMapPinPhotoHead: boolean,
+  mapPinHeadSync: boolean,
+  showPhotoThumbnail: boolean,
   isMobileViewport: boolean,
   discHighlighted: boolean = active,
   mobileSheetOpen: boolean = false,
+  /** Ring color on discs — can differ from `discHighlighted` (e.g. D2 inline showcase keeps white ring). */
+  discRingSelected: boolean = discHighlighted,
 ): string {
   if (
     isD2MobileInlineMeetingPinPassthrough(
@@ -558,20 +561,20 @@ function mapMarkerWrapperClass(
       mobileSheetOpen,
     )
   ) {
-    return `${logisticsRailDiscClass(isVariantBMeetingOrEnd(variantId, stop), discHighlighted)} pointer-events-none cursor-default`
+    return `${logisticsRailDiscClass(isVariantBMeetingOrEnd(variantId, stop), discRingSelected)} pointer-events-none cursor-default`
   }
-  if (isB2DesktopMeetingMapPin(stop, variantId, showMapPinPhotoHead, isMobileViewport)) {
+  if (isB2DesktopMeetingMapPin(stop, variantId, mapPinHeadSync, isMobileViewport)) {
     return mapB2MeetingMarkerShellClass()
   }
   const teardrop = isMapTeardropPin(active, stop, variantId, poiOrder, overlapCompact)
-  const discSelected = teardrop ? active : discHighlighted
+  const discSelected = teardrop ? active : discRingSelected
   if (teardrop) {
     const focusRing =
       isVariantBMeetingOrEnd(variantId, stop)
         ? 'focus-visible:ring-emerald-600'
         : 'focus-visible:ring-black'
     /** Literals keep Tailwind class detection; sizes match `logisticsTeardropMarkup` stack constants. */
-    const minH = showMapPinPhotoHead ? 'min-h-[150px]' : 'min-h-[86px]'
+    const minH = showPhotoThumbnail ? 'min-h-[150px]' : 'min-h-[86px]'
     return `relative flex ${minH} w-20 cursor-pointer items-center justify-center border-0 bg-transparent p-0 shadow-none outline-none ring-0 focus-visible:outline focus-visible:ring-2 focus-visible:ring-offset-0 ${focusRing}`
   }
   if (overlapCompact) {
@@ -640,7 +643,8 @@ function applyMarkerSelectedState(
   poiOrder: number | null,
   overlapCompact: boolean,
   b2CommittedPickupId: string | null,
-  showMapPinPhotoHead: boolean,
+  mapPinHeadSync: boolean,
+  showPhotoThumbnail: boolean,
   isTimelineRowHoverPin = false,
   markerIndex = 0,
   stopCount = 1,
@@ -648,6 +652,7 @@ function applyMarkerSelectedState(
   discHighlighted: boolean = active,
   isMobileViewport = false,
   mobileSheetOpen = false,
+  discRingSelected: boolean = discHighlighted,
 ) {
   /** MapLibre adds `maplibregl-marker` (position:absolute;inset 0) and anchor classes. Replacing
    * `className` wholesale removes them and breaks alignment with the GL route line. */
@@ -675,7 +680,7 @@ function applyMarkerSelectedState(
   /** Avoid replacing identical markup so teardrop CSS animation does not restart on every effect run. */
   const compactTag = overlapCompact ? ':c' : ':f'
   const imgKey = stop?.popupImageSrc ?? ''
-  const photoTag = showMapPinPhotoHead ? '' : ':noph'
+  const photoTag = showPhotoThumbnail ? '' : ':noph'
   const nextHtmlKey = teardrop
     ? stop?.kind === 'passby'
       ? `td:passby:${imgKey}${photoTag}`
@@ -691,11 +696,11 @@ function applyMarkerSelectedState(
     if (teardrop && stop) {
       el.innerHTML = mapSelectedTeardropMarkerHtml(stop, poiOrder, {
         b2ShowCommittedCheck,
-        omitPhotoHead: !showMapPinPhotoHead,
+        omitPhotoHead: !showPhotoThumbnail,
       })
     } else {
       const svg = markerSvgForStop(stop, variantId, poiOrder, overlapCompact, b2CommittedPickupId)
-      if (isB2DesktopMeetingMapPin(stop, variantId, showMapPinPhotoHead, isMobileViewport)) {
+      if (isB2DesktopMeetingMapPin(stop, variantId, mapPinHeadSync, isMobileViewport)) {
         el.innerHTML = `<span class="${logisticsPinButtonClass(true, discHighlighted)}">${svg}</span>`
       } else {
         el.innerHTML = svg
@@ -718,10 +723,12 @@ function applyMarkerSelectedState(
     active,
     poiOrder,
     overlapCompact,
-    showMapPinPhotoHead,
+    mapPinHeadSync,
+    showPhotoThumbnail,
     isMobileViewport,
     discHighlighted,
     mobileSheetOpen,
+    discRingSelected,
   )
   const d2InlineMeetingDecor = isD2MobileInlineMeetingPinPassthrough(
     variantId,
@@ -2015,6 +2022,8 @@ type Props = {
   b2OpenMeetingModalSignal?: number
   /** C2 desktop: meeting pin tap — parent opens the inline meeting dropdown. */
   onC2MapMeetingPinClick?: (meetingStopId: string) => void
+  /** Facilitator: hero image above teardrop on selected / hovered map pins (default on). */
+  mapPinPhotoThumbnail?: boolean
 }
 
 export function LogisticsMap({
@@ -2040,6 +2049,7 @@ export function LogisticsMap({
   expandedStopId = null,
   b2OpenMeetingModalSignal = 0,
   onC2MapMeetingPinClick,
+  mapPinPhotoThumbnail = true,
 }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const previewMapHostRef = useRef<HTMLDivElement>(null)
@@ -2074,6 +2084,8 @@ export function LogisticsMap({
   const userGesturePendingRecentreRef = useRef(false)
 
   const variantIdRef = useRef(variantId)
+  const mapPinPhotoThumbnailRef = useRef(mapPinPhotoThumbnail)
+  mapPinPhotoThumbnailRef.current = mapPinPhotoThumbnail
   const selectedStopIdRef = useRef(selectedStopId)
   const highlightSelectedPinRef = useRef(highlightSelectedPin)
   const lastSelectSourceRef = useRef(lastSelectSource)
@@ -2405,18 +2417,18 @@ export function LogisticsMap({
     const selectionActiveIdx =
       selIdx >= 0 && showMapPinSelected ? selIdx : -1
 
-    /** Desktop + full-screen map modal: square image above teardrop. Mobile inline PDP map: teardrop only. */
-    const showMapPinPhotoHead =
-      !isMobileRef.current || mobileSheetOpenRef.current
+    /** Desktop + full-screen map modal: teardrops follow timeline / selection. Mobile inline PDP: fixed showcase only. */
+    const mapPinHeadSync = !isMobileRef.current || mobileSheetOpenRef.current
+    const showPhotoThumbnail = mapPinHeadSync && mapPinPhotoThumbnailRef.current
 
     /** Inline mobile web map: no screen-space cluster mode — always full-size circle pins (not 18px dots). */
-    const useOverlapCompact = showMapPinPhotoHead
+    const useOverlapCompact = mapPinHeadSync
 
     /**
      * Mobile inline PDP: map pins stay fixed — timeline hover / list selection / B2 preview do not
      * restyle markers. Exception: one “showcase” pin (landing first POI) stays teardrop + does not follow selection.
      */
-    const syncInlineMapPinsWithTimeline = showMapPinPhotoHead
+    const syncInlineMapPinsWithTimeline = mapPinHeadSync
 
     const landingShowcaseIdx = (() => {
       const id = landingDefaultExpandedStopIdRef.current
@@ -2490,18 +2502,29 @@ export function LogisticsMap({
       const isB2Meeting =
         isVariantTripleMeetingMapPickup(vid) && stopAt?.kind === 'meeting'
       const meetingPickerDiscOnly = mapModalMeetingPicker && isB2Meeting
-      /** C2 / D2 MW modal: per-meeting shelf cards — keep compact green discs (same as inline PDP). */
+      /** C2 MW modal: per-meeting shelf cards — keep compact green discs. D2 uses teardrop when selected. */
       const c2MobileMeetingDiscOnly =
-        (vid === 'c2' || vid === 'd2') &&
+        vid === 'c2' &&
         isMobileRef.current &&
         mobileSheetOpenRef.current &&
         isB2Meeting
       /** MW: same compact green discs as inline PDP — never overlap-shrink meeting pins. */
       const mobileB2MeetingDisc =
         isMobileRef.current && isB2Meeting && !meetingPickerDiscOnly && !c2MobileMeetingDiscOnly
+      /** D2 MW inline PDP: landing first POI is a highlighted disc, not teardrop (modal unchanged). */
+      const d2InlineShowcaseDiscOnly =
+        vid === 'd2' &&
+        isMobileRef.current &&
+        !mobileSheetOpenRef.current &&
+        landingShowcaseIdx >= 0 &&
+        i === landingShowcaseIdx
       const teardropActive =
-        active && !meetingPickerDiscOnly && !c2MobileMeetingDiscOnly
+        active &&
+        !meetingPickerDiscOnly &&
+        !c2MobileMeetingDiscOnly &&
+        !d2InlineShowcaseDiscOnly
       const discHighlighted = active
+      const discRingSelected = discHighlighted && !d2InlineShowcaseDiscOnly
       const poiOrder = getPoiOrderForStopIndex(stopsLocal, vid, i)
       const oc = useOverlapCompact ? (overlap[i] ?? false) : false
       const isTimelineRowHoverPin = timelineHoverPinActive
@@ -2520,26 +2543,28 @@ export function LogisticsMap({
         poiOrder,
         ocForMarker,
         b2CommittedPickupIdRef.current,
-        showMapPinPhotoHead,
+        mapPinHeadSync,
+        showPhotoThumbnail,
         isTimelineRowHoverPin,
         i,
         stopsLocal.length,
         discHighlighted,
         isMobileRef.current,
         mobileSheetOpenRef.current,
+        discRingSelected,
       )
       const teardrop = isMapTeardropPin(teardropActive, stopsLocal[i], vid, poiOrder, ocForMarker)
       const collapsed = el.dataset.mapPinHeadCollapsed === '1'
       const b2MeetingFixedShell = isB2DesktopMeetingMapPin(
         stopsLocal[i],
         vid,
-        showMapPinPhotoHead,
+        mapPinHeadSync,
         isMobileRef.current,
       )
       const offY = b2MeetingFixedShell
         ? 0
         : teardrop
-          ? !showMapPinPhotoHead
+          ? !showPhotoThumbnail
             ? MAP_MAP_TEARDROP_ONLY_OFFSET_Y
             : collapsed
               ? MAP_MAP_PIN_COLLAPSED_OFFSET_Y
@@ -2628,7 +2653,7 @@ export function LogisticsMap({
           isB2DesktopMeetingMapPin(
             stopsLocal[hoverIdx],
             vid,
-            showMapPinPhotoHead,
+            mapPinHeadSync,
             isMobileRef.current,
           )
         ) {
@@ -3112,6 +3137,7 @@ export function LogisticsMap({
     showB2MeetingModalPanel,
     mobileB2MeetingPendingId,
     mobileB2MeetingReselectPicker,
+    mapPinPhotoThumbnail,
   ])
 
   useEffect(() => {
@@ -3358,7 +3384,8 @@ export function LogisticsMap({
       markersRef.current = []
       markerElsRef.current = []
 
-      const showMapPinPhotoHeadAtInit = !initialMobile
+      const mapPinHeadSyncAtInit = !initialMobile
+      const showPhotoAtInit = mapPinHeadSyncAtInit && mapPinPhotoThumbnailRef.current
 
       routeLngLat.forEach((coord, i) => {
         const markerEl = document.createElement('button')
@@ -3372,7 +3399,8 @@ export function LogisticsMap({
           false,
           poiOrder,
           false,
-          showMapPinPhotoHeadAtInit,
+          mapPinHeadSyncAtInit,
+          showPhotoAtInit,
           initialMobile,
           false,
           false,
@@ -3387,7 +3415,7 @@ export function LogisticsMap({
         markerEl.innerHTML = isB2DesktopMeetingMapPin(
           stopAtI,
           variantId,
-          showMapPinPhotoHeadAtInit,
+          mapPinHeadSyncAtInit,
           initialMobile,
         )
           ? `<span class="${logisticsPinButtonClass(true, false)}">${initialSvg}</span>`
@@ -3522,8 +3550,8 @@ export function LogisticsMap({
             }
 
             /**
-             * C2 / D2 MW modal: each meeting has its own shelf card — select + show details (no B2 hub / picker).
-             * Skip tight POI zoom so all meeting discs stay in context.
+             * C2 / D2 MW modal: meeting tap — shelf card; overview stays (no tight POI zoom).
+             * C2 keeps green discs; D2 selected meeting renders teardrop via sync (not disc-only).
              */
             if (
               (variantIdRef.current === 'c2' || variantIdRef.current === 'd2') &&
@@ -3604,7 +3632,7 @@ export function LogisticsMap({
             isB2DesktopMeetingMapPin(
               stopAtI,
               variantId,
-              showMapPinPhotoHeadAtInit,
+              mapPinHeadSyncAtInit,
               initialMobile,
             )
               ? 'bottom'
