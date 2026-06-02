@@ -145,9 +145,6 @@ function markerPoiNumberHtml(n: number): string {
   return `<span class="pointer-events-none flex h-[18px] min-w-[18px] items-center justify-center font-medium leading-none tracking-normal text-white tabular-nums" style="font-family:var(--font-sans);font-size:${fs}px;line-height:1" aria-hidden="true">${n}</span>`
 }
 
-/** Quadratic route bulge: control point offset as a fraction of segment length. Higher = deeper arch. */
-const MAP_ROUTE_CURVE_BULGE = 0.4
-
 /** Selected map marker uses the large teardrop when active (POI, pass-by, or variant B meeting/end), unless overlap forces compact. */
 function isMapTeardropPin(
   active: boolean,
@@ -225,59 +222,124 @@ function dashedItineraryLineCoords(
   return [meetingVertex, ...core]
 }
 
+function distLngLat(a: [number, number], b: [number, number]): number {
+  return Math.hypot(b[0] - a[0], b[1] - a[1])
+}
+
+function pushDistinctLngLat(out: [number, number][], p: [number, number]) {
+  const prev = out[out.length - 1]
+  if (!prev || distLngLat(prev, p) > 1e-10) {
+    out.push(p)
+  }
+}
+
+/** Second-derivative M[i] for natural cubic spline (M[0]=M[n]=0). */
+function naturalCubicSecondDerivatives(knots: number[], values: number[]): number[] {
+  const n = knots.length - 1
+  if (n < 1) return [0]
+  if (n === 1) return [0, 0]
+
+  const h: number[] = []
+  for (let i = 0; i < n; i++) {
+    const hi = knots[i + 1] - knots[i]
+    h.push(hi > 1e-14 ? hi : 1e-14)
+  }
+
+  const alpha = new Array<number>(n + 1).fill(0)
+  for (let i = 1; i < n; i++) {
+    alpha[i] =
+      (3 / h[i]) * (values[i + 1] - values[i]) -
+      (3 / h[i - 1]) * (values[i] - values[i - 1])
+  }
+
+  const l = new Array<number>(n + 1).fill(0)
+  const mu = new Array<number>(n + 1).fill(0)
+  const z = new Array<number>(n + 1).fill(0)
+
+  l[0] = 1
+  mu[0] = 0
+  z[0] = 0
+
+  for (let i = 1; i < n; i++) {
+    l[i] = 2 * (knots[i + 1] - knots[i - 1]) - h[i - 1] * mu[i - 1]
+    mu[i] = h[i] / l[i]
+    z[i] = (alpha[i] - h[i - 1] * z[i - 1]) / l[i]
+  }
+
+  l[n] = 1
+  z[n] = 0
+  const M = new Array<number>(n + 1).fill(0)
+
+  for (let j = n - 1; j >= 0; j--) {
+    M[j] = z[j] - mu[j] * M[j + 1]
+  }
+
+  return M
+}
+
+function evalNaturalCubic1D(
+  knots: number[],
+  values: number[],
+  M: number[],
+  tq: number,
+): number {
+  const n = knots.length - 1
+  if (tq <= knots[0]) return values[0]
+  if (tq >= knots[n]) return values[n]
+
+  let i = 0
+  while (i < n - 1 && tq > knots[i + 1]) i++
+
+  const h = knots[i + 1] - knots[i]
+  if (h < 1e-14) return values[i]
+
+  const a = (knots[i + 1] - tq) / h
+  const b = (tq - knots[i]) / h
+  return (
+    a * values[i] +
+    b * values[i + 1] +
+    (((a * a * a - a) * M[i] + (b * b * b - b) * M[i + 1]) * h * h) / 6
+  )
+}
+
 /**
- * Smooth curved path through ordered stops (quadratic Bézier per edge, alternating lateral offset).
- * Renders as a dotted connector on the map similar to illustrated itinerary lines in design.
+ * Natural cubic spline on cumulative chord length — passes through every stop;
+ * C² at interior knots; zero end curvature (natural boundary).
  */
 function buildCurvedRouteLngLat(
   points: [number, number][],
   samplesPerEdge = 22,
-  bulgeFactor = MAP_ROUTE_CURVE_BULGE,
 ): [number, number][] {
   if (points.length < 2) return [...points]
 
-  const pushDistinct = (out: [number, number][], p: [number, number]) => {
-    const prev = out[out.length - 1]
-    if (!prev || Math.hypot(p[0] - prev[0], p[1] - prev[1]) > 1e-10) {
-      out.push(p)
-    }
+  const knots: number[] = [0]
+  for (let i = 1; i < points.length; i++) {
+    knots.push(knots[i - 1] + distLngLat(points[i - 1], points[i]))
   }
 
+  const totalLength = knots[knots.length - 1]
+  if (totalLength < 1e-14) return [...points]
+
+  const lngs = points.map((p) => p[0])
+  const lats = points.map((p) => p[1])
+  const Mlng = naturalCubicSecondDerivatives(knots, lngs)
+  const Mlat = naturalCubicSecondDerivatives(knots, lats)
+
+  const totalSamples = (points.length - 1) * samplesPerEdge
   const out: [number, number][] = []
 
-  for (let i = 0; i < points.length - 1; i++) {
-    const a = points[i]
-    const b = points[i + 1]
-    const dx = b[0] - a[0]
-    const dy = b[1] - a[1]
-    const len = Math.hypot(dx, dy) || 1
-    const nx = -dy / len
-    const ny = dx / len
-    const sign = i % 2 === 0 ? 1 : -1
-    const mid: [number, number] = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
-    const ctrl: [number, number] = [
-      mid[0] + nx * len * bulgeFactor * sign,
-      mid[1] + ny * len * bulgeFactor * sign,
-    ]
-
-    for (let s = 0; s <= samplesPerEdge; s++) {
-      const t = s / samplesPerEdge
-      const omt = 1 - t
-      const lng = omt * omt * a[0] + 2 * omt * t * ctrl[0] + t * t * b[0]
-      const lat = omt * omt * a[1] + 2 * omt * t * ctrl[1] + t * t * b[1]
-      pushDistinct(out, [lng, lat])
-    }
-    // Snap segment end to exact vertex so the line meets HTML markers at setLngLat (no float drift).
-    if (out.length > 0) {
-      const end = out[out.length - 1]
-      end[0] = b[0]
-      end[1] = b[1]
-    }
+  for (let s = 0; s <= totalSamples; s++) {
+    const tq = (s / totalSamples) * totalLength
+    pushDistinctLngLat(out, [
+      evalNaturalCubic1D(knots, lngs, Mlng, tq),
+      evalNaturalCubic1D(knots, lats, Mlat, tq),
+    ])
   }
 
-  if (out.length > 0 && points.length > 0) {
-    out[0][0] = points[0][0]
-    out[0][1] = points[0][1]
+  if (out.length > 0) {
+    out[0] = [points[0][0], points[0][1]]
+    const last = points[points.length - 1]
+    out[out.length - 1] = [last[0], last[1]]
   }
 
   return out
@@ -461,6 +523,21 @@ function isB2DesktopMeetingMapPin(
   )
 }
 
+/** D2 MW inline preview: meeting discs are decorative — map canvas tap opens the full-screen modal. */
+function isD2MobileInlineMeetingPinPassthrough(
+  variantId: VariantId,
+  stop: Stop | undefined,
+  isMobileViewport: boolean,
+  mobileSheetOpen: boolean,
+): boolean {
+  return (
+    variantId === 'd2' &&
+    isMobileViewport &&
+    !mobileSheetOpen &&
+    stop?.kind === 'meeting'
+  )
+}
+
 /** Map-only marker chrome: selected → teardrop stack (photo optional on mobile inline); else disc / compact. */
 function mapMarkerWrapperClass(
   stop: Stop | undefined,
@@ -471,7 +548,18 @@ function mapMarkerWrapperClass(
   showMapPinPhotoHead: boolean,
   isMobileViewport: boolean,
   discHighlighted: boolean = active,
+  mobileSheetOpen: boolean = false,
 ): string {
+  if (
+    isD2MobileInlineMeetingPinPassthrough(
+      variantId,
+      stop,
+      isMobileViewport,
+      mobileSheetOpen,
+    )
+  ) {
+    return `${logisticsRailDiscClass(isVariantBMeetingOrEnd(variantId, stop), discHighlighted)} pointer-events-none cursor-default`
+  }
   if (isB2DesktopMeetingMapPin(stop, variantId, showMapPinPhotoHead, isMobileViewport)) {
     return mapB2MeetingMarkerShellClass()
   }
@@ -559,6 +647,7 @@ function applyMarkerSelectedState(
   /** Disc ring / z-index when MW B2 meeting picker keeps teardrop off (`active` false) but one row is highlighted. */
   discHighlighted: boolean = active,
   isMobileViewport = false,
+  mobileSheetOpen = false,
 ) {
   /** MapLibre adds `maplibregl-marker` (position:absolute;inset 0) and anchor classes. Replacing
    * `className` wholesale removes them and breaks alignment with the GL route line. */
@@ -632,7 +721,29 @@ function applyMarkerSelectedState(
     showMapPinPhotoHead,
     isMobileViewport,
     discHighlighted,
+    mobileSheetOpen,
   )
+  const d2InlineMeetingDecor = isD2MobileInlineMeetingPinPassthrough(
+    variantId,
+    stop,
+    isMobileViewport,
+    mobileSheetOpen,
+  )
+  if (d2InlineMeetingDecor) {
+    el.style.pointerEvents = 'none'
+    el.tabIndex = -1
+    el.setAttribute('aria-hidden', 'true')
+    el.removeAttribute('aria-label')
+  } else {
+    el.style.pointerEvents = ''
+    if (el instanceof HTMLButtonElement) {
+      el.tabIndex = 0
+    }
+    el.removeAttribute('aria-hidden')
+    if (stop?.title) {
+      el.setAttribute('aria-label', `${stop.title} — show on map`)
+    }
+  }
   if (teardrop && el.dataset.mapPinHeadCollapsed === '1') {
     cls += ' logistics-map-marker-head-collapsed'
   }
@@ -2379,9 +2490,12 @@ export function LogisticsMap({
       const isB2Meeting =
         isVariantTripleMeetingMapPickup(vid) && stopAt?.kind === 'meeting'
       const meetingPickerDiscOnly = mapModalMeetingPicker && isB2Meeting
-      /** C2 MW modal: per-meeting shelf cards — keep compact green discs (same as inline PDP). */
+      /** C2 / D2 MW modal: per-meeting shelf cards — keep compact green discs (same as inline PDP). */
       const c2MobileMeetingDiscOnly =
-        vid === 'c2' && isMobileRef.current && mobileSheetOpenRef.current && isB2Meeting
+        (vid === 'c2' || vid === 'd2') &&
+        isMobileRef.current &&
+        mobileSheetOpenRef.current &&
+        isB2Meeting
       /** MW: same compact green discs as inline PDP — never overlap-shrink meeting pins. */
       const mobileB2MeetingDisc =
         isMobileRef.current && isB2Meeting && !meetingPickerDiscOnly && !c2MobileMeetingDiscOnly
@@ -2412,6 +2526,7 @@ export function LogisticsMap({
         stopsLocal.length,
         discHighlighted,
         isMobileRef.current,
+        mobileSheetOpenRef.current,
       )
       const teardrop = isMapTeardropPin(teardropActive, stopsLocal[i], vid, poiOrder, ocForMarker)
       const collapsed = el.dataset.mapPinHeadCollapsed === '1'
@@ -3259,6 +3374,8 @@ export function LogisticsMap({
           false,
           showMapPinPhotoHeadAtInit,
           initialMobile,
+          false,
+          false,
         )
         const b2c = b2CommittedPickupIdRef.current
         const initialB2DiscChk =
@@ -3291,6 +3408,19 @@ export function LogisticsMap({
         )
 
         const stop = stopsRef.current[i]
+        const d2InlineMeetingDecor =
+          isD2MobileInlineMeetingPinPassthrough(
+            variantId,
+            stop,
+            initialMobile,
+            false,
+          )
+        if (d2InlineMeetingDecor) {
+          markerEl.style.pointerEvents = 'none'
+          markerEl.tabIndex = -1
+          markerEl.setAttribute('aria-hidden', 'true')
+          markerEl.removeAttribute('aria-label')
+        }
         if (stop?.kind === 'meeting' && isVariantTripleMeetingMapPickup(variantId)) {
           markerEl.dataset.logisticsMeetingMapPin = '1'
         }
@@ -3319,26 +3449,7 @@ export function LogisticsMap({
               stopsRef.current[1]?.kind === 'meeting' &&
               stopsRef.current[2]?.kind === 'meeting'
 
-            /** D2 MW inline: meeting pin opens sandwich dropdown (not the full-screen map sheet). */
-            if (
-              variantIdRef.current === 'd2' &&
-              mobile &&
-              !sheetOpen &&
-              i < 3 &&
-              currentStop?.kind === 'meeting' &&
-              tripleMeeting
-            ) {
-              onB2MeetingHoverRef.current?.(stop.id)
-              onSelectRef.current(stop.id, 'map')
-              selectedStopIdRef.current = stop.id
-              lastSelectSourceRef.current = 'map'
-              highlightSelectedPinRef.current = true
-              onC2MapMeetingPinClickRef.current?.(stop.id)
-              syncMarkersAppearanceRef.current()
-              return
-            }
-
-            // Mobile inline map: pins only open the sheet (same as tapping the basemap) — no zoom / no selection.
+            /** Mobile inline map: pins only open the sheet (same as tapping the basemap) — no zoom / no selection. */
             if (mobile && !sheetOpen) {
               setMobileSheetOpen(true)
               return
@@ -3411,11 +3522,11 @@ export function LogisticsMap({
             }
 
             /**
-             * C2 MW modal: each meeting has its own shelf card — select + show details (no B2 hub / picker).
+             * C2 / D2 MW modal: each meeting has its own shelf card — select + show details (no B2 hub / picker).
              * Skip tight POI zoom so all meeting discs stay in context.
              */
             if (
-              variantIdRef.current === 'c2' &&
+              (variantIdRef.current === 'c2' || variantIdRef.current === 'd2') &&
               mobile &&
               sheetOpen &&
               tripleMeeting &&
