@@ -104,6 +104,7 @@ export function mapSelectedTeardropMarkerHtml(
         ? wrapMeetingTeardropWithOptionalB2Check(
             mapMeetingSelectedTeardropHtml(),
             options?.b2ShowCommittedCheck === true,
+            options?.variantId,
           )
         : stop.kind === 'end'
           ? mapEndSelectedTeardropHtml()
@@ -145,19 +146,65 @@ export function mapMeetingSelectedTeardropHtml(): string {
   return `<svg class="${TEARDROP_SVG_CLASS}" width="${w}" height="${h}" viewBox="${MAP_POI_TEARDROP_VIEWBOX}" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path fill="${MAP_EMERALD_TEARDROP_FILL}" stroke="#ffffff" stroke-width="${sw}" stroke-linejoin="round" d="${d}"/>${mapMeetingViatorTeardropIconG()}</svg>`
 }
 
+const MAP_MEETING_COMMITTED_CHECK_INNER_SVG =
+  '<svg class="{icon}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+
+function mapMeetingCommittedCheckInnerHtml(iconClass: string): string {
+  return MAP_MEETING_COMMITTED_CHECK_INNER_SVG.replace('{icon}', iconClass)
+}
+
+/** B2 / C2: 14px badge, 9px check. */
+function mapMeetingCommittedCheckBadgeHtml(badgeClass: string, iconClass: string, positionClass: string): string {
+  return `<span class="pointer-events-none ${positionClass} z-10 flex ${badgeClass} items-center justify-center rounded-full bg-white text-emerald-600 shadow-sm ring-1 ring-emerald-600/25" aria-hidden="true">${mapMeetingCommittedCheckInnerHtml(iconClass)}</span>`
+}
+
 /** B2: confirmation badge on committed pickup — **default meeting disc** on map (`absolute inset-0` wrapper). */
 export function mapB2MeetingCommittedCheckBadgeHtml(): string {
-  return `<span class="pointer-events-none absolute right-0 top-0 z-10 flex h-3.5 w-3.5 translate-x-[5px] -translate-y-[5px] items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-emerald-600/25" aria-hidden="true"><svg class="h-[9px] w-[9px] text-emerald-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`
+  return mapMeetingCommittedCheckBadgeHtml(
+    'h-3.5 w-3.5',
+    'h-[9px] w-[9px]',
+    'absolute right-0 top-0 translate-x-[5px] -translate-y-[5px]',
+  )
+}
+
+/** D2: same white-badge styling as B2, slightly larger (16px badge, 10px check). */
+export function mapD2MeetingDiscCommittedCheckBadgeHtml(): string {
+  return mapMeetingCommittedCheckBadgeHtml(
+    'h-4 w-4',
+    'h-[10px] w-[10px]',
+    'absolute right-0 top-0 translate-x-[6px] -translate-y-[6px]',
+  )
 }
 
 /** B2: same badge, softer placement on **meeting teardrop** (down/left vs disc corner push). */
 function mapB2MeetingTeardropCommittedCheckBadgeHtml(): string {
-  return `<span class="pointer-events-none absolute -right-0.5 -top-0.5 z-10 flex h-3.5 w-3.5 -translate-x-1 translate-y-1 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-emerald-600/25" aria-hidden="true"><svg class="h-[9px] w-[9px] text-emerald-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`
+  return mapMeetingCommittedCheckBadgeHtml(
+    'h-3.5 w-3.5',
+    'h-[9px] w-[9px]',
+    'absolute -right-0.5 -top-0.5 -translate-x-1 translate-y-1',
+  )
 }
 
-function wrapMeetingTeardropWithOptionalB2Check(innerSvg: string, showCommittedCheck: boolean): string {
+/** D2: same white-badge styling on meeting teardrop. */
+function mapD2MeetingTeardropCommittedCheckBadgeHtml(): string {
+  return mapMeetingCommittedCheckBadgeHtml(
+    'h-4 w-4',
+    'h-[10px] w-[10px]',
+    'absolute -right-0.5 -top-0.5 -translate-x-1 translate-y-1',
+  )
+}
+
+function wrapMeetingTeardropWithOptionalB2Check(
+  innerSvg: string,
+  showCommittedCheck: boolean,
+  variantId?: VariantId,
+): string {
   if (!showCommittedCheck) return innerSvg
-  return `<span class="relative inline-flex shrink-0 overflow-visible">${innerSvg}${mapB2MeetingTeardropCommittedCheckBadgeHtml()}</span>`
+  const badge =
+    variantId === 'd2'
+      ? mapD2MeetingTeardropCommittedCheckBadgeHtml()
+      : mapB2MeetingTeardropCommittedCheckBadgeHtml()
+  return `<span class="relative inline-flex shrink-0 overflow-visible">${innerSvg}${badge}</span>`
 }
 
 export type MapSelectedTeardropOptions = {
@@ -167,6 +214,7 @@ export type MapSelectedTeardropOptions = {
    * Mobile inline map: teardrop only (no hero image above pin). Full-screen map modal + desktop still pass `false` / omit.
    */
   omitPhotoHead?: boolean
+  variantId?: VariantId
 }
 
 export function mapEndSelectedTeardropHtml(): string {

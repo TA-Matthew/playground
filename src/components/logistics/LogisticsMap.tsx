@@ -46,6 +46,7 @@ import {
   MAP_POI_SELECTED_PIN_OFFSET_Y,
   buildTimelineSelectedTeardropHtml,
   mapB2MeetingCommittedCheckBadgeHtml,
+  mapD2MeetingDiscCommittedCheckBadgeHtml,
   mapSelectedTeardropMarkerHtml,
   itineraryStopUsesTeardropWhenSelected,
 } from './logisticsTeardropMarkup'
@@ -171,7 +172,11 @@ function markerSvgForStop(
       b2CommittedPickupId != null &&
       stop.id === b2CommittedPickupId
     if (showB2DiscCheck) {
-      return `<span class="absolute inset-0 flex items-center justify-center overflow-visible">${MAP_MEETING_VIATOR_SVG}${mapB2MeetingCommittedCheckBadgeHtml()}</span>`
+      const checkBadge =
+        variantId === 'd2'
+          ? mapD2MeetingDiscCommittedCheckBadgeHtml()
+          : mapB2MeetingCommittedCheckBadgeHtml()
+      return `<span class="absolute inset-0 flex items-center justify-center overflow-visible">${MAP_MEETING_VIATOR_SVG}${checkBadge}</span>`
     }
     return MAP_MEETING_VIATOR_SVG
   }
@@ -697,6 +702,7 @@ function applyMarkerSelectedState(
       el.innerHTML = mapSelectedTeardropMarkerHtml(stop, poiOrder, {
         b2ShowCommittedCheck,
         omitPhotoHead: !showPhotoThumbnail,
+        variantId,
       })
     } else {
       const svg = markerSvgForStop(stop, variantId, poiOrder, overlapCompact, b2CommittedPickupId)
