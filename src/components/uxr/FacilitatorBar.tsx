@@ -1,4 +1,4 @@
-import type { RefObject } from 'react'
+import { useEffect, useState, type RefObject } from 'react'
 import type { ProductHighlightIconStyleId } from '../../data/productHighlightIconStyles'
 import type { ProductHighlightBase, ProductHighlightIconRail } from '../../data/productHighlightLayouts'
 import type { VariantId } from '../../data/variants'
@@ -15,7 +15,7 @@ const FACILITATOR_VARIANT_UI: Record<
     label: 'A2 (multiple meeting)',
     title: 'A2 (multiple meeting — pickup card only)',
   },
-  b: { label: 'Variant B' },
+  b: { label: 'Single', title: 'Variant B — single meeting point' },
   b2: { label: 'B2 (multiple meeting)', title: 'B2 (multiple meeting)' },
   c: { label: 'Variant C' },
   c2: {
@@ -23,8 +23,8 @@ const FACILITATOR_VARIANT_UI: Record<
     title: 'C2 (multiple meeting — inline under Read more, no accordion)',
   },
   d2: {
-    label: 'D2 (sandwich)',
-    title: 'D2 (sandwich — mobile: meeting dropdown above map, map between meeting and POIs)',
+    label: 'Multiple',
+    title: 'D2 — multiple meeting points (mobile: meeting dropdown above map, map between meeting and POIs)',
   },
 }
 
@@ -36,8 +36,10 @@ const CONTROL_GROUP_CLASS = 'flex w-fit flex-col gap-2'
 
 type Props = {
   variant: VariantId
-  /** Which variants appear in the facilitator strip (order preserved). */
+  /** Primary variants in the facilitator strip (order preserved). */
   allowedVariants: VariantId[]
+  /** Older variants — second row labeled Archive (order preserved). */
+  archivedVariants?: VariantId[]
   onVariantChange: (v: VariantId) => void
   onOpenParticipantLinkModal: () => void
   participantLinkButtonRef?: RefObject<HTMLButtonElement | null>
@@ -70,9 +72,70 @@ type Props = {
   }
 }
 
+function FacilitatorChevronDown({
+  className,
+  open,
+}: {
+  readonly className?: string
+  readonly open: boolean
+}) {
+  return (
+    <svg
+      className={`shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''} ${className ?? 'h-4 w-4'}`}
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+    >
+      <path
+        d="M6 9l6 6 6-6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function VariantPillGroup({
+  ids,
+  variant,
+  onVariantChange,
+  inactiveClassName = 'text-amber-950 hover:bg-amber-50',
+}: {
+  readonly ids: VariantId[]
+  readonly variant: VariantId
+  readonly onVariantChange: (v: VariantId) => void
+  readonly inactiveClassName?: string
+}) {
+  return (
+    <div className={PILL_GROUP_CLASS}>
+      {ids.map((id) => {
+        const ui = FACILITATOR_VARIANT_UI[id]
+        return (
+          <button
+            key={id}
+            type="button"
+            title={ui.title}
+            className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+              variant === id
+                ? 'bg-amber-600 text-white shadow-sm'
+                : inactiveClassName
+            }`}
+            onClick={() => onVariantChange(id)}
+          >
+            {ui.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 export function FacilitatorBar({
   variant,
   allowedVariants,
+  archivedVariants = [],
   onVariantChange,
   onOpenParticipantLinkModal,
   participantLinkButtonRef,
@@ -82,7 +145,15 @@ export function FacilitatorBar({
   highlightTopProductControls,
   mapPinPhotoThumbnailControls,
 }: Props) {
-  const singleVariant = allowedVariants.length === 1
+  const hasArchive = archivedVariants.length > 0
+  const viewingArchived = hasArchive && archivedVariants.includes(variant)
+  const [archiveOpen, setArchiveOpen] = useState(viewingArchived)
+
+  useEffect(() => {
+    if (viewingArchived) setArchiveOpen(true)
+  }, [viewingArchived])
+
+  const singleVariant = allowedVariants.length === 1 && !hasArchive
 
   const copyButton = (
     <div className="order-2 w-full shrink-0 md:absolute md:right-0 md:top-0 md:order-none md:w-auto">
@@ -108,28 +179,39 @@ export function FacilitatorBar({
           {!singleVariant ? (
         <div className="flex flex-col gap-2">
           <span className="text-[11px] font-medium uppercase tracking-widest text-amber-900/90">
-            UXR — Variations
+            Meeting points
           </span>
-          <div className={PILL_GROUP_CLASS}>
-            {allowedVariants.map((id) => {
-              const ui = FACILITATOR_VARIANT_UI[id]
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  title={ui.title}
-                  className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                    variant === id
-                      ? 'bg-amber-600 text-white shadow-sm'
-                      : 'text-amber-950 hover:bg-amber-50'
-                  }`}
-                  onClick={() => onVariantChange(id)}
-                >
-                  {ui.label}
-                </button>
-              )
-            })}
-          </div>
+          <VariantPillGroup
+            ids={allowedVariants}
+            variant={variant}
+            onVariantChange={onVariantChange}
+          />
+          {hasArchive ? (
+            <>
+              <button
+                type="button"
+                className="inline-flex w-fit items-center gap-2 rounded-lg py-1 pr-0.5 pl-1 text-left text-sm font-medium text-amber-900/85 transition hover:bg-amber-100/50 hover:text-amber-950"
+                aria-expanded={archiveOpen}
+                onClick={() => setArchiveOpen((open) => !open)}
+              >
+                <span>Show archived designs</span>
+                <FacilitatorChevronDown open={archiveOpen} />
+              </button>
+              {viewingArchived && !archiveOpen ? (
+                <span className="text-[12px] text-amber-900/70">
+                  Viewing {FACILITATOR_VARIANT_UI[variant].label} — open archived designs to switch
+                </span>
+              ) : null}
+              {archiveOpen ? (
+                <VariantPillGroup
+                  ids={archivedVariants}
+                  variant={variant}
+                  onVariantChange={onVariantChange}
+                  inactiveClassName="text-amber-900/75 hover:bg-amber-50/80"
+                />
+              ) : null}
+            </>
+          ) : null}
         </div>
       ) : null}
 

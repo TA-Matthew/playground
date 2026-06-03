@@ -18,7 +18,9 @@ import { ParticipantLinkModal } from '../components/uxr/ParticipantLinkModal'
 import { SecretUnlock } from '../components/uxr/SecretUnlock'
 import { ShareLinkGate } from '../components/uxr/ShareLinkGate'
 import {
-  LOGISTICS_FACILITATOR_VARIANTS,
+  LOGISTICS_FACILITATOR_ACTIVE_VARIANTS,
+  LOGISTICS_FACILITATOR_ARCHIVED_VARIANTS,
+  LOGISTICS_DEFAULT_VARIANT,
   PRODUCT_HIGHLIGHT_FACILITATOR_VARIANTS,
   PRODUCT_HIGHLIGHT_PROJECT_PATH,
 } from '../data/projects'
@@ -81,10 +83,15 @@ export function ExperiencePage() {
 
   const isProductHighlight = location.pathname === PRODUCT_HIGHLIGHT_PROJECT_PATH
   const parsedVariant = parseVariant(searchParams)
-  const variant: VariantId = isProductHighlight ? 'a' : parsedVariant
+  const variant: VariantId = isProductHighlight
+    ? 'a'
+    : searchParams.has('variant')
+      ? parsedVariant
+      : LOGISTICS_DEFAULT_VARIANT
   const facilitatorVariants = isProductHighlight
     ? PRODUCT_HIGHLIGHT_FACILITATOR_VARIANTS
-    : LOGISTICS_FACILITATOR_VARIANTS
+    : LOGISTICS_FACILITATOR_ACTIVE_VARIANTS
+  const facilitatorArchivedVariants = isProductHighlight ? [] : LOGISTICS_FACILITATOR_ARCHIVED_VARIANTS
 
   const rawPhLayoutParam = searchParams.get(PRODUCT_HIGHLIGHT_LAYOUT_QUERY)
   const rawPhIconStyleParam = searchParams.get(PRODUCT_HIGHLIGHT_ICON_STYLE_QUERY)
@@ -425,6 +432,7 @@ export function ExperiencePage() {
           <FacilitatorBar
             variant={variant}
             allowedVariants={facilitatorVariants}
+            archivedVariants={facilitatorArchivedVariants}
             onVariantChange={setVariant}
             onOpenParticipantLinkModal={() => setParticipantLinkModalOpen(true)}
             participantLinkButtonRef={participantLinkButtonRef}

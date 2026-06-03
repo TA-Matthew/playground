@@ -8,8 +8,20 @@ export type Project = {
   path: string
 }
 
-/** Facilitator variant buttons on `/projects/logistics` (matches historical PDP experiment set). */
-export const LOGISTICS_FACILITATOR_VARIANTS: VariantId[] = ['a', 'a2', 'b', 'b2', 'c2', 'd2']
+/** Primary logistics variants in the facilitator strip. */
+export const LOGISTICS_FACILITATOR_ACTIVE_VARIANTS: VariantId[] = ['b', 'd2']
+
+/** Older logistics variants — still reachable via facilitator Archive row and `?variant=`. */
+export const LOGISTICS_FACILITATOR_ARCHIVED_VARIANTS: VariantId[] = ['a', 'a2', 'b2', 'c2']
+
+/** All logistics facilitator / share-link variant ids (active + archived). */
+export const LOGISTICS_FACILITATOR_VARIANTS: VariantId[] = [
+  ...LOGISTICS_FACILITATOR_ACTIVE_VARIANTS,
+  ...LOGISTICS_FACILITATOR_ARCHIVED_VARIANTS,
+]
+
+/** Default when `/projects/logistics` has no `variant` query. */
+export const LOGISTICS_DEFAULT_VARIANT: VariantId = 'b'
 
 /** Product highlight study: Variant A PDP only — no A2 / B / B2 (or C) in UI or URL. */
 export const PRODUCT_HIGHLIGHT_FACILITATOR_VARIANTS: VariantId[] = ['a']
