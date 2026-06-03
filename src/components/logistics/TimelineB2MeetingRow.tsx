@@ -254,13 +254,7 @@ export function TimelineB2MeetingRow({
         />
 
         {pickupId != null && activeMeeting ? (
-          <button
-            type="button"
-            className="mt-3 inline-flex cursor-pointer items-center gap-1 border-0 bg-transparent p-0 text-left text-[15px] font-medium text-stone-900 underline decoration-stone-300 underline-offset-[3px] transition hover:decoration-stone-500"
-          >
-            Open in Google Maps
-            <ChevronRightIcon className="h-4 w-4 shrink-0" aria-hidden />
-          </button>
+          <OpenInGoogleMapsLink address={activeMeeting.durationLine} className="mt-4" />
         ) : null}
 
         {revealPickupDetails ? (
@@ -318,99 +312,92 @@ export function TimelineB2MeetingRow({
 
       <div className="min-w-0 flex-1 overflow-visible">
         <div className="pr-0 pt-0.5 sm:pr-1">
-          <div className="flex flex-col gap-4 px-1 py-1">
-            <div className="flex items-start justify-between gap-3">
+          <div className="px-1 py-1">
+            <div
+              className={`flex items-start gap-3 ${staticMeetingPicker ? '' : 'justify-between'}`}
+            >
               <div
                 key={headingSwapKey}
-                className={`flex min-w-0 flex-1 flex-col gap-4 ${headingSwapKey > 0 ? 'ai-summary-body-fade-in' : ''}`}
+                className={`flex min-w-0 flex-1 flex-col ${headingSwapKey > 0 ? 'ai-summary-body-fade-in' : ''}`}
               >
-                {meetAtHeadingActive ? (
-                  <h3 className="text-[15px] font-medium leading-snug text-stone-900 sm:text-base">
-                    {staticMeetingPicker ? (
-                      <span className="min-w-0">Meet at — {selectedPickupLabel}</span>
-                    ) : (
-                      <span className="inline-flex max-w-full flex-wrap items-center gap-1.5">
+                <div className="flex flex-col gap-4">
+                  {meetAtHeadingActive ? (
+                    <h3 className="text-[15px] font-medium leading-snug text-stone-900 sm:text-base">
+                      {staticMeetingPicker ? (
                         <span className="min-w-0">Meet at — {selectedPickupLabel}</span>
-                        <PickupChosenCheckIcon className="h-[18px] w-[18px] shrink-0 text-emerald-600" />
-                      </span>
-                    )}
-                  </h3>
-                ) : (
-                  <h3 className="text-[15px] font-medium leading-snug text-stone-900 sm:text-base">
-                    3 meeting point options
-                  </h3>
-                )}
-                {isOpen &&
-                !useDropdownPicker &&
-                (activeMeeting?.durationLine || !meetAtHeadingActive) ? (
-                  <p className="text-[13px] leading-snug text-stone-500">
-                    {activeMeeting?.durationLine ?? 'Hover to show on map'}
-                  </p>
-                ) : isOpen &&
-                  useDropdownPicker &&
-                  pickupId != null &&
-                  activeMeeting &&
-                  !staticMeetingPicker ? (
-                  <p className="text-[13px] leading-snug text-stone-500">{activeMeeting.durationLine}</p>
-                ) : !isOpen && pickupId != null && activeMeeting && !staticMeetingPicker ? (
-                  <p className="text-[13px] leading-snug text-stone-500">{activeMeeting.durationLine}</p>
-                ) : !isOpen && onOpenMobileMap && !useDropdownPicker ? (
-                  <button
-                    type="button"
-                    className="flex min-h-[44px] w-full cursor-pointer items-center text-left text-[14px] leading-snug text-stone-900 underline decoration-stone-900 underline-offset-[3px] transition hover:decoration-stone-900 md:min-h-0 md:items-start md:text-[13px] md:text-stone-500 md:decoration-stone-300 md:underline-offset-2 md:hover:text-stone-600 md:hover:decoration-stone-400"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      if (isMw) {
-                        onOpenMobileMap()
-                        return
+                      ) : (
+                        <span className="inline-flex max-w-full flex-wrap items-center gap-1.5">
+                          <span className="min-w-0">Meet at — {selectedPickupLabel}</span>
+                          <PickupChosenCheckIcon className="h-[18px] w-[18px] shrink-0 text-emerald-600" />
+                        </span>
+                      )}
+                    </h3>
+                  ) : (
+                    <h3 className="text-[15px] font-medium leading-snug text-stone-900 sm:text-base">
+                      3 meeting point options
+                    </h3>
+                  )}
+                  {isOpen &&
+                  !useDropdownPicker &&
+                  (activeMeeting?.durationLine || !meetAtHeadingActive) ? (
+                    <p className="text-[13px] leading-snug text-stone-500">
+                      {activeMeeting?.durationLine ?? 'Hover to show on map'}
+                    </p>
+                  ) : isOpen &&
+                    useDropdownPicker &&
+                    pickupId != null &&
+                    activeMeeting &&
+                    !staticMeetingPicker ? (
+                    <p className="text-[13px] leading-snug text-stone-500">{activeMeeting.durationLine}</p>
+                  ) : !isOpen && pickupId != null && activeMeeting && !staticMeetingPicker ? (
+                    <p className="text-[13px] leading-snug text-stone-500">{activeMeeting.durationLine}</p>
+                  ) : !isOpen && onOpenMobileMap && !useDropdownPicker ? (
+                    <button
+                      type="button"
+                      className="flex min-h-[44px] w-full cursor-pointer items-center text-left text-[14px] leading-snug text-stone-900 underline decoration-stone-900 underline-offset-[3px] transition hover:decoration-stone-900 md:min-h-0 md:items-start md:text-[13px] md:text-stone-500 md:decoration-stone-300 md:underline-offset-2 md:hover:text-stone-600 md:hover:decoration-stone-400"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        if (isMw) {
+                          onOpenMobileMap()
+                          return
+                        }
+                        if (!isOpen) {
+                          onRowHeaderClick(B2_MEETING_TIMELINE_ROW_ID)
+                        }
+                      }}
+                      aria-label={
+                        isMw
+                          ? 'Open map to show meeting points'
+                          : 'Expand to show meeting points on map'
                       }
-                      if (!isOpen) {
-                        onRowHeaderClick(B2_MEETING_TIMELINE_ROW_ID)
-                      }
-                    }}
-                    aria-label={
-                      isMw
-                        ? 'Open map to show meeting points'
-                        : 'Expand to show meeting points on map'
-                    }
-                  >
-                    Show meeting points on map
-                  </button>
-                ) : !isOpen && !onOpenMobileMap && !useDropdownPicker ? (
-                  <p className="text-[13px] leading-snug text-stone-500">Show meeting points on map</p>
-                ) : null}
-              </div>
-              {!staticMeetingPicker ? (
-                <span
-                  className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-stone-400 ${
-                    mwDisableHeaderExpand || sandwichMode ? 'hidden' : ''
-                  }`}
-                  aria-hidden
-                >
-                  <ChevronRow up={isOpen} />
-                </span>
-              ) : null}
-            </div>
+                    >
+                      Show meeting points on map
+                    </button>
+                  ) : !isOpen && !onOpenMobileMap && !useDropdownPicker ? (
+                    <p className="text-[13px] leading-snug text-stone-500">Show meeting points on map</p>
+                  ) : null}
+                </div>
 
-            {isOpen ? (
-              <>
-                {useDropdownPicker ? (
-                  <MeetingPointDropdownPicker
-                    meetings={meetings}
-                    pickupId={pickupId}
-                    onPickupChange={handleDropdownPickupChange}
-                    onMeetingHover={onMeetingHover}
-                    hoverMeetingId={hoverMeetingId}
-                    openMeetingPickerSignal={openMeetingPickerSignal}
-                    showClearOnListOpen={isVariantTripleMeetingCardOnly(variantId)}
-                    listboxId="meeting-point-options-timeline-b2"
-                    className="relative"
-                    emptyTriggerLabel="View 3 location options"
-                    variantId={variantId}
-                  />
+                {isOpen && useDropdownPicker ? (
+                  <div className="mt-4">
+                    <MeetingPointDropdownPicker
+                      meetings={meetings}
+                      pickupId={pickupId}
+                      onPickupChange={handleDropdownPickupChange}
+                      onMeetingHover={onMeetingHover}
+                      hoverMeetingId={hoverMeetingId}
+                      openMeetingPickerSignal={openMeetingPickerSignal}
+                      showClearOnListOpen={isVariantTripleMeetingCardOnly(variantId)}
+                      listboxId="meeting-point-options-timeline-b2"
+                      className="relative"
+                      emptyTriggerLabel="View 3 location options"
+                      variantId={variantId}
+                    />
+                  </div>
                 ) : null}
-                {showMeetingList ? (
+
+                {isOpen && showMeetingList ? (
                   <div
                     className={`relative mt-2 transition-opacity ease-out motion-reduce:transition-none motion-reduce:duration-0 ${
                       listFadeOut || !listRevealOpacity ? 'opacity-0' : 'opacity-100'
@@ -470,57 +457,99 @@ export function TimelineB2MeetingRow({
                     </ul>
                   </div>
                 ) : null}
-              </>
-            ) : null}
 
-            {staticMeetingPicker && revealPickupDetails ? (
-              <div
-                id={`poi-details-${B2_MEETING_TIMELINE_ROW_ID}`}
-                onClick={(e) => e.stopPropagation()}
-                onPointerDown={(e) => e.stopPropagation()}
-              >
-                <MeetingBody meeting={activeMeeting ?? meetings[0]} pickupChosen={revealPickupDetails} />
+                {staticMeetingPicker && revealPickupDetails && activeMeeting ? (
+                  <OpenInGoogleMapsLink address={activeMeeting.durationLine} className="mt-4" />
+                ) : null}
+
+                {staticMeetingPicker && revealPickupDetails ? (
+                  <div
+                    id={`poi-details-${B2_MEETING_TIMELINE_ROW_ID}`}
+                    className="mt-4"
+                    onClick={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
+                    <MeetingBody meeting={activeMeeting ?? meetings[0]} pickupChosen={revealPickupDetails} />
+                  </div>
+                ) : null}
+
+                {!staticMeetingPicker ? (
+                  <div
+                    className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none motion-reduce:duration-0 ${
+                      rowAlwaysOpen || isOpen ? 'mt-4 grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                    }`}
+                  >
+                    <div className="min-h-0 overflow-hidden">
+                      <div
+                        id={`poi-details-${B2_MEETING_TIMELINE_ROW_ID}`}
+                        aria-hidden={!isOpen}
+                        inert={!isOpen}
+                        onClick={(e) => e.stopPropagation()}
+                        onPointerDown={(e) => e.stopPropagation()}
+                      >
+                        <MeetingBody meeting={activeMeeting ?? meetings[0]} pickupChosen={revealPickupDetails} />
+                        {isOpen &&
+                        meetAtHeadingActive &&
+                        revealPickupDetails &&
+                        !useDropdownPicker &&
+                        !staticMeetingPicker ? (
+                          <button
+                            type="button"
+                            className="mt-4 inline-flex w-full items-center gap-1.5 text-left text-[13px] leading-snug text-stone-500 underline decoration-stone-300 underline-offset-4 transition hover:text-stone-600 hover:decoration-stone-400 sm:w-auto"
+                            onClick={openPickerAgain}
+                          >
+                            <ChangeMeetingIcon className="h-4 w-4 shrink-0 text-stone-500" />
+                            See other meeting points
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
               </div>
-            ) : null}
-          </div>
-
-          {!staticMeetingPicker ? (
-            <div
-              className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none motion-reduce:duration-0 ${
-                rowAlwaysOpen || isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-              }`}
-            >
-              <div className="min-h-0 overflow-hidden">
-                <div
-                  id={`poi-details-${B2_MEETING_TIMELINE_ROW_ID}`}
-                  className="mt-4 px-1 sm:px-1"
-                  aria-hidden={!isOpen}
-                  inert={!isOpen}
-                  onClick={(e) => e.stopPropagation()}
-                  onPointerDown={(e) => e.stopPropagation()}
+              {!staticMeetingPicker ? (
+                <span
+                  className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-stone-400 ${
+                    mwDisableHeaderExpand || sandwichMode ? 'hidden' : ''
+                  }`}
+                  aria-hidden
                 >
-                  <MeetingBody meeting={activeMeeting ?? meetings[0]} pickupChosen={revealPickupDetails} />
-                  {isOpen &&
-                  meetAtHeadingActive &&
-                  revealPickupDetails &&
-                  !useDropdownPicker &&
-                  !staticMeetingPicker ? (
-                    <button
-                      type="button"
-                      className="mt-4 inline-flex w-full items-center gap-1.5 text-left text-[13px] leading-snug text-stone-500 underline decoration-stone-300 underline-offset-4 transition hover:text-stone-600 hover:decoration-stone-400 sm:w-auto"
-                      onClick={openPickerAgain}
-                    >
-                      <ChangeMeetingIcon className="h-4 w-4 shrink-0 text-stone-500" />
-                      See other meeting points
-                    </button>
-                  ) : null}
-                </div>
-              </div>
+                  <ChevronRow up={isOpen} />
+                </span>
+              ) : null}
             </div>
-          ) : null}
+          </div>
         </div>
       </div>
     </div>
+  )
+}
+
+function googleMapsSearchUrl(query: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
+}
+
+function OpenInGoogleMapsLink({
+  address,
+  className = '',
+}: {
+  readonly address: string
+  readonly className?: string
+}) {
+  const line = address.trim()
+  if (!line) return null
+  return (
+    <a
+      href={googleMapsSearchUrl(line)}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`inline-flex cursor-pointer items-center gap-1 text-[15px] font-medium text-stone-900 underline decoration-stone-300 underline-offset-[3px] transition hover:decoration-stone-500 ${className}`.trim()}
+      onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+    >
+      Open in Google Maps
+      <ChevronRightIcon className="h-4 w-4 shrink-0" aria-hidden />
+    </a>
   )
 }
 

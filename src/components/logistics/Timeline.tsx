@@ -191,11 +191,30 @@ function TimelineComponent({
               <div className="pr-0 pt-0.5 sm:pr-1">
                 <div className="px-1 py-1">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex min-w-0 flex-1 flex-col gap-4">
-                      <h3 className="text-[15px] font-medium leading-snug text-stone-900 sm:text-base">
-                        {stop.title}
-                      </h3>
-                      <p className="text-[13px] leading-snug text-stone-500">{stop.durationLine}</p>
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <div className="flex flex-col gap-4">
+                        <h3 className="text-[15px] font-medium leading-snug text-stone-900 sm:text-base">
+                          {stop.title}
+                        </h3>
+                        <p className="text-[13px] leading-snug text-stone-500">{stop.durationLine}</p>
+                      </div>
+                      <div
+                        className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none motion-reduce:duration-0 ${
+                          isOpen ? 'mt-4 grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                        }`}
+                      >
+                        <div className="min-h-0 overflow-hidden">
+                          <div
+                            id={`poi-details-${stop.id}`}
+                            aria-hidden={!isOpen}
+                            inert={!isOpen}
+                            onClick={(e) => e.stopPropagation()}
+                            onPointerDown={(e) => e.stopPropagation()}
+                          >
+                            <TimelineStopDescription text={stop.description} clampLines={3} />
+                          </div>
+                        </div>
+                      </div>
                     </div>
                     <span
                       className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-stone-400"
@@ -203,25 +222,6 @@ function TimelineComponent({
                     >
                       <ChevronRow up={isOpen} />
                     </span>
-                  </div>
-                </div>
-
-                <div
-                  className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none motion-reduce:duration-0 ${
-                    isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-                  }`}
-                >
-                  <div className="min-h-0 overflow-hidden">
-                      <div
-                        id={`poi-details-${stop.id}`}
-                        className="mt-4"
-                        aria-hidden={!isOpen}
-                        inert={!isOpen}
-                        onClick={(e) => e.stopPropagation()}
-                        onPointerDown={(e) => e.stopPropagation()}
-                      >
-                        <TimelineStopDescription text={stop.description} clampLines={3} />
-                      </div>
                   </div>
                 </div>
               </div>
