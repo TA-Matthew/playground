@@ -1136,10 +1136,10 @@ function MobileMapModalStopPanelCard({
 
         <div className="min-w-0 flex-1 pr-0 pt-0.5 sm:pr-1">
           <div className="flex items-start justify-between gap-2 px-1 py-1">
-            <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 flex-1 flex-col gap-4">
               <h3 className="text-[15px] font-medium leading-snug text-stone-900 sm:text-base">{title}</h3>
               {displayStop.durationLine?.trim() ? (
-                <p className="mt-1.5 text-[13px] leading-snug text-stone-500">
+                <p className="text-[13px] leading-snug text-stone-500">
                   {displayStop.durationLine.trim()}
                 </p>
               ) : null}

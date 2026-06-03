@@ -40,7 +40,7 @@ type Props = {
   onTimelineRowHover?: (stopId: string | null) => void
   /** B2: open MW full-screen map meeting picker from timeline helper (“Show meeting points on map”). */
   onOpenB2MeetingMobileMap?: () => void
-  /** D2 sandwich uses meeting row in LogisticsBlock on MW only; desktop uses inline row like B2. */
+  /** B / D2 sandwich: meeting row in LogisticsBlock on MW only; desktop uses inline timeline row. */
   layoutIsMobile?: boolean
   /** D2: map pin tap opens timeline dropdown (desktop row or MW sandwich). */
   openMeetingPickerSignal?: number
@@ -68,7 +68,9 @@ function TimelineComponent({
   /** C2: end in card/map only — not in timeline. B2 / D2: end row in timeline (incl. D2 MW). */
   const listStops = b2Triple
     ? stops.slice(3).filter((s) => !(variantId === 'c2' && s.kind === 'end'))
-    : stops
+    : variantId === 'b' && layoutIsMobile
+      ? stops.filter((s) => s.kind !== 'meeting')
+      : stops
   const showInlineB2MeetingRow =
     b2Triple &&
     variantId !== 'c2' &&
@@ -189,9 +191,12 @@ function TimelineComponent({
               <div className="pr-0 pt-0.5 sm:pr-1">
                 <div className="px-1 py-1">
                   <div className="flex items-start justify-between gap-3">
-                    <h3 className="text-[15px] font-medium leading-snug text-stone-900 sm:text-base">
-                      {stop.title}
-                    </h3>
+                    <div className="flex min-w-0 flex-1 flex-col gap-4">
+                      <h3 className="text-[15px] font-medium leading-snug text-stone-900 sm:text-base">
+                        {stop.title}
+                      </h3>
+                      <p className="text-[13px] leading-snug text-stone-500">{stop.durationLine}</p>
+                    </div>
                     <span
                       className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-stone-400"
                       aria-hidden
@@ -199,7 +204,6 @@ function TimelineComponent({
                       <ChevronRow up={isOpen} />
                     </span>
                   </div>
-                  <p className="mt-1.5 text-[13px] leading-snug text-stone-500">{stop.durationLine}</p>
                 </div>
 
                 <div

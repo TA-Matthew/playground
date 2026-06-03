@@ -318,11 +318,11 @@ export function TimelineB2MeetingRow({
 
       <div className="min-w-0 flex-1 overflow-visible">
         <div className="pr-0 pt-0.5 sm:pr-1">
-          <div className={`px-1 py-1${staticMeetingPicker ? ' flex flex-col gap-4' : ''}`}>
+          <div className="flex flex-col gap-4 px-1 py-1">
             <div className="flex items-start justify-between gap-3">
               <div
                 key={headingSwapKey}
-                className={`min-w-0 flex-1 ${headingSwapKey > 0 ? 'ai-summary-body-fade-in' : ''}`}
+                className={`flex min-w-0 flex-1 flex-col gap-4 ${headingSwapKey > 0 ? 'ai-summary-body-fade-in' : ''}`}
               >
                 {meetAtHeadingActive ? (
                   <h3 className="text-[15px] font-medium leading-snug text-stone-900 sm:text-base">
@@ -340,6 +340,46 @@ export function TimelineB2MeetingRow({
                     3 meeting point options
                   </h3>
                 )}
+                {isOpen &&
+                !useDropdownPicker &&
+                (activeMeeting?.durationLine || !meetAtHeadingActive) ? (
+                  <p className="text-[13px] leading-snug text-stone-500">
+                    {activeMeeting?.durationLine ?? 'Hover to show on map'}
+                  </p>
+                ) : isOpen &&
+                  useDropdownPicker &&
+                  pickupId != null &&
+                  activeMeeting &&
+                  !staticMeetingPicker ? (
+                  <p className="text-[13px] leading-snug text-stone-500">{activeMeeting.durationLine}</p>
+                ) : !isOpen && pickupId != null && activeMeeting && !staticMeetingPicker ? (
+                  <p className="text-[13px] leading-snug text-stone-500">{activeMeeting.durationLine}</p>
+                ) : !isOpen && onOpenMobileMap && !useDropdownPicker ? (
+                  <button
+                    type="button"
+                    className="flex min-h-[44px] w-full cursor-pointer items-center text-left text-[14px] leading-snug text-stone-900 underline decoration-stone-900 underline-offset-[3px] transition hover:decoration-stone-900 md:min-h-0 md:items-start md:text-[13px] md:text-stone-500 md:decoration-stone-300 md:underline-offset-2 md:hover:text-stone-600 md:hover:decoration-stone-400"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      if (isMw) {
+                        onOpenMobileMap()
+                        return
+                      }
+                      if (!isOpen) {
+                        onRowHeaderClick(B2_MEETING_TIMELINE_ROW_ID)
+                      }
+                    }}
+                    aria-label={
+                      isMw
+                        ? 'Open map to show meeting points'
+                        : 'Expand to show meeting points on map'
+                    }
+                  >
+                    Show meeting points on map
+                  </button>
+                ) : !isOpen && !onOpenMobileMap && !useDropdownPicker ? (
+                  <p className="text-[13px] leading-snug text-stone-500">Show meeting points on map</p>
+                ) : null}
               </div>
               {!staticMeetingPicker ? (
                 <span
@@ -365,7 +405,7 @@ export function TimelineB2MeetingRow({
                     openMeetingPickerSignal={openMeetingPickerSignal}
                     showClearOnListOpen={isVariantTripleMeetingCardOnly(variantId)}
                     listboxId="meeting-point-options-timeline-b2"
-                    className={staticMeetingPicker ? 'relative' : 'relative mt-2'}
+                    className="relative"
                     emptyTriggerLabel="View 3 location options"
                     variantId={variantId}
                   />
@@ -430,49 +470,8 @@ export function TimelineB2MeetingRow({
                     </ul>
                   </div>
                 ) : null}
-                {!useDropdownPicker ? (
-                  <p className="mt-1.5 text-[13px] leading-snug text-stone-500">
-                    {activeMeeting?.durationLine ?? 'Hover to show on map'}
-                  </p>
-                ) : pickupId != null && activeMeeting && !staticMeetingPicker ? (
-                  <p className="mt-1.5 text-[13px] leading-snug text-stone-500">
-                    {activeMeeting.durationLine}
-                  </p>
-                ) : null}
               </>
-            ) : pickupId != null && activeMeeting && !staticMeetingPicker ? (
-              <p className="mt-1.5 text-[13px] leading-snug text-stone-500">
-                {activeMeeting.durationLine}
-              </p>
-            ) : onOpenMobileMap && !useDropdownPicker ? (
-              <button
-                type="button"
-                className="mt-1.5 flex min-h-[44px] w-full cursor-pointer items-center text-left text-[14px] leading-snug text-stone-900 underline decoration-stone-900 underline-offset-[3px] transition hover:decoration-stone-900 md:min-h-0 md:items-start md:text-[13px] md:text-stone-500 md:decoration-stone-300 md:underline-offset-2 md:hover:text-stone-600 md:hover:decoration-stone-400"
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  if (isMw) {
-                    onOpenMobileMap()
-                    return
-                  }
-                  /** Desktop: MW modal doesn’t exist — expand this row so the inline meeting list appears (don’t rely on event bubbling). */
-                  if (!isOpen) {
-                    onRowHeaderClick(B2_MEETING_TIMELINE_ROW_ID)
-                  }
-                }}
-                aria-label={
-                  isMw
-                    ? 'Open map to show meeting points'
-                    : 'Expand to show meeting points on map'
-                }
-              >
-                Show meeting points on map
-              </button>
-            ) : (
-              <p className="mt-1.5 text-[13px] leading-snug text-stone-500">
-                Show meeting points on map
-              </p>
-            )}
+            ) : null}
 
             {staticMeetingPicker && revealPickupDetails ? (
               <div

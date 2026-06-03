@@ -156,7 +156,7 @@ export function MobileMapModalB2MeetingPanel({
       <div className="min-w-0 flex-1 pr-0 pt-0.5 sm:pr-1">
         <div className="px-1 py-1">
           <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 flex-1 flex-col gap-4">
               {!showPickerList && meetAtHeadingActive ? (
                 <h3 className="text-[15px] font-medium leading-snug text-stone-900 sm:text-base">
                   <span className="inline-flex max-w-full flex-wrap items-center gap-1.5">
@@ -170,10 +170,10 @@ export function MobileMapModalB2MeetingPanel({
                 </h3>
               )}
               {showPickerList ? (
-                <p className="mt-1.5 text-[13px] leading-snug text-stone-500">Tap a meeting point to read more</p>
+                <p className="text-[13px] leading-snug text-stone-500">Tap a meeting point to read more</p>
               ) : activeMeeting?.durationLine?.trim() ? (
                 <p
-                  className="mt-1.5 min-w-0 truncate text-[13px] leading-snug text-stone-500"
+                  className="min-w-0 truncate text-[13px] leading-snug text-stone-500"
                   title={activeMeeting.durationLine.trim()}
                 >
                   {activeMeeting.durationLine.trim()}

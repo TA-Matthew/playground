@@ -155,7 +155,7 @@ function mapMeetingCommittedCheckInnerHtml(iconClass: string): string {
 
 /** B2 / C2: 14px badge, 9px check. */
 function mapMeetingCommittedCheckBadgeHtml(badgeClass: string, iconClass: string, positionClass: string): string {
-  return `<span class="pointer-events-none ${positionClass} z-10 flex ${badgeClass} items-center justify-center rounded-full bg-white text-emerald-600 shadow-sm ring-1 ring-emerald-600/25" aria-hidden="true">${mapMeetingCommittedCheckInnerHtml(iconClass)}</span>`
+  return `<span class="pointer-events-none ${positionClass} z-10 flex ${badgeClass} items-center justify-center rounded-full bg-white text-emerald-600 shadow-sm ring-1 ring-emerald-600" aria-hidden="true">${mapMeetingCommittedCheckInnerHtml(iconClass)}</span>`
 }
 
 /** B2: confirmation badge on committed pickup — **default meeting disc** on map (`absolute inset-0` wrapper). */

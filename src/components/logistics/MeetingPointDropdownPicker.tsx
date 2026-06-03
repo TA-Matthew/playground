@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import { B2_MEETING_OPTION_LABELS, type Stop, type VariantId } from '../../data/variants'
-import { BenefitCheckIcon } from '../icons/BenefitCheckIcon'
+import { MeetingCommittedCheckBadge } from './MeetingCommittedCheckBadge'
 
 /** C2 picker trigger — same outer height for “Show meeting points” and selected (border included). */
 export const C2_PICKER_TRIGGER_HEIGHT_CLASS = 'box-border h-[48px]'
@@ -156,7 +156,7 @@ export function MeetingPointDropdownPicker({
                 <ClearSelectionIcon className="h-4 w-4 shrink-0" />
               </button>
             ) : (
-              <BenefitCheckIcon className="h-5 w-5 shrink-0" />
+              <MeetingCommittedCheckBadge size={variantId === 'd2' ? 'sm' : 'md'} />
             )}
           </button>
         ) : (
@@ -266,7 +266,7 @@ function MeetingPickupOptionRow({
         </span>
       </span>
       {selected && showSelectedCheck ? (
-        <BenefitCheckIcon className="h-5 w-5 shrink-0 self-center" />
+        <MeetingCommittedCheckBadge className="self-center" size="sm" />
       ) : null}
     </button>
   )

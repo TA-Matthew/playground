@@ -10,6 +10,7 @@ import {
 import { LogisticsMap } from './LogisticsMap'
 import { Timeline, type SelectSource } from './Timeline'
 import { TimelineB2MeetingRow } from './TimelineB2MeetingRow'
+import { TimelineBSandwichMeetingRow } from './TimelineBSandwichMeetingRow'
 
 /** Match `LogisticsMap` mobile layout — used to avoid list scroll when interacting with the map. */
 const MOBILE_MAP_MAX_WIDTH_PX = 768
@@ -328,12 +329,15 @@ export function LogisticsBlock({
   const isB2orC2orD2 = variantId === 'b2' || variantId === 'c2' || variantId === 'd2'
   const isD2 = isVariantD2Sandwich(variantId)
   const isD2SandwichMw = isD2 && isMw
+  const isBSandwichMw = variantId === 'b' && isMw
+  const isSandwichMw = isD2SandwichMw || isBSandwichMw
   const b2Meetings = isVariantB2TripleMeeting(variantId, stops) ? stops.slice(0, 3) : []
+  const bMeetingStop = variantId === 'b' ? stops.find((s) => s.kind === 'meeting') : undefined
 
   return (
     <div
       className={`mt-8 flex flex-col md:grid md:grid-cols-[minmax(0,1fr)_minmax(280px,1fr)] md:items-start md:gap-6 ${
-        isD2 ? 'max-md:gap-0' : 'gap-2'
+        isSandwichMw ? 'max-md:gap-0' : 'gap-2'
       }`}
     >
       {isD2SandwichMw ? (
@@ -355,8 +359,19 @@ export function LogisticsBlock({
           />
         </div>
       ) : null}
+      {isBSandwichMw && bMeetingStop ? (
+        <div className="relative z-20 order-0 min-w-0 overflow-visible">
+          <TimelineBSandwichMeetingRow
+            stop={bMeetingStop}
+            selectedStopId={selectedStopId}
+            expandedId={expandedId}
+            onRowHeaderClick={handleRowHeaderClick}
+            onTimelineRowHover={handleTimelineRowHover}
+          />
+        </div>
+      ) : null}
       {/* Mobile: map first, then timeline; md+: timeline (left) | map (right) */}
-      <div className={`order-2 min-w-0 md:order-1 ${isD2 ? 'max-md:mt-2' : ''}`}>
+      <div className={`order-2 min-w-0 md:order-1 ${isSandwichMw ? 'max-md:mt-2' : ''}`}>
         <Timeline
           variantId={variantId}
           stops={stops}
@@ -377,8 +392,8 @@ export function LogisticsBlock({
       </div>
       <div
         className={`order-1 min-h-0 min-w-0 w-full md:order-2 md:sticky md:top-8 md:z-[1] md:self-start ${
-          isD2 ? 'max-md:mt-6' : ''
-        } ${isD2SandwichMw ? 'relative z-[1]' : ''}`}
+          isSandwichMw ? 'max-md:mt-6' : ''
+        } ${isSandwichMw ? 'relative z-[1]' : ''}`}
       >
         <LogisticsMap
           variantId={variantId}
