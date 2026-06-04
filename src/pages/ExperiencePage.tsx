@@ -60,6 +60,10 @@ import {
   setMapPinPhotoThumbnail,
 } from '../uxr/mapPinPhotoThumbnail'
 import {
+  readBookAheadMobile,
+  setBookAheadMobile,
+} from '../uxr/bookAheadMobile'
+import {
   parseHideUi,
   parseHighlightConciseSummary,
   parseHighlightIconStyle,
@@ -78,6 +82,7 @@ export function ExperiencePage() {
   const [mapPinPhotoThumbnail, setMapPinPhotoThumbnailState] = useState(() =>
     readMapPinPhotoThumbnail(),
   )
+  const [bookAheadMobile, setBookAheadMobileState] = useState(() => readBookAheadMobile())
   const [participantLinkModalOpen, setParticipantLinkModalOpen] = useState(false)
   const participantLinkButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -277,6 +282,11 @@ export function ExperiencePage() {
   const handleMapPinPhotoThumbnailChange = useCallback((enabled: boolean) => {
     setMapPinPhotoThumbnailState(enabled)
     setMapPinPhotoThumbnail(enabled)
+  }, [])
+
+  const handleBookAheadMobileChange = useCallback((enabled: boolean) => {
+    setBookAheadMobileState(enabled)
+    setBookAheadMobile(enabled)
   }, [])
 
   const showFacilitatorChrome = useMemo(
@@ -485,6 +495,14 @@ export function ExperiencePage() {
                   }
                 : undefined
             }
+            bookAheadMobileControls={
+              isProductHighlight
+                ? {
+                    enabled: bookAheadMobile,
+                    onEnabledChange: handleBookAheadMobileChange,
+                  }
+                : undefined
+            }
           />
         ) : null}
 
@@ -512,6 +530,7 @@ export function ExperiencePage() {
               productHighlightIconStyleId={isProductHighlight ? highlightIconStyleId : null}
               productHighlightConciseSummary={isProductHighlight ? highlightConciseSummary : null}
               productHighlightTopProduct={isProductHighlight ? highlightTopProduct : null}
+              hideBookAheadMobile={!bookAheadMobile}
             />
             {!isVariantBLayout(variant) && meetingAndPickupAccordion}
 

@@ -12,9 +12,11 @@ type Props = {
   booking: BookingContent
   /** Mobile PDP inline: strip outer booking card border/padding; book-ahead row keeps its border. */
   embedded?: boolean
+  /** Facilitator-only: hide the book-ahead row on mobile (only applied when embedded). */
+  hideBookAheadMobile?: boolean
 }
 
-export function BookingSidebar({ booking, embedded }: Props) {
+export function BookingSidebar({ booking, embedded, hideBookAheadMobile }: Props) {
   const shellCard = embedded
     ? 'bg-transparent p-0'
     : `rounded-[12px] border ${CARD_BORDER} bg-white p-6`
@@ -105,6 +107,7 @@ export function BookingSidebar({ booking, embedded }: Props) {
         </div>
       </div>
 
+      {embedded && hideBookAheadMobile ? null : (
       <div
         className={`flex items-start gap-4 self-stretch rounded-[12px] border ${CARD_BORDER} bg-white px-4 py-2`}
       >
@@ -125,6 +128,7 @@ export function BookingSidebar({ booking, embedded }: Props) {
           </p>
         </div>
       </div>
+      )}
     </div>
   )
 }

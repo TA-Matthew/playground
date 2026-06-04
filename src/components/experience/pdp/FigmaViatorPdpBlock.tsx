@@ -21,6 +21,8 @@ type Props = {
   productHighlightIconStyleId?: ProductHighlightIconStyleId | null
   productHighlightConciseSummary?: boolean | null
   productHighlightTopProduct?: boolean | null
+  /** Facilitator-only: hide the book-ahead row on mobile. */
+  hideBookAheadMobile?: boolean
 }
 
 /**
@@ -35,6 +37,7 @@ export function FigmaViatorPdpBlock({
   productHighlightIconStyleId,
   productHighlightConciseSummary,
   productHighlightTopProduct,
+  hideBookAheadMobile,
 }: Props) {
   const l = viatorListing
   const layoutOpts =
@@ -64,7 +67,7 @@ export function FigmaViatorPdpBlock({
         <div className="flex flex-col gap-6">
           <PdpViatorHeroGallery />
           <div className="lg:hidden">
-            <BookingSidebar booking={booking} embedded />
+            <BookingSidebar booking={booking} embedded hideBookAheadMobile={hideBookAheadMobile} />
           </div>
           {groupHighlightsWithViatorRail && productHighlights && viatorIconRail ? (
             <div className="flex flex-col gap-8">

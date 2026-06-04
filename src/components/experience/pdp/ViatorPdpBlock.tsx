@@ -13,6 +13,8 @@ export type ViatorPdpBlockProps = {
   productHighlightIconStyleId?: ProductHighlightIconStyleId | null
   productHighlightConciseSummary?: boolean | null
   productHighlightTopProduct?: boolean | null
+  /** Facilitator-only: hide the book-ahead row on mobile. */
+  hideBookAheadMobile?: boolean
 }
 
 export function ViatorPdpBlock({
@@ -21,6 +23,7 @@ export function ViatorPdpBlock({
   productHighlightIconStyleId,
   productHighlightConciseSummary,
   productHighlightTopProduct,
+  hideBookAheadMobile,
 }: ViatorPdpBlockProps) {
   return (
     <FigmaViatorPdpBlock
@@ -29,6 +32,7 @@ export function ViatorPdpBlock({
       productHighlightIconStyleId={productHighlightIconStyleId}
       productHighlightConciseSummary={productHighlightConciseSummary}
       productHighlightTopProduct={productHighlightTopProduct}
+      hideBookAheadMobile={hideBookAheadMobile}
     />
   )
 }

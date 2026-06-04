@@ -70,6 +70,11 @@ type Props = {
     enabled: boolean
     onEnabledChange: (enabled: boolean) => void
   }
+  /** Show/hide the book-ahead label on mobile. */
+  bookAheadMobileControls?: {
+    enabled: boolean
+    onEnabledChange: (enabled: boolean) => void
+  }
 }
 
 function FacilitatorChevronDown({
@@ -144,6 +149,7 @@ export function FacilitatorBar({
   highlightConciseSummaryControls,
   highlightTopProductControls,
   mapPinPhotoThumbnailControls,
+  bookAheadMobileControls,
 }: Props) {
   const hasArchive = archivedVariants.length > 0
   const viewingArchived = hasArchive && archivedVariants.includes(variant)
@@ -377,6 +383,32 @@ export function FacilitatorBar({
                           : 'text-amber-950 hover:bg-amber-50'
                       }`}
                       onClick={() => highlightConciseSummaryControls.onConciseSummaryChange(opt.on)}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            {bookAheadMobileControls ? (
+              <div className={CONTROL_GROUP_CLASS}>
+                <span className="text-[11px] font-medium text-amber-900/80">Book-ahead (mobile)</span>
+                <div className={PILL_GROUP_CLASS}>
+                  {(
+                    [
+                      { on: true as const, label: 'On' },
+                      { on: false as const, label: 'Off' },
+                    ] as const
+                  ).map((opt) => (
+                    <button
+                      key={opt.label}
+                      type="button"
+                      className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
+                        bookAheadMobileControls.enabled === opt.on
+                          ? 'bg-amber-600 text-white shadow-sm'
+                          : 'text-amber-950 hover:bg-amber-50'
+                      }`}
+                      onClick={() => bookAheadMobileControls.onEnabledChange(opt.on)}
                     >
                       {opt.label}
                     </button>

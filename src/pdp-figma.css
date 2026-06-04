@@ -35,10 +35,17 @@
     font-family: var(--font-sans);
     font-style: normal;
     font-weight: 500;
-    font-size: 16px;
-    line-height: 24px;
+    font-size: 14px;
+    line-height: 150%;
     letter-spacing: 0.05px;
     color: var(--pdp-ink, #000);
+  }
+
+  @media (min-width: 768px) {
+    .pdp-figma .pdp-highlight-title {
+      font-size: 16px;
+      line-height: 24px;
+    }
   }
 
   .pdp-figma .pdp-highlight-subtext {
@@ -46,10 +53,17 @@
     font-family: var(--font-sans);
     font-style: normal;
     font-weight: 400;
-    font-size: 14px;
-    line-height: 20px;
+    font-size: 13px;
+    line-height: 150%;
     letter-spacing: 0.05px;
     color: var(--pdp-body, #333);
+  }
+
+  @media (min-width: 768px) {
+    .pdp-figma .pdp-highlight-subtext {
+      font-size: 14px;
+      line-height: 20px;
+    }
   }
 
   /** Overview / tour summary — global/body (#tour.summary) */
