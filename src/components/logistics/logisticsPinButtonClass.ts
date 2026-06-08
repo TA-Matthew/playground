@@ -19,10 +19,10 @@ const LOGISTICS_PASSBY_RAIL_DISPLAY_BASE =
 export function logisticsPinButtonClass(greenRail: boolean, selected: boolean): string {
   let ring = 'ring-white'
   if (selected) {
-    ring = greenRail ? 'ring-emerald-800' : 'ring-black'
+    ring = greenRail ? 'ring-[#006952]' : 'ring-black'
   }
   if (greenRail) {
-    return `${LOGISTICS_PIN_BUTTON_BASE} bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-600 ${ring}`
+    return `${LOGISTICS_PIN_BUTTON_BASE} bg-[#00AD86] hover:bg-[#008C6D] focus-visible:ring-[#00AD86] ${ring}`
   }
   return `${LOGISTICS_PIN_BUTTON_BASE} bg-[#333333] hover:bg-neutral-800 focus-visible:ring-black ${ring}`
 }
@@ -49,10 +49,10 @@ export function logisticsPassbyRailDiscClass(selected: boolean): string {
 export function logisticsRailDiscClass(greenRail: boolean, selected: boolean): string {
   let ring = 'ring-white'
   if (selected) {
-    ring = greenRail ? 'ring-emerald-800' : 'ring-black'
+    ring = greenRail ? 'ring-[#006952]' : 'ring-black'
   }
   if (greenRail) {
-    return `${LOGISTICS_PIN_RAIL_DISPLAY_BASE} bg-emerald-600 ${ring}`
+    return `${LOGISTICS_PIN_RAIL_DISPLAY_BASE} bg-[#00AD86] ${ring}`
   }
   return `${LOGISTICS_PIN_RAIL_DISPLAY_BASE} bg-[#333333] ${ring}`
 }
@@ -61,7 +61,7 @@ export function logisticsRailDiscClass(greenRail: boolean, selected: boolean): s
 export function logisticsCompactGreenPinButtonClass(selected: boolean): string {
   let ring = 'ring-white'
   if (selected) {
-    ring = 'ring-emerald-800'
+    ring = 'ring-[#006952]'
   }
-  return `${LOGISTICS_PASSBY_PIN_BUTTON_BASE} bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-600 ${ring}`
+  return `${LOGISTICS_PASSBY_PIN_BUTTON_BASE} bg-[#00AD86] hover:bg-[#008C6D] focus-visible:ring-[#00AD86] ${ring}`
 }

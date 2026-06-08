@@ -211,6 +211,7 @@ function TimelineComponent({
                             onClick={(e) => e.stopPropagation()}
                             onPointerDown={(e) => e.stopPropagation()}
                           >
+                            {isOpen && stop.kind === 'meeting' && <OpenInGoogleMapsLink address={stop.title} className="mb-3 block" />}
                             <TimelineStopDescription text={stop.description} clampLines={3} />
                           </div>
                         </div>
@@ -731,6 +732,42 @@ function ChevronTiny({ down }: { down: boolean }) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </svg>
+  )
+}
+
+function googleMapsSearchUrl(query: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
+}
+
+function OpenInGoogleMapsLink({
+  address,
+  className = '',
+}: {
+  readonly address: string
+  readonly className?: string
+}) {
+  const line = address.trim()
+  if (!line) return null
+  return (
+    <a
+      href={googleMapsSearchUrl(line)}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`inline-flex cursor-pointer items-center gap-1 text-[15px] font-medium text-stone-900 underline decoration-stone-300 underline-offset-[3px] transition hover:decoration-stone-500 ${className}`.trim()}
+      onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+    >
+      Open in Google Maps
+      <ChevronRightIcon className="h-4 w-4 shrink-0" aria-hidden />
+    </a>
+  )
+}
+
+function ChevronRightIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }

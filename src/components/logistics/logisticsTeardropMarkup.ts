@@ -52,8 +52,8 @@ export const MAP_POI_TEARDROP_VIEWBOX = `-4 -4 35 44`
 export const MAP_POI_TEARDROP_PATH_D =
   'M27,13.5 C27,19.074644 20.250001,27.000002 14.75,34.500002 C14.016665,35.500004 12.983335,35.500004 12.25,34.500002 C6.7499993,27.000002 0,19.222562 0,13.5 C0,6.0441559 6.0441559,0 13.5,0 C20.955844,0 27,6.0441559 27,13.5 Z'
 
-/** Tailwind `emerald-600` — matches green rail / disc markers */
-export const MAP_EMERALD_TEARDROP_FILL = '#059669'
+/** Custom green (#00AD86) — matches green rail / disc markers */
+export const MAP_EMERALD_TEARDROP_FILL = '#00AD86'
 
 /**
  * Viator mark scale inside the meeting teardrop: same on-screen size as the rail
@@ -155,7 +155,7 @@ function mapMeetingCommittedCheckInnerHtml(iconClass: string): string {
 
 /** B2 / C2: 14px badge, 9px check. */
 function mapMeetingCommittedCheckBadgeHtml(badgeClass: string, iconClass: string, positionClass: string): string {
-  return `<span class="pointer-events-none ${positionClass} z-10 flex ${badgeClass} items-center justify-center rounded-full bg-white text-emerald-600 shadow-sm ring-1 ring-emerald-600" aria-hidden="true">${mapMeetingCommittedCheckInnerHtml(iconClass)}</span>`
+  return `<span class="pointer-events-none ${positionClass} z-10 flex ${badgeClass} items-center justify-center rounded-full bg-white text-[#00AD86] shadow-sm ring-1 ring-[#00AD86]" aria-hidden="true">${mapMeetingCommittedCheckInnerHtml(iconClass)}</span>`
 }
 
 /** B2: confirmation badge on committed pickup — **default meeting disc** on map (`absolute inset-0` wrapper). */
