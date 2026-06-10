@@ -5,6 +5,8 @@ export type VariantId = 'a' | 'a2' | 'b' | 'b2' | 'c' | 'c2' | 'd2'
 export interface Stop {
   id: string
   title: string
+  /** Short place name shown on the map pin label (overrides title for meeting stops). */
+  placeName?: string
   durationLine: string
   /** Full POI description (may be truncated in UI with Read more) */
   description: string
@@ -34,6 +36,8 @@ export interface BookingContent {
 /** Shared meeting / end copy for the `MeetingAndPickupCard` (placement in `ExperiencePage` is variant-specific). */
 export type MeetingAndPickupContent = {
   meeting: {
+    /** Short display name shown on the map pin label (e.g. “Via Plauto, Prati North”). */
+    placeName: string
     address: string
     directions: string
     /** Used for “Open in Google Maps” search query */
@@ -222,6 +226,7 @@ const STOP_B_MEETING: Stop = {
   id: 'b-meeting',
   kind: 'meeting',
   title: 'Meeting point',
+  placeName: 'Via Plauto',
   durationLine: 'Via Plauto, 17, 00193 Roma RM, Italy',
   popupImageSrc: MEETING_VIA_PLAUTO_IMAGE_SRC,
   popupImageAlt: MEETING_VIA_PLAUTO_IMAGE_ALT,
@@ -256,6 +261,7 @@ const B2_MEETING_STOPS: Stop[] = [
     id: 'b2-meeting-a',
     kind: 'meeting',
     title: 'Meeting point',
+    placeName: 'Prati North',
     durationLine: 'Piazza del Risorgimento, 00192 Roma RM, Italy',
     popupImageSrc: MEETING_RISORGIMENTO_IMAGE_SRC,
     popupImageAlt: MEETING_RISORGIMENTO_IMAGE_ALT,
@@ -266,6 +272,7 @@ const B2_MEETING_STOPS: Stop[] = [
     id: 'b2-meeting-b',
     kind: 'meeting',
     title: 'Meeting point',
+    placeName: 'Ottaviano',
     durationLine: 'Via Ottaviano, 00192 Roma RM, Italy',
     popupImageSrc: MEETING_OTTAVIANO_IMAGE_SRC,
     popupImageAlt: MEETING_OTTAVIANO_IMAGE_ALT,
@@ -276,6 +283,7 @@ const B2_MEETING_STOPS: Stop[] = [
     id: 'b2-meeting-c',
     kind: 'meeting',
     title: 'Meeting point',
+    placeName: 'Via Plauto',
     durationLine: 'Via Plauto, 17, 00193 Roma RM, Italy',
     popupImageSrc: MEETING_VIA_PLAUTO_IMAGE_SRC,
     popupImageAlt: MEETING_VIA_PLAUTO_IMAGE_ALT,
@@ -299,6 +307,7 @@ const ROUTE_POLYLINE_B2_CORE: [number, number][] = [...VATICAN_ROUTE_B, END_LNG_
 
 const MEETING_AND_PICKUP_A: MeetingAndPickupContent = {
   meeting: {
+    placeName: 'Via Plauto',
     address: 'Via Plauto, 17, 00193 Roma RM, Italy',
     directions:
       "The meeting point is located in Borgo Pio, near St. Peter's square. The exact address is Via Plauto 17/A. IMPORTANT: Please check your booking for the start time of the Vatican ENGLISH tour. Arrive 20 minutes before at the meeting point (Via Plauto 17A) for check-in. Thank you!",

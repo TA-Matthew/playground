@@ -27,6 +27,7 @@ import {
   MW_SHELF_DESC_TRANSITION_MS,
   mwShelfLayoutTransition,
   TimelineStopDescription,
+  OpenInGoogleMapsLink,
   type SelectSource,
 } from './Timeline'
 import { getPoiOrderForStopIndex } from './poiOrder'
@@ -139,6 +140,12 @@ function computeOverlapCompactByIndex(
  * charcoal disc (avoids flex/grid subpixel drift with MapLibre’s marker `transform`).
  */
 const MAP_PASSBY_DOT_HTML = `<svg class="pointer-events-none block h-[18px] w-[18px] shrink-0" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><circle cx="9" cy="9" r="2.5" fill="#fff"/></svg>`
+
+/** POI name label shown on desktop — opacity driven by JS class toggle so transitions always animate. */
+function mapPinLabelHtml(title: string): string {
+  const escaped = title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+  return `<span data-pin-label-wrap class="pointer-events-none absolute left-1/2 top-[calc(100%+4px)] -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-150 [will-change:opacity] hidden md:block" aria-hidden="true"><span data-pin-label class="block max-w-[110px] truncate rounded-full border border-stone-200 bg-white px-2 py-0.5 text-center text-[14px] font-normal leading-5 tracking-[0.05px] text-black shadow-[0px_2px_4px_0px_rgba(2,44,69,0.25)]" style="font-family:var(--Typeface-Font-Brand,Aeonik)">${escaped}</span></span>`
+}
 
 /** White number on POI marker disc (same slot as former pin icon). */
 function markerPoiNumberHtml(n: number): string {
@@ -580,7 +587,7 @@ function mapMarkerWrapperClass(
         : 'focus-visible:ring-black'
     /** Literals keep Tailwind class detection; sizes match `logisticsTeardropMarkup` stack constants. */
     const minH = showPhotoThumbnail ? 'min-h-[150px]' : 'min-h-[86px]'
-    return `relative flex ${minH} w-20 cursor-pointer items-center justify-center border-0 bg-transparent p-0 shadow-none outline-none ring-0 focus-visible:outline focus-visible:ring-2 focus-visible:ring-offset-0 ${focusRing}`
+    return `group relative flex ${minH} w-20 cursor-pointer items-center justify-center overflow-visible border-0 bg-transparent p-0 shadow-none outline-none ring-0 focus-visible:outline focus-visible:ring-2 focus-visible:ring-offset-0 ${focusRing}`
   }
   if (overlapCompact) {
     if (isVariantBMeetingOrEnd(variantId, stop)) {
@@ -658,6 +665,10 @@ function applyMarkerSelectedState(
   isMobileViewport = false,
   mobileSheetOpen = false,
   discRingSelected: boolean = discHighlighted,
+  /** True only when this pin is the user-selected stop — keeps the label pinned visible (not timeline/hover active). */
+  labelSelected = false,
+  /** Override label text (e.g. meeting address instead of stop title). */
+  labelTitle?: string,
 ) {
   /** MapLibre adds `maplibregl-marker` (position:absolute;inset 0) and anchor classes. Replacing
    * `className` wholesale removes them and breaks alignment with the GL route line. */
@@ -699,20 +710,40 @@ function applyMarkerSelectedState(
   if (prevHtmlKey !== nextHtmlKey) {
     delete el.dataset.mapPinHeadCollapsed
     if (teardrop && stop) {
+      const title = labelTitle ?? stop.title
+      const label = title ? mapPinLabelHtml(title) : ''
       el.innerHTML = mapSelectedTeardropMarkerHtml(stop, poiOrder, {
         b2ShowCommittedCheck,
         omitPhotoHead: !showPhotoThumbnail,
         variantId,
-      })
+      }) + label
     } else {
       const svg = markerSvgForStop(stop, variantId, poiOrder, overlapCompact, b2CommittedPickupId)
+      const title = labelTitle ?? stop?.title
+      const label = title ? mapPinLabelHtml(title) : ''
       if (isB2DesktopMeetingMapPin(stop, variantId, mapPinHeadSync, isMobileViewport)) {
-        el.innerHTML = `<span class="${logisticsPinButtonClass(true, discHighlighted)}">${svg}</span>`
+        el.innerHTML = `<span class="${logisticsPinButtonClass(true, discHighlighted)}">${svg}${label}</span>`
       } else {
-        el.innerHTML = svg
+        el.innerHTML = `${svg}${label}`
       }
     }
     el.setAttribute('data-marker-html-key', nextHtmlKey)
+    // innerHTML was replaced — defer the class toggle so the browser paints
+    // opacity-0 first, giving the CSS transition a starting point to animate from.
+    if (labelSelected) {
+      requestAnimationFrame(() => {
+        const lw = el.querySelector<HTMLElement>('[data-pin-label-wrap]')
+        if (lw) lw.classList.add('!opacity-100')
+      })
+    }
+  } else {
+    if (labelTitle) {
+      const labelEl = el.querySelector<HTMLElement>('[data-pin-label]')
+      if (labelEl) labelEl.textContent = labelTitle
+    }
+    // Key unchanged — DOM element persists, transition fires immediately
+    const labelWrap = el.querySelector<HTMLElement>('[data-pin-label-wrap]')
+    if (labelWrap) labelWrap.classList.toggle('!opacity-100', labelSelected)
   }
 
   if (!active || !teardrop) {
@@ -1159,6 +1190,11 @@ function MobileMapModalStopPanelCard({
               </button>
             ) : null}
           </div>
+          {meeting && displayStop.placeName ? (
+            <div className="mt-2 px-1" onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+              <OpenInGoogleMapsLink address={displayStop.placeName} />
+            </div>
+          ) : null}
           {desc ? (
             <div className="mt-4 px-1" onClick={(e) => e.stopPropagation()}>
               <TimelineStopDescription
@@ -2030,6 +2066,8 @@ type Props = {
   onC2MapMeetingPinClick?: (meetingStopId: string) => void
   /** Facilitator: hero image above teardrop on selected / hovered map pins (default on). */
   mapPinPhotoThumbnail?: boolean
+  /** Meeting point address — shown as the pin label for meeting-kind stops instead of the stop title. */
+  meetingAddress?: string
 }
 
 export function LogisticsMap({
@@ -2056,6 +2094,7 @@ export function LogisticsMap({
   b2OpenMeetingModalSignal = 0,
   onC2MapMeetingPinClick,
   mapPinPhotoThumbnail = true,
+  meetingAddress,
 }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const previewMapHostRef = useRef<HTMLDivElement>(null)
@@ -2082,6 +2121,8 @@ export function LogisticsMap({
   /** >0 while `fitRouteOverview` is animating the camera — suppresses mistaking that for user zoom in `zoomend`. */
   const programmaticOverviewCameraDepthRef = useRef(0)
   const routeCoordsRef = useRef(routeLngLat)
+  const meetingAddressRef = useRef(meetingAddress)
+  meetingAddressRef.current = meetingAddress
   /** After initial overview has settled — before this, `moveend` is ignored for “Re-centre” visibility. */
   const trackRecentreHintRef = useRef(false)
   /** Ignore `moveend` until this time (ms) so programmatic `fitBounds` does not reveal Re-centre. */
@@ -2135,6 +2176,7 @@ export function LogisticsMap({
   const [mobileModalB2MeetingPanelOpen, setMobileModalB2MeetingPanelOpen] = useState(false)
   const setMobileModalB2MeetingPanelOpenRef = useRef(setMobileModalB2MeetingPanelOpen)
   setMobileModalB2MeetingPanelOpenRef.current = setMobileModalB2MeetingPanelOpen
+
   /** Map modal: highlighted meeting for map preview; cleared after list tap commits pickup. */
   const [mobileB2MeetingPendingId, setMobileB2MeetingPendingId] = useState<string | null>(null)
   const mobileB2MeetingPendingIdRef = useRef(mobileB2MeetingPendingId)
@@ -2541,10 +2583,14 @@ export function LogisticsMap({
           : teardropActive
             ? false
             : oc
+      const stopAt_ = stopsLocal[i]
+      const labelTitle = stopAt_?.kind === 'meeting'
+        ? (stopAt_.placeName ?? meetingAddressRef.current ?? stopAt_.title)
+        : stopAt_?.title
       applyMarkerSelectedState(
         el,
         teardropActive,
-        stopsLocal[i],
+        stopAt_,
         vid,
         poiOrder,
         ocForMarker,
@@ -2558,6 +2604,8 @@ export function LogisticsMap({
         isMobileRef.current,
         mobileSheetOpenRef.current,
         discRingSelected,
+        selectedPinActive || timelineHoverPinActive || b2MeetingHoverPinActive,
+        labelTitle,
       )
       const teardrop = isMapTeardropPin(teardropActive, stopsLocal[i], vid, poiOrder, ocForMarker)
       const collapsed = el.dataset.mapPinHeadCollapsed === '1'
@@ -3418,14 +3466,18 @@ export function LogisticsMap({
           b2c != null &&
           stopAtI.id === b2c
         const initialSvg = markerSvgForStop(stopAtI, variantId, poiOrder, false, b2c)
+        const initialLabelTitle = stopAtI?.kind === 'meeting'
+          ? (stopAtI.placeName ?? meetingAddressRef.current ?? stopAtI.title)
+          : stopAtI?.title
+        const initialLabel = initialLabelTitle ? mapPinLabelHtml(initialLabelTitle) : ''
         markerEl.innerHTML = isB2DesktopMeetingMapPin(
           stopAtI,
           variantId,
           mapPinHeadSyncAtInit,
           initialMobile,
         )
-          ? `<span class="${logisticsPinButtonClass(true, false)}">${initialSvg}</span>`
-          : initialSvg
+          ? `<span class="${logisticsPinButtonClass(true, false)}">${initialSvg}${initialLabel}</span>`
+          : `${initialSvg}${initialLabel}`
         markerEl.setAttribute(
           'data-marker-html-key',
           `pl:${variantId}:${stopAtI?.id ?? ''}:${poiOrder ?? ''}:f${initialB2DiscChk ? ':b2chk' : ''}`,

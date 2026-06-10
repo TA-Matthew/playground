@@ -553,6 +553,7 @@ export function ExperiencePage() {
                 routePolylineLngLat={data.routePolylineLngLat}
                 mapKey={`logistics-${variant}`}
                 mapPinPhotoThumbnail={mapPinPhotoThumbnail}
+                meetingAddress={data.meetingAndPickup?.meeting.placeName}
                 poiPopupContent="image-only"
                 controlledB2PickupId={
                   variant === 'b2'

@@ -196,7 +196,16 @@ function TimelineComponent({
                         <h3 className="text-[15px] font-medium leading-snug text-stone-900 sm:text-base">
                           {stop.title}
                         </h3>
-                        <p className="text-[13px] leading-snug text-stone-500">{stop.durationLine}</p>
+                        <p className="text-[13px] leading-snug text-stone-500">
+                          {stop.placeName ? (
+                            <>
+                              <span className="font-medium">{stop.placeName}</span>
+                              {`, ${stop.durationLine}`}
+                            </>
+                          ) : (
+                            stop.durationLine
+                          )}
+                        </p>
                       </div>
                       <div
                         className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none motion-reduce:duration-0 ${
@@ -211,7 +220,9 @@ function TimelineComponent({
                             onClick={(e) => e.stopPropagation()}
                             onPointerDown={(e) => e.stopPropagation()}
                           >
-                            {isOpen && stop.kind === 'meeting' && <OpenInGoogleMapsLink address={stop.title} className="mb-3 block" />}
+                            {isOpen && stop.kind === 'meeting' && (
+                              <OpenInGoogleMapsLink address={stop.durationLine} className="mb-3 block" />
+                            )}
                             <TimelineStopDescription text={stop.description} clampLines={3} />
                           </div>
                         </div>
@@ -740,7 +751,7 @@ function googleMapsSearchUrl(query: string): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
 }
 
-function OpenInGoogleMapsLink({
+export function OpenInGoogleMapsLink({
   address,
   className = '',
 }: {

@@ -103,6 +103,8 @@ type Props = {
   openMeetingPickerSignal?: number
   /** Facilitator: hero image on map teardrop pins. */
   mapPinPhotoThumbnail?: boolean
+  /** Meeting point address — forwarded to LogisticsMap for meeting-kind pin labels. */
+  meetingAddress?: string
 }
 
 export function LogisticsBlock({
@@ -120,6 +122,7 @@ export function LogisticsBlock({
   onC2MapMeetingPinClick,
   openMeetingPickerSignal = 0,
   mapPinPhotoThumbnail = true,
+  meetingAddress,
 }: Props) {
   const [landingDefaultExpandedStopId] = useState(() =>
     getLandingStateForBlock(stops, variantId, controlledB2PickupId).landingDefaultExpandedStopId,
@@ -203,11 +206,16 @@ export function LogisticsBlock({
     setTimelineHoverStopId(null)
   }, [variantId])
 
+  const lastPickupCommitAtRef = useRef(0)
+  const PICKUP_HOVER_COOLDOWN_MS = 700
+
   const handleTimelineRowHover = useCallback((id: string | null) => {
+    if (id !== null && Date.now() - lastPickupCommitAtRef.current < PICKUP_HOVER_COOLDOWN_MS) return
     setTimelineHoverStopId(id)
   }, [])
 
   const handleB2PickupChange = useCallback((id: string | null) => {
+    if (id !== null) lastPickupCommitAtRef.current = Date.now()
     setB2PickupId(id)
     setB2HoverMeetingId(null)
     if (id != null) {
@@ -427,6 +435,7 @@ export function LogisticsBlock({
           }
           onC2MapMeetingPinClick={(variantId === 'c2' || variantId === 'd2') ? onC2MapMeetingPinClick : undefined}
           mapPinPhotoThumbnail={mapPinPhotoThumbnail}
+          meetingAddress={meetingAddress}
         />
       </div>
     </div>

@@ -1,5 +1,5 @@
 const LOGISTICS_PIN_BUTTON_BASE =
-  'relative z-10 box-border flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full p-1 ring-4 transition-[box-shadow,filter] focus-visible:outline focus-visible:ring-2 focus-visible:ring-offset-0'
+  'group relative z-10 box-border flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center overflow-visible rounded-full p-1 ring-4 transition-[box-shadow,filter] focus-visible:outline focus-visible:ring-2 focus-visible:ring-offset-0'
 
 /** Timeline rail discs only — visuals match numbered pins without hover/focus (row expands/collapses instead). */
 const LOGISTICS_PIN_RAIL_DISPLAY_BASE =

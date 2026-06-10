@@ -1,7 +1,7 @@
 import type { Stop } from '../../data/variants'
 import { buildTimelineSelectedTeardropHtml } from './logisticsTeardropMarkup'
 import { logisticsRailDiscClass } from './logisticsPinButtonClass'
-import { TimelineStopDescription } from './Timeline'
+import { OpenInGoogleMapsLink, TimelineStopDescription } from './Timeline'
 import { viatorMeetingMarkSvgHtml } from './viatorMeetingMark'
 
 type Props = {
@@ -70,7 +70,16 @@ export function TimelineBSandwichMeetingRow({
                   <h3 className="text-[15px] font-medium leading-snug text-stone-900 sm:text-base">
                     {stop.title}
                   </h3>
-                  <p className="text-[13px] leading-snug text-stone-500">{stop.durationLine}</p>
+                  <p className="text-[13px] leading-snug text-stone-500">
+                    {stop.placeName ? (
+                      <>
+                        <span className="font-medium">{stop.placeName}</span>
+                        {`, ${stop.durationLine}`}
+                      </>
+                    ) : (
+                      stop.durationLine
+                    )}
+                  </p>
                 </span>
                 <span
                   className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-stone-400"
@@ -90,6 +99,9 @@ export function TimelineBSandwichMeetingRow({
                     aria-hidden={!isOpen}
                     inert={!isOpen}
                   >
+                    {isOpen ? (
+                      <OpenInGoogleMapsLink address={stop.durationLine} className="mb-3 block" />
+                    ) : null}
                     <TimelineStopDescription text={stop.description} clampLines={3} />
                   </div>
                 </div>
