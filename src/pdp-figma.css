@@ -138,4 +138,45 @@
     @apply inline-flex items-center justify-center gap-2 rounded-lg bg-white px-6 py-[10px] font-sans text-base font-medium leading-6 tracking-[0.05px] text-[#0d0d0d] transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2;
     border: 1.5px solid #000;
   }
+
+  @keyframes availability-skeleton-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.48;
+    }
+  }
+
+  .pdp-figma .availability-skeleton-bone {
+    animation: availability-skeleton-pulse 1.75s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pdp-figma .availability-skeleton-bone {
+      animation: none;
+    }
+  }
+
+  @keyframes booking-sidebar-skeleton-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.48;
+    }
+  }
+
+  .booking-sidebar-bone {
+    animation: booking-sidebar-skeleton-pulse 1.75s ease-in-out infinite;
+    background-color: #e8e8e8;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .booking-sidebar-bone {
+      animation: none;
+    }
+  }
 }

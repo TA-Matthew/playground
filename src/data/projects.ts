@@ -26,9 +26,14 @@ export const LOGISTICS_DEFAULT_VARIANT: VariantId = 'b'
 /** Product highlight study: Variant A PDP only — no A2 / B / B2 (or C) in UI or URL. */
 export const PRODUCT_HIGHLIGHT_FACILITATOR_VARIANTS: VariantId[] = ['a']
 
+/** Availability shortcut study — Variant A PDP shell + upcoming availability meta toggle. */
+export const AVAILABILITY_SHORTCUT_FACILITATOR_VARIANTS: VariantId[] = ['a']
+
 /** Keep in sync with the matching `<Route>` in App.tsx */
 export const LOGISTICS_PROJECT_PATH = '/projects/logistics'
 export const PRODUCT_HIGHLIGHT_PROJECT_PATH = '/projects/product-highlight'
+export const PDP_TEMPLATE_PROJECT_PATH = '/projects/pdp-template'
+export const AVAILABILITY_SHORTCUT_PROJECT_PATH = '/projects/availability-shortcut'
 export const AI_REVIEW_PROJECT_PATH = '/projects/ai-review-prototype'
 export const LOYALTY_LOGIN_BUTTON_PATH = '/projects/loyalty-login-button-animation'
 
@@ -59,5 +64,19 @@ export const projects: Project[] = [
     description:
       'We hypothesize a PDP Product Highlights strip (2–4 explicit positives plus critical booking facts) compounds perceived quality, clarifies reasons to book, and lifts booking confidence and conversion.',
     path: PRODUCT_HIGHLIGHT_PROJECT_PATH,
+  },
+  {
+    id: 'pdp-template',
+    title: 'PDP template',
+    description:
+      'Base Viator booking PDP shell — hero, overview, booking card, and down-page sections. Starting point for new studies.',
+    path: PDP_TEMPLATE_PROJECT_PATH,
+  },
+  {
+    id: 'availability-shortcut',
+    title: 'Availability shortcut',
+    description:
+      'Prototype faster paths to Check Availability and booking on the PDP — Q2 Decide Availability study shell.',
+    path: AVAILABILITY_SHORTCUT_PROJECT_PATH,
   },
 ]

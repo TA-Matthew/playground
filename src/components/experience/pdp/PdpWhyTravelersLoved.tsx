@@ -11,9 +11,14 @@ import { ViatorSpotlightFiveStars } from './ViatorSpotlightFiveStars'
 type Props = {
   /** Expedia-style PDP — divider + spacing above (replaces default top margin). */
   showTopDivider?: boolean
+  /** Availability shortcut — divider above section on desktop only (upcoming block sits above). */
+  showTopDividerFromLg?: boolean
 }
 
-export function PdpWhyTravelersLoved({ showTopDivider = false }: Props) {
+export function PdpWhyTravelersLoved({
+  showTopDivider = false,
+  showTopDividerFromLg = false,
+}: Props) {
   const w = viatorListing.whyTravelersLoved
   const spotlightScrollRef = useRef<HTMLDivElement>(null)
   const [spotlightHasMoreAfter, setSpotlightHasMoreAfter] = useState(true)
@@ -59,9 +64,11 @@ export function PdpWhyTravelersLoved({ showTopDivider = false }: Props) {
   return (
     <section
       className={
-        showTopDivider
-          ? 'border-t border-slate-200/90 pt-8'
-          : 'mt-8 pt-0'
+        showTopDividerFromLg
+          ? 'max-lg:mt-8 max-lg:pt-0 lg:border-t lg:border-[#d9d9d9] lg:pt-8'
+          : showTopDivider
+            ? 'border-t border-slate-200/90 pt-8'
+            : 'mt-8 pt-0'
       }
       aria-labelledby="pdp-why-travelers-h"
     >

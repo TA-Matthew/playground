@@ -1,6 +1,7 @@
 import { useEffect, useState, type RefObject } from 'react'
 import type { ProductHighlightIconStyleId } from '../../data/productHighlightIconStyles'
 import type { ProductHighlightBase, ProductHighlightIconRail } from '../../data/productHighlightLayouts'
+import type { AvailabilityMetaDisplayId } from '../../data/availabilityShortcutMeta'
 import type { VariantId } from '../../data/variants'
 
 const FACILITATOR_VARIANT_UI: Record<
@@ -74,6 +75,11 @@ type Props = {
   bookAheadMobileControls?: {
     enabled: boolean
     onEnabledChange: (enabled: boolean) => void
+  }
+  /** Availability shortcut — date / travelers row (`asMeta`). */
+  availabilityMetaControls?: {
+    metaDisplay: AvailabilityMetaDisplayId
+    onMetaDisplayChange: (metaDisplay: AvailabilityMetaDisplayId) => void
   }
 }
 
@@ -150,6 +156,7 @@ export function FacilitatorBar({
   highlightTopProductControls,
   mapPinPhotoThumbnailControls,
   bookAheadMobileControls,
+  availabilityMetaControls,
 }: Props) {
   const hasArchive = archivedVariants.length > 0
   const viewingArchived = hasArchive && archivedVariants.includes(variant)
@@ -247,6 +254,35 @@ export function FacilitatorBar({
                         : 'text-amber-950 hover:bg-amber-50'
                     }`}
                     onClick={() => mapPinPhotoThumbnailControls.onEnabledChange(opt.on)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {availabilityMetaControls ? (
+            <div className={`flex flex-col gap-2 ${singleVariant ? '' : 'mt-5'}`}>
+              <span className="text-[11px] font-medium uppercase tracking-widest text-amber-900/90">
+                Date &amp; travelers
+              </span>
+              <div className={PILL_GROUP_CLASS}>
+                {(
+                  [
+                    { id: 'chips' as const, label: 'Filter chips' },
+                    { id: 'inline' as const, label: 'Inline text' },
+                  ] as const
+                ).map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                      availabilityMetaControls.metaDisplay === opt.id
+                        ? 'bg-amber-600 text-white shadow-sm'
+                        : 'text-amber-950 hover:bg-amber-50'
+                    }`}
+                    onClick={() => availabilityMetaControls.onMetaDisplayChange(opt.id)}
                   >
                     {opt.label}
                   </button>

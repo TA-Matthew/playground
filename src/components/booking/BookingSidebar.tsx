@@ -14,23 +14,66 @@ type Props = {
   embedded?: boolean
   /** Facilitator-only: hide the book-ahead row on mobile (only applied when embedded). */
   hideBookAheadMobile?: boolean
+  /** Opens expanded availability options in the main column (availability shortcut). */
+  onCheckAvailability?: () => void
+  /** Availability shortcut — total price, Update Search CTA, hide policy panel. */
+  availabilitySearchActive?: boolean
+  /** Shown when {@link availabilitySearchActive} (defaults to travelers × option price). */
+  searchTotalAmount?: string
+  /** Skeleton for total price while availability options load. */
+  searchTotalLoading?: boolean
+  /** Overrides {@link BookingContent.travellers} in the date/travelers row. */
+  travelers?: number
+  /** Overrides {@link BookingContent.dateLabel} in the date/travelers row. */
+  dateLabel?: string
 }
 
-export function BookingSidebar({ booking, embedded, hideBookAheadMobile }: Props) {
+export function BookingSidebar({
+  booking,
+  embedded,
+  hideBookAheadMobile,
+  onCheckAvailability,
+  availabilitySearchActive = false,
+  searchTotalAmount,
+  searchTotalLoading = false,
+  travelers,
+  dateLabel: dateLabelOverride,
+}: Props) {
   const shellCard = embedded
     ? 'bg-transparent p-0'
     : `rounded-[12px] border ${CARD_BORDER} bg-white p-6`
+
+  const travelerCount = travelers ?? booking.travellers
+  const dateLabel = dateLabelOverride ?? booking.dateLabel
 
   return (
     <div className="space-y-4">
       <div className={shellCard} aria-label="Book this experience">
         {/* Price */}
-        <p className="leading-[1.2] text-black">
-          <span className="text-[clamp(22px,2.75vw,28px)] font-bold tracking-[-0.02em]">
-            From {booking.priceAmount}
-          </span>{' '}
-          <span className="text-[14px] font-normal">per person</span>
-        </p>
+        {availabilitySearchActive ? (
+          searchTotalLoading ? (
+            <BookingSearchTotalSkeleton />
+          ) : (
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 leading-[1.2] text-black">
+              <span className="text-[clamp(22px,2.75vw,28px)] font-bold tracking-[-0.02em]">
+                {searchTotalAmount ?? booking.priceAmount}
+              </span>
+              <button
+                type="button"
+                className="text-[14px] font-normal underline decoration-solid underline-offset-2 transition hover:text-[#333]"
+              >
+                Price details
+              </button>
+            </div>
+          )
+        ) : (
+          <p className="leading-[1.2] text-black">
+            <span className="text-[clamp(22px,2.75vw,28px)] font-bold tracking-[-0.02em]">
+              From {booking.priceAmount}
+            </span>{' '}
+            <span className="text-[14px] font-normal">per person</span>
+          </p>
+        )}
 
         {/* Badges — shared Tag component, outlined variant */}
         <div className="mt-4 flex flex-wrap gap-2">
@@ -53,7 +96,7 @@ export function BookingSidebar({ booking, embedded, hideBookAheadMobile }: Props
             >
               <span className="text-[12px] font-normal leading-tight text-[#737373]">Date</span>
               <span className="flex w-full items-center justify-between gap-2 text-[15px] font-medium leading-tight text-black">
-                <span className="min-w-0 truncate">{booking.dateLabel}</span>
+                <span className="min-w-0 truncate">{dateLabel}</span>
                 <ChevronDown className="shrink-0" />
               </span>
             </button>
@@ -65,7 +108,7 @@ export function BookingSidebar({ booking, embedded, hideBookAheadMobile }: Props
               <span className="flex w-full items-center justify-between gap-2 text-[15px] font-medium leading-tight text-black">
                 <span className="inline-flex min-w-0 items-center gap-1.5 truncate">
                   <PersonIcon />
-                  <span>{booking.travellers}</span>
+                  <span>{travelerCount}</span>
                 </span>
                 <ChevronDown className="shrink-0" />
               </span>
@@ -76,12 +119,18 @@ export function BookingSidebar({ booking, embedded, hideBookAheadMobile }: Props
         {/* Primary CTA */}
         <button
           type="button"
-          className={`mt-5 w-full rounded-[10px] ${CTA_TEAL} py-3.5 text-center text-[15px] font-bold leading-tight tracking-tight text-white shadow-none transition hover:bg-[#256b51] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#256b51] active:scale-[0.99]`}
+          className={
+            availabilitySearchActive
+              ? 'mt-5 w-full rounded-[10px] border-[1.5px] border-black bg-white py-3.5 text-center text-[15px] font-bold leading-tight tracking-tight text-black shadow-none transition hover:bg-neutral-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black active:scale-[0.99]'
+              : `mt-5 w-full rounded-[10px] ${CTA_TEAL} py-3.5 text-center text-[15px] font-bold leading-tight tracking-tight text-white shadow-none transition hover:bg-[#256b51] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#256b51] active:scale-[0.99]`
+          }
+          onClick={availabilitySearchActive ? undefined : onCheckAvailability}
         >
-          Check Availability
+          {availabilitySearchActive ? 'Update Search' : 'Check Availability'}
         </button>
 
         {/* Policies */}
+        {availabilitySearchActive ? null : (
         <div className={`mt-5 rounded-[10px] ${MINT_PANEL} px-4 py-3.5`}>
           <ul className="space-y-3 text-[13px] leading-snug text-[#333]">
             <li className="flex gap-2.5">
@@ -105,6 +154,7 @@ export function BookingSidebar({ booking, embedded, hideBookAheadMobile }: Props
             </li>
           </ul>
         </div>
+        )}
       </div>
 
       {embedded && hideBookAheadMobile ? null : (
@@ -129,6 +179,19 @@ export function BookingSidebar({ booking, embedded, hideBookAheadMobile }: Props
         </div>
       </div>
       )}
+    </div>
+  )
+}
+
+function BookingSearchTotalSkeleton() {
+  return (
+    <div
+      className="flex items-baseline gap-2"
+      aria-busy="true"
+      aria-label="Loading price"
+    >
+      <div className="booking-sidebar-bone h-8 w-[5.5rem] rounded" />
+      <div className="booking-sidebar-bone h-4 w-[5.25rem] rounded" />
     </div>
   )
 }
