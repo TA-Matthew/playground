@@ -4,10 +4,13 @@ import {
   type ProductHighlightLayoutId,
 } from '../../../data/productHighlightLayouts'
 import type { ProductHighlightIconStyleId } from '../../../data/productHighlightIconStyles'
-import type { AvailabilityMetaDisplayId } from '../../../data/availabilityShortcutMeta'
+import type { AvailabilityCommerceModeId } from '../../../data/availabilityShortcutCommerce'
 import type { AvailabilityTravelerCounts } from '../../../data/availabilityShortcutTravelers'
 import { totalTravelers } from '../../../data/availabilityShortcutTravelers'
-import { formatAvailabilitySearchTotal } from '../../../data/availabilityShortcutOptions'
+import {
+  formatAvailabilitySearchTotal,
+  getTourGradeOption,
+} from '../../../data/availabilityShortcutOptions'
 import { viatorListing } from '../../../data/viatorListing'
 import type { BookingContent } from '../../../data/variants'
 import { PdpOverviewSection } from './PdpOverviewSection'
@@ -30,8 +33,8 @@ type Props = {
   hideBookAheadMobile?: boolean
   /** Availability shortcut — desktop “Upcoming availability” between icon rail and reviews. */
   showUpcomingAvailability?: boolean
-  /** Availability shortcut — date / travelers row style (`asMeta`). */
-  availabilityMetaDisplay?: AvailabilityMetaDisplayId
+  /** Availability shortcut — shortcuts in main column vs sticky commerce (`asCommerce`). */
+  availabilityCommerceMode?: AvailabilityCommerceModeId
   /** Availability shortcut — expanded options panel (post Select / Check Availability). */
   availabilityOptionsOpen?: boolean
   availabilityOptionsLoading?: boolean
@@ -59,7 +62,7 @@ export function FigmaViatorPdpBlock({
   productHighlightTopProduct,
   hideBookAheadMobile,
   showUpcomingAvailability = false,
-  availabilityMetaDisplay = 'chips',
+  availabilityCommerceMode = 'main-column',
   availabilityOptionsOpen = false,
   availabilityOptionsLoading = false,
   selectedAvailabilityOptionId = 'english',
@@ -95,6 +98,26 @@ export function FigmaViatorPdpBlock({
     ) : null
   const viatorIconRail = showStandaloneIconRail ? <PdpViatorIconRail items={l.iconRail} /> : null
 
+  const availabilitySectionProps = {
+    dateLabel: dateLabel ?? booking.dateLabel,
+    onDateLabelChange,
+    travelerCounts: resolvedTravelerCounts,
+    onTravelerCountsChange,
+    showOptionsPanel: availabilityOptionsOpen,
+    optionsLoading: availabilityOptionsLoading,
+    selectedOptionId: selectedAvailabilityOptionId,
+    onSelectOption: onSelectAvailabilityOption,
+    onOpenOptions: onOpenAvailabilityOptions,
+    availabilityCommerceMode,
+  }
+
+  const availabilitySectionBelow = showUpcomingAvailability ? (
+    <PdpUpcomingAvailabilitySection
+      {...availabilitySectionProps}
+      showTopDivider
+    />
+  ) : null
+
   return (
     <div className="w-full">
       <div className="flex w-full flex-col">
@@ -107,6 +130,12 @@ export function FigmaViatorPdpBlock({
               travelers={travelerTotal}
               dateLabel={dateLabel ?? booking.dateLabel}
               hideBookAheadMobile={hideBookAheadMobile}
+              availabilityCommerceMode={availabilityCommerceMode}
+              travelerCounts={resolvedTravelerCounts}
+              onDateLabelChange={onDateLabelChange}
+              onTravelerCountsChange={onTravelerCountsChange}
+              onSelectAvailabilityOption={onOpenAvailabilityOptions}
+              availabilityOptionsLoading={showUpcomingAvailability && availabilityOptionsLoading}
               onCheckAvailability={
                 showUpcomingAvailability
                   ? () => onOpenAvailabilityOptions?.('english')
@@ -115,7 +144,10 @@ export function FigmaViatorPdpBlock({
               availabilitySearchActive={showUpcomingAvailability && availabilityOptionsOpen}
               searchTotalAmount={
                 showUpcomingAvailability
-                  ? formatAvailabilitySearchTotal(resolvedTravelerCounts)
+                  ? formatAvailabilitySearchTotal(
+                      resolvedTravelerCounts,
+                      getTourGradeOption(selectedAvailabilityOptionId)?.perPersonPrice,
+                    )
                   : undefined
               }
               searchTotalLoading={showUpcomingAvailability && availabilityOptionsLoading}
@@ -133,24 +165,11 @@ export function FigmaViatorPdpBlock({
             </>
           )}
         </div>
-        {showUpcomingAvailability ? (
-          <PdpUpcomingAvailabilitySection
-            metaDisplay={availabilityMetaDisplay}
-            dateLabel={dateLabel ?? booking.dateLabel}
-            onDateLabelChange={onDateLabelChange}
-            travelerCounts={resolvedTravelerCounts}
-            onTravelerCountsChange={onTravelerCountsChange}
-            showOptionsPanel={availabilityOptionsOpen}
-            optionsLoading={availabilityOptionsLoading}
-            selectedOptionId={selectedAvailabilityOptionId}
-            onSelectOption={onSelectAvailabilityOption}
-            onOpenOptions={onOpenAvailabilityOptions}
-          />
-        ) : null}
         <PdpWhyTravelersLoved
           showTopDivider={layoutOpts?.iconRail === 'expedia'}
-          showTopDividerFromLg={showUpcomingAvailability}
+          showBottomSpacingFromLg={showUpcomingAvailability}
         />
+        {availabilitySectionBelow}
         <div className="mt-5 flex flex-col gap-5">
           <PdpPromotedExperiences />
           {/* gap-5 only before Overview; deferred quick facts + What's included stack with top rules only (gap-0). */}

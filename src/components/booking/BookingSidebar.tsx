@@ -1,7 +1,13 @@
 import { useId, type SVGProps } from 'react'
 import { BenefitCheckIcon } from '../icons/BenefitCheckIcon'
 import { Tag } from '../common/Tag'
+import { AvailabilityDateControl } from '../experience/pdp/AvailabilityDateControl'
+import { AvailabilityTravelersControl } from '../experience/pdp/AvailabilityTravelersControl'
+import { BookingSidebarCommerceOptions } from './BookingSidebarCommerceOptions'
 import bookAheadFlame from '../../assets/book-ahead-flame.png'
+import type { AvailabilityCommerceModeId } from '../../data/availabilityShortcutCommerce'
+import { isStickyCommerceAvailabilityMode } from '../../data/availabilityShortcutCommerce'
+import type { AvailabilityTravelerCounts } from '../../data/availabilityShortcutTravelers'
 import type { BookingContent } from '../../data/variants'
 
 const CARD_BORDER = 'border-[#e0e0e0]'
@@ -26,6 +32,13 @@ type Props = {
   travelers?: number
   /** Overrides {@link BookingContent.dateLabel} in the date/travelers row. */
   dateLabel?: string
+  /** Availability shortcut — where shortcuts render (`asCommerce`). */
+  availabilityCommerceMode?: AvailabilityCommerceModeId
+  travelerCounts?: AvailabilityTravelerCounts
+  onDateLabelChange?: (dateLabel: string) => void
+  onTravelerCountsChange?: (counts: AvailabilityTravelerCounts) => void
+  onSelectAvailabilityOption?: (optionId: string) => void
+  availabilityOptionsLoading?: boolean
 }
 
 export function BookingSidebar({
@@ -38,7 +51,16 @@ export function BookingSidebar({
   searchTotalLoading = false,
   travelers,
   dateLabel: dateLabelOverride,
+  availabilityCommerceMode = 'main-column',
+  travelerCounts,
+  onDateLabelChange,
+  onTravelerCountsChange,
+  onSelectAvailabilityOption,
+  availabilityOptionsLoading = false,
 }: Props) {
+  const stickyCommerce = isStickyCommerceAvailabilityMode(availabilityCommerceMode)
+  const useMetaChips =
+    stickyCommerce && Boolean(onDateLabelChange && onTravelerCountsChange && travelerCounts)
   const shellCard = embedded
     ? 'bg-transparent p-0'
     : `rounded-[12px] border ${CARD_BORDER} bg-white p-6`
@@ -88,6 +110,22 @@ export function BookingSidebar({
         </div>
 
         {/* Date + Travelers */}
+        {useMetaChips ? (
+          <div className="mt-5 flex w-full items-center gap-2">
+            <AvailabilityDateControl
+              dateLabel={dateLabel}
+              onDateLabelChange={onDateLabelChange!}
+              variant="chip"
+              fullWidth
+            />
+            <AvailabilityTravelersControl
+              travelerCounts={travelerCounts!}
+              onTravelerCountsChange={onTravelerCountsChange!}
+              variant="chip"
+              className="shrink-0"
+            />
+          </div>
+        ) : (
         <div className={`mt-5 overflow-hidden rounded-[10px] border ${CARD_BORDER} bg-white`}>
           <div className="grid grid-cols-2 divide-x divide-[#e0e0e0]">
             <button
@@ -115,6 +153,17 @@ export function BookingSidebar({
             </button>
           </div>
         </div>
+        )}
+
+        {stickyCommerce && !availabilitySearchActive ? (
+          <div className="mt-6">
+            <BookingSidebarCommerceOptions
+              optionsLoading={availabilityOptionsLoading}
+              onSelectOption={onSelectAvailabilityOption}
+              onShowMoreOptions={onCheckAvailability}
+            />
+          </div>
+        ) : null}
 
         {/* Primary CTA */}
         <button
@@ -130,7 +179,17 @@ export function BookingSidebar({
         </button>
 
         {/* Policies */}
-        {availabilitySearchActive ? null : (
+        {availabilitySearchActive ? null : stickyCommerce ? (
+          <div className="mt-6 flex items-center justify-center gap-2 text-center text-sm leading-normal text-black">
+            <BenefitCheckIcon className="size-5 shrink-0" />
+            <span>
+              <span className="font-normal">Free 24 hr cancellation</span>
+              <span className="font-normal"> • </span>
+              <span className="font-normal">Pay $0 today</span>
+            </span>
+            <InfoCircleIcon />
+          </div>
+        ) : (
         <div className={`mt-5 rounded-[10px] ${MINT_PANEL} px-4 py-3.5`}>
           <ul className="space-y-3 text-[13px] leading-snug text-[#333]">
             <li className="flex gap-2.5">
@@ -313,6 +372,15 @@ function PersonIcon() {
         strokeWidth="1.75"
         strokeLinecap="round"
       />
+    </svg>
+  )
+}
+
+function InfoCircleIcon() {
+  return (
+    <svg className="size-4 shrink-0 text-[#4d4d4d]" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <circle cx="8" cy="8" r="6.25" stroke="currentColor" strokeWidth="1.25" />
+      <path d="M8 7v4M8 5.5v.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
     </svg>
   )
 }

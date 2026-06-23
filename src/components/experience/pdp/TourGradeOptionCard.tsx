@@ -52,13 +52,13 @@ function ExpandedTourGradeOptionCard({
   readonly dateLabel: string
 }) {
   const [selectedTimeId, setSelectedTimeId] = useState(
-    () => option.timeSlots?.find((slot) => slot.status === 'selected')?.id ?? '1030',
+    () => option.timeSlots?.find((slot) => slot.status === 'selected')?.id ?? '900',
   )
   const [readMoreOpen, setReadMoreOpen] = useState(false)
 
   const totalPrice = useMemo(
-    () => formatAvailabilitySearchTotal(travelerCounts),
-    [travelerCounts],
+    () => formatAvailabilitySearchTotal(travelerCounts, option.perPersonPrice),
+    [travelerCounts, option.perPersonPrice],
   )
 
   const priceDetailLine = useMemo(() => {
@@ -179,8 +179,8 @@ function CollapsedTourGradeOptionCard({
   readonly onSelect: () => void
 }) {
   const total = useMemo(
-    () => formatAvailabilitySearchTotal(travelerCounts),
-    [travelerCounts],
+    () => formatAvailabilitySearchTotal(travelerCounts, option.perPersonPrice),
+    [travelerCounts, option.perPersonPrice],
   )
 
   const priceDetailLine = useMemo(() => {

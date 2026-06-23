@@ -1,7 +1,7 @@
 import {
-  AVAILABILITY_META_QUERY,
-  type AvailabilityMetaDisplayId,
-} from '../data/availabilityShortcutMeta'
+  AVAILABILITY_COMMERCE_QUERY,
+  type AvailabilityCommerceModeId,
+} from '../data/availabilityShortcutCommerce'
 import {
   PRODUCT_HIGHLIGHT_CONCISE_SUMMARY_QUERY,
 } from '../data/productHighlightConciseSummary'
@@ -39,7 +39,7 @@ export type ParticipantLinkExtras = {
   highlightIconStyleId?: ProductHighlightIconStyleId
   highlightConciseSummary?: boolean
   highlightTopProduct?: boolean
-  availabilityMetaDisplay?: AvailabilityMetaDisplayId
+  availabilityCommerceMode?: AvailabilityCommerceModeId
 }
 
 export function hasShareSignature(searchParams: URLSearchParams): boolean {
@@ -75,8 +75,8 @@ export function buildParticipantParams(
   if (extras?.highlightTopProduct === true) {
     params[PRODUCT_HIGHLIGHT_TOP_PRODUCT_QUERY] = '1'
   }
-  if (extras?.availabilityMetaDisplay != null) {
-    params[AVAILABILITY_META_QUERY] = extras.availabilityMetaDisplay
+  if (extras?.availabilityCommerceMode != null) {
+    params[AVAILABILITY_COMMERCE_QUERY] = extras.availabilityCommerceMode
   }
   return params
 }

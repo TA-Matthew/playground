@@ -19,13 +19,14 @@ import { ParticipantLinkModal } from '../components/uxr/ParticipantLinkModal'
 import { SecretUnlock } from '../components/uxr/SecretUnlock'
 import { ShareLinkGate } from '../components/uxr/ShareLinkGate'
 import {
-  AVAILABILITY_META_QUERY,
-  DEFAULT_AVAILABILITY_META_DISPLAY,
-  type AvailabilityMetaDisplayId,
-} from '../data/availabilityShortcutMeta'
+  AVAILABILITY_COMMERCE_QUERY,
+  DEFAULT_AVAILABILITY_COMMERCE_MODE,
+  isStickyCommerceAvailabilityMode,
+  type AvailabilityCommerceModeId,
+} from '../data/availabilityShortcutCommerce'
 import { AVAILABILITY_SHORTCUT_FACILITATOR_VARIANTS } from '../data/projects'
 import { AVAILABILITY_SHORTCUT_DEFAULT_DATE_LABEL } from '../data/availabilityShortcutDates'
-import { formatAvailabilitySearchTotal } from '../data/availabilityShortcutOptions'
+import { formatAvailabilitySearchTotal, getTourGradeOption } from '../data/availabilityShortcutOptions'
 import {
   areTravelerCountsEqual,
   travelerCountsFromTotal,
@@ -36,7 +37,7 @@ import { viatorListing } from '../data/viatorListing'
 import { variants } from '../data/variants'
 import type { ParticipantLinkExtras } from '../uxr/shareLink'
 import {
-  parseAvailabilityMeta,
+  parseAvailabilityCommerceModeFromUrl,
   parseHideUi,
   readFacilitatorUnlock,
   setFacilitatorUnlock,
@@ -57,7 +58,10 @@ export function AvailabilityShortcutPage() {
   const [availabilityOptionsLoading, setAvailabilityOptionsLoading] = useState(false)
   const [selectedAvailabilityOptionId, setSelectedAvailabilityOptionId] = useState('english')
   const availabilityPanelHasLoaded = useRef(false)
-  const booking = variants.a.booking
+  const booking = useMemo(
+    () => ({ ...variants.a.booking, priceAmount: '$80.35' }),
+    [],
+  )
   const [dateLabel, setDateLabel] = useState(() => AVAILABILITY_SHORTCUT_DEFAULT_DATE_LABEL)
   const [travelerCounts, setTravelerCounts] = useState<AvailabilityTravelerCounts>(() =>
     travelerCountsFromTotal(booking.travellers),
@@ -65,6 +69,10 @@ export function AvailabilityShortcutPage() {
   const optionsLoadingTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const prevTravelerCountsRef = useRef(travelerCounts)
   const prevDateLabelRef = useRef(dateLabel)
+
+  const hideUi = parseHideUi(searchParams)
+  const availabilityCommerceMode = parseAvailabilityCommerceModeFromUrl(searchParams)
+  const stickyCommerce = isStickyCommerceAvailabilityMode(availabilityCommerceMode)
 
   const triggerOptionsLoading = useCallback(() => {
     setAvailabilityOptionsLoading(true)
@@ -97,10 +105,22 @@ export function AvailabilityShortcutPage() {
     })
   }, [])
 
+  const handleOpenAvailabilityOptions = useCallback(
+    (optionId: string) => {
+      openAvailabilityOptions(optionId)
+      if (stickyCommerce) {
+        requestAnimationFrame(() => scrollToUpcomingAvailability())
+      }
+    },
+    [openAvailabilityOptions, scrollToUpcomingAvailability, stickyCommerce],
+  )
+
   const openAvailabilityFromSidebar = useCallback(() => {
-    openAvailabilityOptions('english')
-    requestAnimationFrame(() => scrollToUpcomingAvailability())
-  }, [openAvailabilityOptions, scrollToUpcomingAvailability])
+    handleOpenAvailabilityOptions('english')
+    if (!stickyCommerce) {
+      requestAnimationFrame(() => scrollToUpcomingAvailability())
+    }
+  }, [handleOpenAvailabilityOptions, scrollToUpcomingAvailability, stickyCommerce])
 
   const resetAvailabilityFlow = useCallback(() => {
     availabilityPanelHasLoaded.current = false
@@ -141,27 +161,28 @@ export function AvailabilityShortcutPage() {
     triggerOptionsLoading()
   }, [dateLabel, triggerOptionsLoading])
 
-  const availabilitySearchTotal = useMemo(
-    () => formatAvailabilitySearchTotal(travelerCounts),
-    [travelerCounts],
-  )
-  const hideUi = parseHideUi(searchParams)
-  const availabilityMetaDisplay = parseAvailabilityMeta(searchParams)
+  const availabilitySearchTotal = useMemo(() => {
+    const option = getTourGradeOption(selectedAvailabilityOptionId)
+    return formatAvailabilitySearchTotal(
+      travelerCounts,
+      option?.perPersonPrice,
+    )
+  }, [travelerCounts, selectedAvailabilityOptionId])
 
   const showFacilitatorChrome = useMemo(
     () => shouldShowFacilitatorChrome(hideUi, unlock),
     [hideUi, unlock],
   )
 
-  const setAvailabilityMetaDisplay = useCallback(
-    (metaDisplay: AvailabilityMetaDisplayId) => {
+  const setAvailabilityCommerceMode = useCallback(
+    (commerceMode: AvailabilityCommerceModeId) => {
       setSearchParams(
         (prev) => {
           const next = new URLSearchParams(prev)
-          if (metaDisplay === DEFAULT_AVAILABILITY_META_DISPLAY) {
-            next.delete(AVAILABILITY_META_QUERY)
+          if (commerceMode === DEFAULT_AVAILABILITY_COMMERCE_MODE) {
+            next.delete(AVAILABILITY_COMMERCE_QUERY)
           } else {
-            next.set(AVAILABILITY_META_QUERY, metaDisplay)
+            next.set(AVAILABILITY_COMMERCE_QUERY, commerceMode)
           }
           return next
         },
@@ -171,18 +192,21 @@ export function AvailabilityShortcutPage() {
     [setSearchParams],
   )
 
-  const handleAvailabilityMetaDisplayChange = useCallback(
-    (metaDisplay: AvailabilityMetaDisplayId) => {
+  const handleAvailabilityCommerceModeChange = useCallback(
+    (commerceMode: AvailabilityCommerceModeId) => {
       resetAvailabilityFlow()
-      setAvailabilityMetaDisplay(metaDisplay)
+      setAvailabilityCommerceMode(commerceMode)
     },
-    [resetAvailabilityFlow, setAvailabilityMetaDisplay],
+    [resetAvailabilityFlow, setAvailabilityCommerceMode],
   )
 
   const participantLinkExtras = useMemo((): ParticipantLinkExtras | undefined => {
-    if (availabilityMetaDisplay === DEFAULT_AVAILABILITY_META_DISPLAY) return undefined
-    return { availabilityMetaDisplay }
-  }, [availabilityMetaDisplay])
+    const extras: ParticipantLinkExtras = {}
+    if (availabilityCommerceMode !== DEFAULT_AVAILABILITY_COMMERCE_MODE) {
+      extras.availabilityCommerceMode = availabilityCommerceMode
+    }
+    return Object.keys(extras).length > 0 ? extras : undefined
+  }, [availabilityCommerceMode])
 
   const applyParticipantViewToFacilitator = useCallback(() => {
     setFacilitatorUnlock(false)
@@ -233,9 +257,9 @@ export function AvailabilityShortcutPage() {
                 onVariantChange={resetAvailabilityFlow}
                 onOpenParticipantLinkModal={() => setParticipantLinkModalOpen(true)}
                 participantLinkButtonRef={participantLinkButtonRef}
-                availabilityMetaControls={{
-                  metaDisplay: availabilityMetaDisplay,
-                  onMetaDisplayChange: handleAvailabilityMetaDisplayChange,
+                availabilityCommerceControls={{
+                  commerceMode: availabilityCommerceMode,
+                  onCommerceModeChange: handleAvailabilityCommerceModeChange,
                 }}
               />
             ) : null}
@@ -254,7 +278,7 @@ export function AvailabilityShortcutPage() {
                 <ViatorPdpBlock
                   booking={booking}
                   showUpcomingAvailability
-                  availabilityMetaDisplay={availabilityMetaDisplay}
+                  availabilityCommerceMode={availabilityCommerceMode}
                   availabilityOptionsOpen={availabilityOptionsOpen}
                   availabilityOptionsLoading={availabilityOptionsLoading}
                   selectedAvailabilityOptionId={selectedAvailabilityOptionId}
@@ -263,7 +287,7 @@ export function AvailabilityShortcutPage() {
                   dateLabel={dateLabel}
                   onDateLabelChange={setDateLabel}
                   onSelectAvailabilityOption={setSelectedAvailabilityOptionId}
-                  onOpenAvailabilityOptions={openAvailabilityOptions}
+                  onOpenAvailabilityOptions={handleOpenAvailabilityOptions}
                 />
 
                 <CollapsibleSection title="Additional Info" defaultOpen>
@@ -282,6 +306,12 @@ export function AvailabilityShortcutPage() {
                   booking={booking}
                   travelers={totalTravelers(travelerCounts)}
                   dateLabel={dateLabel}
+                  availabilityCommerceMode={availabilityCommerceMode}
+                  travelerCounts={travelerCounts}
+                  onDateLabelChange={setDateLabel}
+                  onTravelerCountsChange={handleTravelerCountsChange}
+                  onSelectAvailabilityOption={handleOpenAvailabilityOptions}
+                  availabilityOptionsLoading={availabilityOptionsLoading}
                   onCheckAvailability={openAvailabilityFromSidebar}
                   availabilitySearchActive={availabilityOptionsOpen}
                   searchTotalAmount={availabilitySearchTotal}

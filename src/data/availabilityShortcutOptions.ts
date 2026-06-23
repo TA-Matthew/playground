@@ -22,42 +22,103 @@ export const TOUR_GRADE_OPTIONS: readonly TourGradeOption[] = [
   {
     id: 'english',
     title: 'Vatican Group - English',
-    expandedTitle: 'English includes all entries',
+    expandedTitle: 'Vatican Group - English',
     description:
-      'Tour with an English speaking guide. Please make sure to contact the supplier no later than 24h prior to your tour in order to confirm exact pickup time.',
-    scarcityLabel: 'Only 5 spots left',
-    perPersonPrice: '$50',
+      'Vatican Museums, Sistine Chapel & St. Peter\'s Basilica tour with English-speaking guide & small group of 20 people or less.',
+    scarcityLabel: 'Only 3 spots left',
+    perPersonPrice: '$108.31',
     timeSlots: [
-      { id: '830', label: '8:30 AM', status: 'available' },
+      { id: '800', label: '8:00 AM', status: 'sold-out' },
+      { id: '830', label: '8:30 AM', status: 'sold-out' },
+      { id: '900', label: '9:00 AM', status: 'selected' },
       { id: '930', label: '9:30 AM', status: 'available' },
-      { id: '1030', label: '10:30 AM', status: 'selected' },
-      { id: '1130', label: '11:30 AM', status: 'sold-out' },
+      { id: '1000', label: '10:00 AM', status: 'available' },
+      { id: '1030', label: '10:30 AM', status: 'available' },
+      { id: '1430', label: '2:30 PM', status: 'available' },
     ],
   },
   {
-    id: 'spanish',
-    title: 'Vatican Group - Spanish',
-    expandedTitle: 'Spanish includes all entries',
-    perPersonPrice: '$50',
+    id: 'semi-private',
+    title: 'Vatican Semi Private - English',
+    expandedTitle: 'Vatican Semi Private - English',
+    scarcityLabel: 'Only 2 spots left',
+    perPersonPrice: '$124.61',
+    timeSlots: [
+      { id: '800', label: '8:00 AM', status: 'available' },
+      { id: '900', label: '9:00 AM', status: 'available' },
+      { id: '1000', label: '10:00 AM', status: 'available' },
+      { id: '1100', label: '11:00 AM', status: 'available' },
+      { id: '1300', label: '1:00 PM', status: 'available' },
+      { id: '1400', label: '2:00 PM', status: 'available' },
+      { id: '1500', label: '3:00 PM', status: 'available' },
+    ],
   },
   {
-    id: 'chinese',
-    title: 'Vatican Group - Chinese',
-    expandedTitle: 'Chinese includes all entries',
-    perPersonPrice: '$50',
+    id: 'express',
+    title: 'Vatican Express Group Tour',
+    expandedTitle: 'Vatican Express Group Tour',
+    perPersonPrice: '$78.61',
+    timeSlots: [
+      { id: '730', label: '7:30 AM', status: 'available' },
+      { id: '830', label: '8:30 AM', status: 'available' },
+      { id: '1200', label: '12:00 PM', status: 'available' },
+    ],
+  },
+  {
+    id: 'private',
+    title: 'Private Tour up to 4 guests',
+    expandedTitle: 'Private Tour up to 4 guests',
+    scarcityLabel: 'Only 4 spots left',
+    perPersonPrice: '$320.26',
   },
 ]
 
-export function formatAvailabilitySearchTotal(counts: AvailabilityTravelerCounts): string {
-  const perPerson = Number.parseFloat(
-    TOUR_GRADE_OPTIONS[0].perPersonPrice.replace(/[^0-9.]/g, ''),
-  )
-  if (!Number.isFinite(perPerson)) return TOUR_GRADE_OPTIONS[0].perPersonPrice
+export function formatAvailabilitySearchTotal(
+  counts: AvailabilityTravelerCounts,
+  perPersonPrice: string = TOUR_GRADE_OPTIONS[0].perPersonPrice,
+): string {
+  const perPerson = Number.parseFloat(perPersonPrice.replace(/[^0-9.]/g, ''))
+  if (!Number.isFinite(perPerson)) return perPersonPrice
   const total =
     counts.adults * perPerson +
     counts.children * perPerson * 0.94 +
     counts.infants * 0
   return `$${total.toFixed(2)}`
+}
+
+export function formatRoundedFromPrice(perPersonPrice: string): string {
+  const perPerson = Number.parseFloat(perPersonPrice.replace(/[^0-9.]/g, ''))
+  if (!Number.isFinite(perPerson)) return perPersonPrice
+  return `$${Math.round(perPerson)}`
+}
+
+const COMMERCE_TIMES_PREVIEW_COUNT = 1
+
+/** Sticky commerce — first N bookable times, then "+M" for the rest. */
+export function formatCommerceTimesPreview(
+  timeSlots: readonly AvailabilityTimeSlot[] | undefined,
+  maxVisible = COMMERCE_TIMES_PREVIEW_COUNT,
+): { readonly text: string; readonly ariaLabel: string } | undefined {
+  if (!timeSlots?.length) return undefined
+
+  const bookable = timeSlots.filter((slot) => slot.status !== 'sold-out')
+  if (bookable.length === 0) return undefined
+
+  const visible = bookable.slice(0, maxVisible)
+  const remaining = bookable.length - visible.length
+  const visibleLabels = visible.map((slot) => slot.label).join(', ')
+
+  if (remaining > 0) {
+    return {
+      text: `${visibleLabels} +${remaining} more`,
+      ariaLabel: `${visibleLabels}, and ${remaining} more times`,
+    }
+  }
+
+  return {
+    text: visibleLabels,
+    ariaLabel: visibleLabels,
+  }
 }
 
 export function getTourGradeOption(id: string): TourGradeOption | undefined {

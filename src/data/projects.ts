@@ -26,7 +26,7 @@ export const LOGISTICS_DEFAULT_VARIANT: VariantId = 'b'
 /** Product highlight study: Variant A PDP only — no A2 / B / B2 (or C) in UI or URL. */
 export const PRODUCT_HIGHLIGHT_FACILITATOR_VARIANTS: VariantId[] = ['a']
 
-/** Availability shortcut study — Variant A PDP shell + upcoming availability meta toggle. */
+/** Availability shortcut study — Variant A PDP shell + upcoming availability controls. */
 export const AVAILABILITY_SHORTCUT_FACILITATOR_VARIANTS: VariantId[] = ['a']
 
 /** Keep in sync with the matching `<Route>` in App.tsx */

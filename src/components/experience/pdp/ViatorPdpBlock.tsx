@@ -4,7 +4,7 @@
  */
 import type { ProductHighlightIconStyleId } from '../../../data/productHighlightIconStyles'
 import type { ProductHighlightLayoutId } from '../../../data/productHighlightLayouts'
-import type { AvailabilityMetaDisplayId } from '../../../data/availabilityShortcutMeta'
+import type { AvailabilityCommerceModeId } from '../../../data/availabilityShortcutCommerce'
 import type { AvailabilityTravelerCounts } from '../../../data/availabilityShortcutTravelers'
 import type { BookingContent } from '../../../data/variants'
 import { FigmaViatorPdpBlock } from './FigmaViatorPdpBlock'
@@ -19,7 +19,7 @@ export type ViatorPdpBlockProps = {
   hideBookAheadMobile?: boolean
   /** Availability shortcut — desktop “Upcoming availability” section. */
   showUpcomingAvailability?: boolean
-  availabilityMetaDisplay?: AvailabilityMetaDisplayId
+  availabilityCommerceMode?: AvailabilityCommerceModeId
   availabilityOptionsOpen?: boolean
   availabilityOptionsLoading?: boolean
   selectedAvailabilityOptionId?: string
@@ -40,7 +40,7 @@ export function ViatorPdpBlock({
   productHighlightTopProduct,
   hideBookAheadMobile,
   showUpcomingAvailability,
-  availabilityMetaDisplay,
+  availabilityCommerceMode,
   availabilityOptionsOpen,
   availabilityOptionsLoading,
   selectedAvailabilityOptionId,
@@ -61,7 +61,7 @@ export function ViatorPdpBlock({
       productHighlightTopProduct={productHighlightTopProduct}
       hideBookAheadMobile={hideBookAheadMobile}
       showUpcomingAvailability={showUpcomingAvailability}
-      availabilityMetaDisplay={availabilityMetaDisplay}
+      availabilityCommerceMode={availabilityCommerceMode}
       availabilityOptionsOpen={availabilityOptionsOpen}
       availabilityOptionsLoading={availabilityOptionsLoading}
       selectedAvailabilityOptionId={selectedAvailabilityOptionId}

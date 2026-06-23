@@ -1,8 +1,8 @@
 import {
-  AVAILABILITY_META_QUERY,
-  parseAvailabilityMetaDisplay,
-  type AvailabilityMetaDisplayId,
-} from '../data/availabilityShortcutMeta'
+  AVAILABILITY_COMMERCE_QUERY,
+  parseAvailabilityCommerceMode,
+  type AvailabilityCommerceModeId,
+} from '../data/availabilityShortcutCommerce'
 import {
   parseProductHighlightConciseSummary,
   PRODUCT_HIGHLIGHT_CONCISE_SUMMARY_QUERY,
@@ -92,8 +92,10 @@ export function parseHighlightTopProduct(searchParams: URLSearchParams): boolean
   return parseProductHighlightTopProduct(searchParams.get(PRODUCT_HIGHLIGHT_TOP_PRODUCT_QUERY))
 }
 
-export function parseAvailabilityMeta(searchParams: URLSearchParams): AvailabilityMetaDisplayId {
-  return parseAvailabilityMetaDisplay(searchParams.get(AVAILABILITY_META_QUERY))
+export function parseAvailabilityCommerceModeFromUrl(
+  searchParams: URLSearchParams,
+): AvailabilityCommerceModeId {
+  return parseAvailabilityCommerceMode(searchParams.get(AVAILABILITY_COMMERCE_QUERY))
 }
 
 export { isProductHighlightIconStyleId }

@@ -8,6 +8,7 @@ type Props = {
   readonly travelerCounts: AvailabilityTravelerCounts
   readonly onTravelerCountsChange: (counts: AvailabilityTravelerCounts) => void
   readonly variant: 'chip' | 'inline'
+  readonly className?: string
 }
 
 /** Travelers chip / inline control — opens Figma pax picker overlay. */
@@ -15,6 +16,7 @@ export function AvailabilityTravelersControl({
   travelerCounts,
   onTravelerCountsChange,
   variant,
+  className,
 }: Props) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -71,10 +73,10 @@ export function AvailabilityTravelersControl({
   }
 
   return (
-    <div ref={rootRef} className="relative">
+    <div ref={rootRef} className={`relative ${className ?? ''}`.trim()}>
       <button
         type="button"
-        className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full border border-[#d9d9d9] bg-white px-4 text-sm font-medium leading-5 tracking-[0.05px] text-[#4d4d4d] transition hover:bg-neutral-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2d8564]"
+        className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-[#d9d9d9] bg-white px-4 text-sm font-medium leading-5 tracking-[0.05px] text-[#4d4d4d] transition hover:bg-neutral-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2d8564]"
         aria-expanded={open}
         aria-controls={popoverId}
         aria-label={`Change travelers, currently ${displayTotal}`}
@@ -82,7 +84,6 @@ export function AvailabilityTravelersControl({
       >
         <PersonIcon />
         <span className="whitespace-nowrap">{displayTotal}</span>
-        <ChevronDown className={open ? 'rotate-180' : ''} />
       </button>
       {overlay}
     </div>
@@ -97,25 +98,6 @@ function PersonIcon() {
         clipRule="evenodd"
         d="M8 8a2.667 2.667 0 1 0 0-5.333A2.667 2.667 0 0 0 8 8ZM3.333 13.333c0-2.577 2.09-4.666 4.667-4.666s4.667 2.09 4.667 4.666H3.333Z"
         fill="#4D4D4D"
-      />
-    </svg>
-  )
-}
-
-function ChevronDown({ className = '' }: { readonly className?: string }) {
-  return (
-    <svg
-      className={`size-4 shrink-0 transition-transform ${className}`.trim()}
-      viewBox="0 0 16 16"
-      fill="none"
-      aria-hidden
-    >
-      <path
-        d="M4 6l4 4 4-4"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </svg>
   )
