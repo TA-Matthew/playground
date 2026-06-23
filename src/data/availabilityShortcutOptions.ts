@@ -110,7 +110,7 @@ export function formatCommerceTimesPreview(
 
   if (remaining > 0) {
     return {
-      text: `${visibleLabels} +${remaining} more`,
+      text: `${visibleLabels} + ${remaining}`,
       ariaLabel: `${visibleLabels}, and ${remaining} more times`,
     }
   }
