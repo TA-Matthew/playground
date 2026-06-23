@@ -21,9 +21,11 @@ import { ShareLinkGate } from '../components/uxr/ShareLinkGate'
 import {
   AVAILABILITY_COMMERCE_QUERY,
   DEFAULT_AVAILABILITY_COMMERCE_MODE,
-  isStickyCommerceAvailabilityMode,
+  loadsAvailabilityOptionsInModal,
+  usesStickyCommerceSidebar,
   type AvailabilityCommerceModeId,
 } from '../data/availabilityShortcutCommerce'
+import { AvailabilityOptionsModal } from '../components/booking/AvailabilityOptionsModal'
 import { AVAILABILITY_SHORTCUT_FACILITATOR_VARIANTS } from '../data/projects'
 import { AVAILABILITY_SHORTCUT_DEFAULT_DATE_LABEL } from '../data/availabilityShortcutDates'
 import { formatAvailabilitySearchTotal, getTourGradeOption } from '../data/availabilityShortcutOptions'
@@ -57,6 +59,7 @@ export function AvailabilityShortcutPage() {
   const [availabilityOptionsOpen, setAvailabilityOptionsOpen] = useState(false)
   const [availabilityOptionsLoading, setAvailabilityOptionsLoading] = useState(false)
   const [selectedAvailabilityOptionId, setSelectedAvailabilityOptionId] = useState('english')
+  const [availabilityModalOpen, setAvailabilityModalOpen] = useState(false)
   const availabilityPanelHasLoaded = useRef(false)
   const booking = useMemo(
     () => ({ ...variants.a.booking, priceAmount: '$80.35' }),
@@ -72,7 +75,8 @@ export function AvailabilityShortcutPage() {
 
   const hideUi = parseHideUi(searchParams)
   const availabilityCommerceMode = parseAvailabilityCommerceModeFromUrl(searchParams)
-  const stickyCommerce = isStickyCommerceAvailabilityMode(availabilityCommerceMode)
+  const sidebarCommerce = usesStickyCommerceSidebar(availabilityCommerceMode)
+  const optionsInModal = loadsAvailabilityOptionsInModal(availabilityCommerceMode)
 
   const triggerOptionsLoading = useCallback(() => {
     setAvailabilityOptionsLoading(true)
@@ -108,23 +112,39 @@ export function AvailabilityShortcutPage() {
   const handleOpenAvailabilityOptions = useCallback(
     (optionId: string) => {
       openAvailabilityOptions(optionId)
-      if (stickyCommerce) {
+      if (optionsInModal) {
+        setAvailabilityModalOpen(true)
+      } else if (sidebarCommerce) {
         requestAnimationFrame(() => scrollToUpcomingAvailability())
       }
     },
-    [openAvailabilityOptions, scrollToUpcomingAvailability, stickyCommerce],
+    [openAvailabilityOptions, optionsInModal, scrollToUpcomingAvailability, sidebarCommerce],
   )
 
   const openAvailabilityFromSidebar = useCallback(() => {
     handleOpenAvailabilityOptions('english')
-    if (!stickyCommerce) {
+    if (!sidebarCommerce) {
       requestAnimationFrame(() => scrollToUpcomingAvailability())
     }
-  }, [handleOpenAvailabilityOptions, scrollToUpcomingAvailability, stickyCommerce])
+  }, [handleOpenAvailabilityOptions, scrollToUpcomingAvailability, sidebarCommerce])
+
+  const handleCloseAvailabilityModal = useCallback(() => {
+    setAvailabilityModalOpen(false)
+    setAvailabilityOptionsOpen(false)
+    availabilityPanelHasLoaded.current = false
+  }, [])
+
+  const handleUpdateSearch = useCallback(() => {
+    if (!optionsInModal) return
+    setAvailabilityOptionsOpen(true)
+    setAvailabilityModalOpen(true)
+    triggerOptionsLoading()
+  }, [optionsInModal, triggerOptionsLoading])
 
   const resetAvailabilityFlow = useCallback(() => {
     availabilityPanelHasLoaded.current = false
     setAvailabilityOptionsOpen(false)
+    setAvailabilityModalOpen(false)
     setAvailabilityOptionsLoading(false)
     setSelectedAvailabilityOptionId('english')
     setTravelerCounts(travelerCountsFromTotal(booking.travellers))
@@ -140,6 +160,7 @@ export function AvailabilityShortcutPage() {
   useEffect(() => {
     if (!availabilityOptionsOpen) {
       availabilityPanelHasLoaded.current = false
+      setAvailabilityModalOpen(false)
       return
     }
 
@@ -288,6 +309,7 @@ export function AvailabilityShortcutPage() {
                   onDateLabelChange={setDateLabel}
                   onSelectAvailabilityOption={setSelectedAvailabilityOptionId}
                   onOpenAvailabilityOptions={handleOpenAvailabilityOptions}
+                  onUpdateSearch={optionsInModal ? handleUpdateSearch : undefined}
                 />
 
                 <CollapsibleSection title="Additional Info" defaultOpen>
@@ -313,6 +335,7 @@ export function AvailabilityShortcutPage() {
                   onSelectAvailabilityOption={handleOpenAvailabilityOptions}
                   availabilityOptionsLoading={availabilityOptionsLoading}
                   onCheckAvailability={openAvailabilityFromSidebar}
+                  onUpdateSearch={optionsInModal ? handleUpdateSearch : undefined}
                   availabilitySearchActive={availabilityOptionsOpen}
                   searchTotalAmount={availabilitySearchTotal}
                   searchTotalLoading={availabilityOptionsLoading}
@@ -337,6 +360,19 @@ export function AvailabilityShortcutPage() {
         onCopied={applyParticipantViewToFacilitator}
         returnFocusRef={participantLinkButtonRef}
       />
+
+      {optionsInModal && availabilityModalOpen ? (
+        <AvailabilityOptionsModal
+          onClose={handleCloseAvailabilityModal}
+          dateLabel={dateLabel}
+          onDateLabelChange={setDateLabel}
+          travelerCounts={travelerCounts}
+          onTravelerCountsChange={handleTravelerCountsChange}
+          selectedOptionId={selectedAvailabilityOptionId}
+          onSelectedOptionChange={setSelectedAvailabilityOptionId}
+          optionsLoading={availabilityOptionsLoading}
+        />
+      ) : null}
     </>
   )
 }

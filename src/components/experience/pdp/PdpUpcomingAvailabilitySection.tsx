@@ -1,6 +1,9 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import type { AvailabilityCommerceModeId } from '../../../data/availabilityShortcutCommerce'
-import { isStickyCommerceAvailabilityMode } from '../../../data/availabilityShortcutCommerce'
+import {
+  loadsAvailabilityOptionsInModal,
+  usesStickyCommerceSidebar,
+} from '../../../data/availabilityShortcutCommerce'
 import type { AvailabilityTravelerCounts } from '../../../data/availabilityShortcutTravelers'
 import { totalTravelers } from '../../../data/availabilityShortcutTravelers'
 import { AVAILABILITY_SHORTCUTS } from '../../../data/availabilityShortcuts'
@@ -51,9 +54,14 @@ export function PdpUpcomingAvailabilitySection({
   availabilityCommerceMode = 'main-column',
 }: Props) {
   const travelerTotal = totalTravelers(travelerCounts)
-  const stickyCommerce = isStickyCommerceAvailabilityMode(availabilityCommerceMode)
+  const sidebarCommerce = usesStickyCommerceSidebar(availabilityCommerceMode)
+  const optionsInModal = loadsAvailabilityOptionsInModal(availabilityCommerceMode)
 
-  if (stickyCommerce && !showOptionsPanel) {
+  if (optionsInModal) {
+    return null
+  }
+
+  if (sidebarCommerce && !showOptionsPanel) {
     return null
   }
 
@@ -66,7 +74,7 @@ export function PdpUpcomingAvailabilitySection({
       aria-labelledby="pdp-upcoming-availability-h"
     >
       <div className="flex flex-col gap-4">
-        {!stickyCommerce ? (
+        {!sidebarCommerce ? (
           <div className="flex flex-col gap-2">
             <h2
               id="pdp-upcoming-availability-h"
@@ -112,7 +120,7 @@ export function PdpUpcomingAvailabilitySection({
           dateLabel={dateLabel}
           onSelectOption={onSelectOption}
           onOpenOptions={onOpenOptions}
-          stickyCommerce={stickyCommerce}
+          sidebarCommerce={sidebarCommerce}
         />
       </div>
     </section>
@@ -123,13 +131,13 @@ function getAvailabilityViewKey(
   showOptionsPanel: boolean,
   optionsLoading: boolean,
   selectedOptionId: string,
-  stickyCommerce: boolean,
+  sidebarCommerce: boolean,
 ): string {
   if (optionsLoading) {
-    if (stickyCommerce) return showOptionsPanel ? 'skeleton-panel' : 'skeleton-shortcuts'
+    if (sidebarCommerce) return showOptionsPanel ? 'skeleton-panel' : 'skeleton-shortcuts'
     return showOptionsPanel ? 'skeleton-panel' : 'skeleton-shortcuts'
   }
-  if (!showOptionsPanel) return stickyCommerce ? 'empty' : 'shortcuts'
+  if (!showOptionsPanel) return sidebarCommerce ? 'empty' : 'shortcuts'
   return `panel-${selectedOptionId}`
 }
 
@@ -141,7 +149,7 @@ function AvailabilityContentStage({
   dateLabel,
   onSelectOption,
   onOpenOptions,
-  stickyCommerce,
+  sidebarCommerce,
 }: {
   readonly showOptionsPanel: boolean
   readonly optionsLoading: boolean
@@ -150,14 +158,14 @@ function AvailabilityContentStage({
   readonly dateLabel: string
   readonly onSelectOption?: (optionId: string) => void
   readonly onOpenOptions?: (optionId: string) => void
-  readonly stickyCommerce: boolean
+  readonly sidebarCommerce: boolean
 }) {
   const reduceMotion = useReducedMotion()
   const viewKey = getAvailabilityViewKey(
     showOptionsPanel,
     optionsLoading,
     selectedOptionId,
-    stickyCommerce,
+    sidebarCommerce,
   )
   const fadeDuration = reduceMotion ? 0 : AVAILABILITY_FADE_MS
 

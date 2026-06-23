@@ -46,6 +46,7 @@ type Props = {
   onDateLabelChange?: (dateLabel: string) => void
   onSelectAvailabilityOption?: (optionId: string) => void
   onOpenAvailabilityOptions?: (optionId: string) => void
+  onUpdateSearch?: () => void
 }
 
 /**
@@ -72,6 +73,7 @@ export function FigmaViatorPdpBlock({
   onDateLabelChange,
   onSelectAvailabilityOption,
   onOpenAvailabilityOptions,
+  onUpdateSearch,
 }: Props) {
   const resolvedTravelerCounts =
     travelerCounts ?? { adults: booking.travellers, children: 0, infants: 0 }
@@ -151,6 +153,7 @@ export function FigmaViatorPdpBlock({
                   : undefined
               }
               searchTotalLoading={showUpcomingAvailability && availabilityOptionsLoading}
+              onUpdateSearch={onUpdateSearch}
             />
           </div>
           {groupHighlightsWithViatorRail && productHighlights && viatorIconRail ? (

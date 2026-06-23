@@ -6,7 +6,7 @@ import { AvailabilityTravelersControl } from '../experience/pdp/AvailabilityTrav
 import { BookingSidebarCommerceOptions } from './BookingSidebarCommerceOptions'
 import bookAheadFlame from '../../assets/book-ahead-flame.png'
 import type { AvailabilityCommerceModeId } from '../../data/availabilityShortcutCommerce'
-import { isStickyCommerceAvailabilityMode } from '../../data/availabilityShortcutCommerce'
+import { usesStickyCommerceSidebar } from '../../data/availabilityShortcutCommerce'
 import type { AvailabilityTravelerCounts } from '../../data/availabilityShortcutTravelers'
 import type { BookingContent } from '../../data/variants'
 
@@ -28,6 +28,8 @@ type Props = {
   searchTotalAmount?: string
   /** Skeleton for total price while availability options load. */
   searchTotalLoading?: boolean
+  /** Reopens availability search (modal variant) when search is already active. */
+  onUpdateSearch?: () => void
   /** Overrides {@link BookingContent.travellers} in the date/travelers row. */
   travelers?: number
   /** Overrides {@link BookingContent.dateLabel} in the date/travelers row. */
@@ -46,6 +48,7 @@ export function BookingSidebar({
   embedded,
   hideBookAheadMobile,
   onCheckAvailability,
+  onUpdateSearch,
   availabilitySearchActive = false,
   searchTotalAmount,
   searchTotalLoading = false,
@@ -58,9 +61,9 @@ export function BookingSidebar({
   onSelectAvailabilityOption,
   availabilityOptionsLoading = false,
 }: Props) {
-  const stickyCommerce = isStickyCommerceAvailabilityMode(availabilityCommerceMode)
+  const sidebarCommerce = usesStickyCommerceSidebar(availabilityCommerceMode)
   const useMetaChips =
-    stickyCommerce && Boolean(onDateLabelChange && onTravelerCountsChange && travelerCounts)
+    sidebarCommerce && Boolean(onDateLabelChange && onTravelerCountsChange && travelerCounts)
   const shellCard = embedded
     ? 'bg-transparent p-0'
     : `rounded-[12px] border ${CARD_BORDER} bg-white p-6`
@@ -155,7 +158,7 @@ export function BookingSidebar({
         </div>
         )}
 
-        {stickyCommerce && !availabilitySearchActive ? (
+        {sidebarCommerce && !availabilitySearchActive ? (
           <div className="mt-6">
             <BookingSidebarCommerceOptions
               optionsLoading={availabilityOptionsLoading}
@@ -173,13 +176,15 @@ export function BookingSidebar({
               ? 'mt-5 w-full rounded-[10px] border-[1.5px] border-black bg-white py-3.5 text-center text-[15px] font-bold leading-tight tracking-tight text-black shadow-none transition hover:bg-neutral-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black active:scale-[0.99]'
               : `mt-5 w-full rounded-[10px] ${CTA_TEAL} py-3.5 text-center text-[15px] font-bold leading-tight tracking-tight text-white shadow-none transition hover:bg-[#256b51] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#256b51] active:scale-[0.99]`
           }
-          onClick={availabilitySearchActive ? undefined : onCheckAvailability}
+          onClick={
+            availabilitySearchActive ? onUpdateSearch ?? onCheckAvailability : onCheckAvailability
+          }
         >
           {availabilitySearchActive ? 'Update Search' : 'Check Availability'}
         </button>
 
         {/* Policies */}
-        {availabilitySearchActive ? null : stickyCommerce ? (
+        {availabilitySearchActive ? null : sidebarCommerce ? (
           <div className="mt-6 flex items-center justify-center gap-2 text-center text-sm leading-normal text-black">
             <BenefitCheckIcon className="size-5 shrink-0" />
             <span>

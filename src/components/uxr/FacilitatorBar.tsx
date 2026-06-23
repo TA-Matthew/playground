@@ -2,6 +2,7 @@ import { useEffect, useState, type RefObject } from 'react'
 import type { ProductHighlightIconStyleId } from '../../data/productHighlightIconStyles'
 import type { ProductHighlightBase, ProductHighlightIconRail } from '../../data/productHighlightLayouts'
 import type { AvailabilityCommerceModeId } from '../../data/availabilityShortcutCommerce'
+import { AVAILABILITY_COMMERCE_MODE_OPTIONS } from '../../data/availabilityShortcutCommerce'
 import type { VariantId } from '../../data/variants'
 
 const FACILITATOR_VARIANT_UI: Record<
@@ -268,20 +269,7 @@ export function FacilitatorBar({
                 Options
               </span>
               <div className={PILL_GROUP_CLASS}>
-                {(
-                  [
-                    {
-                      id: 'main-column' as const,
-                      label: 'Main column',
-                      title: 'Availability shortcuts in upcoming availability section',
-                    },
-                    {
-                      id: 'sticky-commerce' as const,
-                      label: 'Sticky commerce',
-                      title: 'Availability shortcuts in sticky booking sidebar (Figma 23804:21049)',
-                    },
-                  ] as const
-                ).map((opt) => (
+                {AVAILABILITY_COMMERCE_MODE_OPTIONS.map((opt) => (
                   <button
                     key={opt.id}
                     type="button"

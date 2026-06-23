@@ -30,6 +30,7 @@ export type ViatorPdpBlockProps = {
   onDateLabelChange?: (dateLabel: string) => void
   onSelectAvailabilityOption?: (optionId: string) => void
   onOpenAvailabilityOptions?: (optionId: string) => void
+  onUpdateSearch?: () => void
 }
 
 export function ViatorPdpBlock({
@@ -51,6 +52,7 @@ export function ViatorPdpBlock({
   onDateLabelChange,
   onSelectAvailabilityOption,
   onOpenAvailabilityOptions,
+  onUpdateSearch,
 }: ViatorPdpBlockProps) {
   return (
     <FigmaViatorPdpBlock
@@ -72,6 +74,7 @@ export function ViatorPdpBlock({
       onDateLabelChange={onDateLabelChange}
       onSelectAvailabilityOption={onSelectAvailabilityOption}
       onOpenAvailabilityOptions={onOpenAvailabilityOptions}
+      onUpdateSearch={onUpdateSearch}
     />
   )
 }

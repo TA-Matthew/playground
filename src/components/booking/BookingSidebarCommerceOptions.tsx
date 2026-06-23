@@ -1,4 +1,7 @@
-import { AVAILABILITY_SHORTCUTS } from '../../data/availabilityShortcuts'
+import {
+  COMMERCE_SIDEBAR_HIDDEN_OPTION_COUNT,
+  COMMERCE_SIDEBAR_SHORTCUTS,
+} from '../../data/availabilityShortcuts'
 import type { AvailabilityShortcut } from '../../data/availabilityShortcuts'
 import {
   formatCommerceTimesPreview,
@@ -29,11 +32,11 @@ export function BookingSidebarCommerceOptions({
       className="overflow-hidden rounded-lg border border-[#d9d9d9]"
       data-commerce-availability-options
     >
-      {AVAILABILITY_SHORTCUTS.map((shortcut, index) => (
+      {COMMERCE_SIDEBAR_SHORTCUTS.map((shortcut, index) => (
         <CommerceOptionRow
           key={shortcut.id}
           shortcut={shortcut}
-          showDivider={index < AVAILABILITY_SHORTCUTS.length - 1}
+          showDivider={index < COMMERCE_SIDEBAR_SHORTCUTS.length - 1}
           onSelect={() => onSelectOption?.(shortcut.id)}
         />
       ))}
@@ -42,7 +45,7 @@ export function BookingSidebarCommerceOptions({
         className="flex w-full items-center justify-center gap-2 border-t border-[#d9d9d9] px-4 py-4 text-sm font-medium leading-5 tracking-[0.05px] text-[#333] underline decoration-solid underline-offset-2 transition hover:bg-neutral-50"
         onClick={onShowMoreOptions}
       >
-        Show 1 more option
+        Show {COMMERCE_SIDEBAR_HIDDEN_OPTION_COUNT} more options
         <ChevronDown />
       </button>
     </div>
@@ -100,7 +103,6 @@ function BookingSidebarCommerceOptionsSkeleton() {
       aria-busy="true"
       aria-label="Loading availability options"
     >
-      <CommerceOptionRowSkeleton showDivider />
       <CommerceOptionRowSkeleton showDivider />
       <CommerceOptionRowSkeleton />
       <div className="border-t border-[#e8e8e8] px-4 py-4">
