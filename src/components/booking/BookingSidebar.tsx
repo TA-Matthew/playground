@@ -71,46 +71,75 @@ export function BookingSidebar({
   const travelerCount = travelers ?? booking.travellers
   const dateLabel = dateLabelOverride ?? booking.dateLabel
 
+  const bookingBadges = (
+    <div className="flex flex-wrap gap-2">
+      <Tag variant="outlined">
+        <DealBadgeIcon aria-hidden />
+        {booking.badgeExceptionalDeal}
+      </Tag>
+      <Tag variant="outlined">
+        <KidsDiscountIcon aria-hidden />
+        {booking.badgeKidsDiscount}
+      </Tag>
+    </div>
+  )
+
+  const commerceFromPriceBlock = (
+    <div className="flex flex-col gap-2">
+      <p className="flex items-baseline gap-1 leading-[1.2] text-black">
+        <span className="text-2xl font-bold tracking-[-0.02em]">
+          From {booking.priceAmount}
+        </span>
+        <span className="text-sm font-normal leading-5 tracking-[0.05px] text-[#737373]">
+          /person
+        </span>
+      </p>
+      <div className="flex items-center gap-1 text-sm leading-5 text-[#008768]">
+        <span>
+          Free cancellation
+          <span aria-hidden> • </span>
+          Pay $0 today
+        </span>
+        <InfoCircleIcon className="size-4 shrink-0 text-[#008768]" />
+      </div>
+    </div>
+  )
+
+  const priceBlock = availabilitySearchActive ? (
+    searchTotalLoading ? (
+      <BookingSearchTotalSkeleton />
+    ) : (
+      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 leading-[1.2] text-black">
+        <span className="text-[clamp(22px,2.75vw,28px)] font-bold tracking-[-0.02em]">
+          {searchTotalAmount ?? booking.priceAmount}
+        </span>
+        <button
+          type="button"
+          className="text-[14px] font-normal underline decoration-solid underline-offset-2 transition hover:text-[#333]"
+        >
+          Price details
+        </button>
+      </div>
+    )
+  ) : sidebarCommerce ? (
+    commerceFromPriceBlock
+  ) : (
+    <p className="leading-[1.2] text-black">
+      <span className="text-[clamp(22px,2.75vw,28px)] font-bold tracking-[-0.02em]">
+        From {booking.priceAmount}
+      </span>{' '}
+      <span className="text-[14px] font-normal">per person</span>
+    </p>
+  )
+
   return (
     <div className="space-y-4">
       <div className={shellCard} aria-label="Book this experience">
-        {/* Price */}
-        {availabilitySearchActive ? (
-          searchTotalLoading ? (
-            <BookingSearchTotalSkeleton />
-          ) : (
-            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 leading-[1.2] text-black">
-              <span className="text-[clamp(22px,2.75vw,28px)] font-bold tracking-[-0.02em]">
-                {searchTotalAmount ?? booking.priceAmount}
-              </span>
-              <button
-                type="button"
-                className="text-[14px] font-normal underline decoration-solid underline-offset-2 transition hover:text-[#333]"
-              >
-                Price details
-              </button>
-            </div>
-          )
-        ) : (
-          <p className="leading-[1.2] text-black">
-            <span className="text-[clamp(22px,2.75vw,28px)] font-bold tracking-[-0.02em]">
-              From {booking.priceAmount}
-            </span>{' '}
-            <span className="text-[14px] font-normal">per person</span>
-          </p>
-        )}
+        {sidebarCommerce ? bookingBadges : null}
 
-        {/* Badges — shared Tag component, outlined variant */}
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Tag variant="outlined">
-            <DealBadgeIcon aria-hidden />
-            {booking.badgeExceptionalDeal}
-          </Tag>
-          <Tag variant="outlined">
-            <KidsDiscountIcon aria-hidden />
-            {booking.badgeKidsDiscount}
-          </Tag>
-        </div>
+        <div className={sidebarCommerce ? 'mt-4' : undefined}>{priceBlock}</div>
+
+        {!sidebarCommerce ? <div className="mt-4">{bookingBadges}</div> : null}
 
         {/* Date + Travelers */}
         {useMetaChips ? (
@@ -183,18 +212,8 @@ export function BookingSidebar({
           {availabilitySearchActive ? 'Update Search' : 'Check Availability'}
         </button>
 
-        {/* Policies */}
-        {availabilitySearchActive ? null : sidebarCommerce ? (
-          <div className="mt-6 flex items-center justify-center gap-2 text-center text-sm leading-normal text-black">
-            <BenefitCheckIcon className="size-5 shrink-0" />
-            <span>
-              <span className="font-normal">Free 24 hr cancellation</span>
-              <span className="font-normal"> • </span>
-              <span className="font-normal">Pay $0 today</span>
-            </span>
-            <InfoCircleIcon />
-          </div>
-        ) : (
+        {/* Policies — main column only; commerce benefits sit under From price */}
+        {availabilitySearchActive || sidebarCommerce ? null : (
         <div className={`mt-5 rounded-[10px] ${MINT_PANEL} px-4 py-3.5`}>
           <ul className="space-y-3 text-[13px] leading-snug text-[#333]">
             <li className="flex gap-2.5">
@@ -381,9 +400,14 @@ function PersonIcon() {
   )
 }
 
-function InfoCircleIcon() {
+function InfoCircleIcon({ className }: { readonly className?: string }) {
   return (
-    <svg className="size-4 shrink-0 text-[#4d4d4d]" viewBox="0 0 16 16" fill="none" aria-hidden>
+    <svg
+      className={className ?? 'size-4 shrink-0 text-[#4d4d4d]'}
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden
+    >
       <circle cx="8" cy="8" r="6.25" stroke="currentColor" strokeWidth="1.25" />
       <path d="M8 7v4M8 5.5v.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
     </svg>

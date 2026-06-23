@@ -8,6 +8,9 @@ import {
   getTourGradeOption,
 } from '../../data/availabilityShortcutOptions'
 
+const COMMERCE_SECONDARY_TEXT =
+  'text-sm font-normal leading-5 tracking-[0.05px] text-[#737373]'
+
 type Props = {
   readonly optionsLoading?: boolean
   readonly onSelectOption?: (optionId: string) => void
@@ -74,18 +77,24 @@ function CommerceOptionRow({
       }`}
       onClick={onSelect}
     >
-      {shortcut.scarcityLabel ? (
-        <p className="text-xs font-medium leading-4 text-[#c81e3a]">{shortcut.scarcityLabel}</p>
-      ) : null}
-      <p className="text-base font-medium leading-6 tracking-[0.05px] text-[#333]">{shortcut.title}</p>
+      <div className="flex items-start justify-between gap-3">
+        <p className="min-w-0 text-base font-medium leading-6 tracking-[0.05px] text-[#333]">
+          {shortcut.title}
+        </p>
+        {shortcut.scarcityLabel ? (
+          <span className="shrink-0 text-sm font-medium leading-5 text-[#c81e3a]">
+            {shortcut.scarcityLabel}
+          </span>
+        ) : null}
+      </div>
       <div className="flex items-end justify-between gap-3">
-        <p className="flex min-w-0 items-baseline gap-1 whitespace-nowrap text-black">
-          <span className="text-xs font-normal leading-4 tracking-[0.05px]">from</span>
-          <span className="text-base font-bold leading-6 tracking-[0.05px]">{shortcut.priceAmount}</span>
-          <span className="text-xs font-normal leading-4 tracking-[0.05px]">/person</span>
+        <p className={`flex min-w-0 items-baseline gap-1 whitespace-nowrap ${COMMERCE_SECONDARY_TEXT}`}>
+          <span>from</span>
+          <span className="text-base font-bold leading-6 tracking-[0.05px] text-[#333]">{shortcut.priceAmount}</span>
+          <span>/person</span>
         </p>
         <p
-          className="shrink-0 text-right text-sm font-normal leading-5 tracking-[0.05px] text-[#4d4d4d]"
+          className={`shrink-0 text-right ${COMMERCE_SECONDARY_TEXT}`}
           aria-label={timesPreview.ariaLabel}
         >
           {timesPreview.text}
@@ -117,7 +126,10 @@ function CommerceOptionRowSkeleton({ showDivider }: { readonly showDivider?: boo
     <div
       className={`flex flex-col gap-2 px-4 py-4 ${showDivider ? 'border-b border-[#e8e8e8]' : ''}`}
     >
-      <Bone className="h-6 w-[min(100%,180px)]" />
+      <div className="flex items-start justify-between gap-3">
+        <Bone className="h-6 w-[min(100%,180px)]" />
+        <Bone className="h-4 w-16 shrink-0" />
+      </div>
       <div className="flex items-end justify-between gap-3">
         <Bone className="h-6 w-24" />
         <Bone className="h-5 w-28 shrink-0" />

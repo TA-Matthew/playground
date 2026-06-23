@@ -37,10 +37,14 @@ export const AVAILABILITY_SHORTCUTS: readonly AvailabilityShortcut[] = [
 /** Sticky commerce / modal sidebar — first N shortcuts before “Show more”. */
 export const COMMERCE_SIDEBAR_SHORTCUT_COUNT = 2
 
-export const COMMERCE_SIDEBAR_SHORTCUTS = AVAILABILITY_SHORTCUTS.slice(
-  0,
-  COMMERCE_SIDEBAR_SHORTCUT_COUNT,
-)
+export const COMMERCE_SIDEBAR_SCARCITY_LABEL = '3 left'
+
+export const COMMERCE_SIDEBAR_SHORTCUTS: readonly AvailabilityShortcut[] =
+  AVAILABILITY_SHORTCUTS.slice(0, COMMERCE_SIDEBAR_SHORTCUT_COUNT).map((shortcut, index) =>
+    index === 0 && shortcut.scarcityLabel
+      ? { ...shortcut, scarcityLabel: COMMERCE_SIDEBAR_SCARCITY_LABEL }
+      : shortcut,
+  )
 
 export const COMMERCE_SIDEBAR_HIDDEN_OPTION_COUNT =
   TOUR_GRADE_OPTIONS.length - COMMERCE_SIDEBAR_SHORTCUT_COUNT
