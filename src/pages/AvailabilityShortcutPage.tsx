@@ -174,13 +174,19 @@ export function AvailabilityShortcutPage() {
     if (areTravelerCountsEqual(prevTravelerCountsRef.current, travelerCounts)) return
     prevTravelerCountsRef.current = travelerCounts
     triggerOptionsLoading()
-  }, [travelerCounts, triggerOptionsLoading])
+    if (!sidebarCommerce) {
+      requestAnimationFrame(() => scrollToUpcomingAvailability())
+    }
+  }, [travelerCounts, triggerOptionsLoading, sidebarCommerce, scrollToUpcomingAvailability])
 
   useEffect(() => {
     if (prevDateLabelRef.current === dateLabel) return
     prevDateLabelRef.current = dateLabel
     triggerOptionsLoading()
-  }, [dateLabel, triggerOptionsLoading])
+    if (!sidebarCommerce) {
+      requestAnimationFrame(() => scrollToUpcomingAvailability())
+    }
+  }, [dateLabel, triggerOptionsLoading, sidebarCommerce, scrollToUpcomingAvailability])
 
   const availabilitySearchTotal = useMemo(() => {
     const option = getTourGradeOption(selectedAvailabilityOptionId)
