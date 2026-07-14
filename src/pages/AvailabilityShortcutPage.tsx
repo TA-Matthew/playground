@@ -114,19 +114,33 @@ export function AvailabilityShortcutPage() {
       openAvailabilityOptions(optionId)
       if (optionsInModal) {
         setAvailabilityModalOpen(true)
-      } else if (sidebarCommerce) {
+      } else {
         requestAnimationFrame(() => scrollToUpcomingAvailability())
       }
     },
-    [openAvailabilityOptions, optionsInModal, scrollToUpcomingAvailability, sidebarCommerce],
+    [openAvailabilityOptions, optionsInModal, scrollToUpcomingAvailability],
   )
 
   const openAvailabilityFromSidebar = useCallback(() => {
     handleOpenAvailabilityOptions('english')
-    if (!sidebarCommerce) {
+  }, [handleOpenAvailabilityOptions])
+
+  /** Date/pax edited inline in the main-column section — re-anchor on the section like the sticky "Check Availability" flow. */
+  const handleDateLabelChangeInSection = useCallback(
+    (nextDateLabel: string) => {
+      setDateLabel(nextDateLabel)
       requestAnimationFrame(() => scrollToUpcomingAvailability())
-    }
-  }, [handleOpenAvailabilityOptions, scrollToUpcomingAvailability, sidebarCommerce])
+    },
+    [scrollToUpcomingAvailability],
+  )
+
+  const handleTravelerCountsChangeInSection = useCallback(
+    (counts: AvailabilityTravelerCounts) => {
+      handleTravelerCountsChange(counts)
+      requestAnimationFrame(() => scrollToUpcomingAvailability())
+    },
+    [handleTravelerCountsChange, scrollToUpcomingAvailability],
+  )
 
   const handleCloseAvailabilityModal = useCallback(() => {
     setAvailabilityModalOpen(false)
@@ -304,9 +318,9 @@ export function AvailabilityShortcutPage() {
                   availabilityOptionsLoading={availabilityOptionsLoading}
                   selectedAvailabilityOptionId={selectedAvailabilityOptionId}
                   travelerCounts={travelerCounts}
-                  onTravelerCountsChange={handleTravelerCountsChange}
+                  onTravelerCountsChange={handleTravelerCountsChangeInSection}
                   dateLabel={dateLabel}
-                  onDateLabelChange={setDateLabel}
+                  onDateLabelChange={handleDateLabelChangeInSection}
                   onSelectAvailabilityOption={setSelectedAvailabilityOptionId}
                   onOpenAvailabilityOptions={handleOpenAvailabilityOptions}
                   onUpdateSearch={optionsInModal ? handleUpdateSearch : undefined}
