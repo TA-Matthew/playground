@@ -34,6 +34,7 @@ export const LOGISTICS_PROJECT_PATH = '/projects/logistics'
 export const PRODUCT_HIGHLIGHT_PROJECT_PATH = '/projects/product-highlight'
 export const PDP_TEMPLATE_PROJECT_PATH = '/projects/pdp-template'
 export const AVAILABILITY_SHORTCUT_PROJECT_PATH = '/projects/availability-shortcut'
+export const OASIS_PDP_PROJECT_PATH = '/projects/oasis-pdp'
 export const AI_REVIEW_PROJECT_PATH = '/projects/ai-review-prototype'
 export const LOYALTY_LOGIN_BUTTON_PATH = '/projects/loyalty-login-button-animation'
 
@@ -78,5 +79,12 @@ export const projects: Project[] = [
     description:
       'Prototype faster paths to Check Availability and booking on the PDP — Q2 Decide Availability study shell.',
     path: AVAILABILITY_SHORTCUT_PROJECT_PATH,
+  },
+  {
+    id: 'oasis-pdp',
+    title: 'OASIS',
+    description:
+      'Distilling the PDP to its core and giving a streamlined experience to travelers.',
+    path: OASIS_PDP_PROJECT_PATH,
   },
 ]

@@ -4,6 +4,7 @@ import {
   AVAILABILITY_SHORTCUT_PROJECT_PATH,
   LOGISTICS_PROJECT_PATH,
   LOYALTY_LOGIN_BUTTON_PATH,
+  OASIS_PDP_PROJECT_PATH,
   PDP_TEMPLATE_PROJECT_PATH,
   PRODUCT_HIGHLIGHT_PROJECT_PATH,
 } from './data/projects'
@@ -12,6 +13,7 @@ import { AvailabilityShortcutPage } from './pages/AvailabilityShortcutPage'
 import { ExperiencePage } from './pages/ExperiencePage'
 import { HomePage } from './pages/HomePage'
 import { LoyaltyLoginButtonPage } from './pages/LoyaltyLoginButtonPage'
+import { OasisPdpPage } from './pages/OasisPdpPage'
 import { PdpTemplatePage } from './pages/PdpTemplatePage'
 
 export default function App() {
@@ -22,6 +24,7 @@ export default function App() {
       <Route path={PRODUCT_HIGHLIGHT_PROJECT_PATH} element={<ExperiencePage />} />
       <Route path={PDP_TEMPLATE_PROJECT_PATH} element={<PdpTemplatePage />} />
       <Route path={AVAILABILITY_SHORTCUT_PROJECT_PATH} element={<AvailabilityShortcutPage />} />
+      <Route path={OASIS_PDP_PROJECT_PATH} element={<OasisPdpPage />} />
       <Route path={AI_REVIEW_PROJECT_PATH} element={<AiReviewPage />} />
       <Route path={LOYALTY_LOGIN_BUTTON_PATH} element={<LoyaltyLoginButtonPage />} />
     </Routes>
