@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { BookingSidebar, type BookingSidebarHandle } from '../../booking/BookingSidebar'
 import { MobileStickyAvailabilityBar } from './MobileStickyAvailabilityBar'
 import {
@@ -33,6 +33,8 @@ type Props = {
   productHighlightTopProduct?: boolean | null
   /** Facilitator-only: hide the book-ahead row on mobile. */
   hideBookAheadMobile?: boolean
+  /** Oasis — highlights icon rows rendered between the icon rail and the review carousel. */
+  extraHighlights?: ReactNode
   /** Availability shortcut — desktop “Upcoming availability” between icon rail and reviews. */
   showUpcomingAvailability?: boolean
   /** Availability shortcut — shortcuts in main column vs sticky commerce (`asCommerce`). */
@@ -64,6 +66,7 @@ export function FigmaViatorPdpBlock({
   productHighlightConciseSummary,
   productHighlightTopProduct,
   hideBookAheadMobile,
+  extraHighlights,
   showUpcomingAvailability = false,
   availabilityCommerceMode = 'main-column',
   availabilityOptionsOpen = false,
@@ -198,6 +201,7 @@ export function FigmaViatorPdpBlock({
             </>
           )}
         </div>
+        {extraHighlights}
         <PdpWhyTravelersLoved
           showTopDivider={layoutOpts?.iconRail === 'expedia'}
           showBottomSpacingFromLg={showUpcomingAvailability}

@@ -2,6 +2,7 @@
  * Logistics PDP top: Figma (Q2) layout with real Viator / Tripadvisor listing data.
  * @see FigmaViatorPdpBlock
  */
+import type { ReactNode } from 'react'
 import type { ProductHighlightIconStyleId } from '../../../data/productHighlightIconStyles'
 import type { ProductHighlightLayoutId } from '../../../data/productHighlightLayouts'
 import type { AvailabilityCommerceModeId } from '../../../data/availabilityShortcutCommerce'
@@ -17,6 +18,8 @@ export type ViatorPdpBlockProps = {
   productHighlightTopProduct?: boolean | null
   /** Facilitator-only: hide the book-ahead row on mobile. */
   hideBookAheadMobile?: boolean
+  /** Oasis — highlights icon rows rendered between the icon rail and the review carousel. */
+  extraHighlights?: ReactNode
   /** Availability shortcut — desktop “Upcoming availability” section. */
   showUpcomingAvailability?: boolean
   availabilityCommerceMode?: AvailabilityCommerceModeId
@@ -40,6 +43,7 @@ export function ViatorPdpBlock({
   productHighlightConciseSummary,
   productHighlightTopProduct,
   hideBookAheadMobile,
+  extraHighlights,
   showUpcomingAvailability,
   availabilityCommerceMode,
   availabilityOptionsOpen,
@@ -62,6 +66,7 @@ export function ViatorPdpBlock({
       productHighlightConciseSummary={productHighlightConciseSummary}
       productHighlightTopProduct={productHighlightTopProduct}
       hideBookAheadMobile={hideBookAheadMobile}
+      extraHighlights={extraHighlights}
       showUpcomingAvailability={showUpcomingAvailability}
       availabilityCommerceMode={availabilityCommerceMode}
       availabilityOptionsOpen={availabilityOptionsOpen}

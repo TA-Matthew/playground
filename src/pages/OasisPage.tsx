@@ -4,7 +4,6 @@ import { usePreloadMapPinImages } from '../hooks/usePreloadMapPinImages'
 import { useIsMobileViewport } from '../hooks/useIsMobileViewport'
 import { BookingSidebar } from '../components/booking/BookingSidebar'
 import { CollapsibleSection } from '../components/common/CollapsibleSection'
-import { AdditionalInfo } from '../components/additional/AdditionalInfo'
 import { PdpCancellationQuestionsSection } from '../components/experience/pdp/PdpCancellationQuestionsSection'
 import { PdpCompareSimilarExperiences } from '../components/experience/pdp/PdpCompareSimilarExperiences'
 import { PdpCustomersAlsoBought } from '../components/experience/pdp/PdpCustomersAlsoBought'
@@ -15,9 +14,12 @@ import { ViatorPdpBlock } from '../components/experience/pdp/ViatorPdpBlock'
 import { UPCOMING_AVAILABILITY_SECTION_ID } from '../components/experience/pdp/PdpUpcomingAvailabilitySection'
 import { LogisticsBlock } from '../components/logistics/LogisticsBlock'
 import { OasisHeader, OasisMobileTopBar } from '../components/oasis/OasisHeader'
+import { OasisExploreSimilar } from '../components/oasis/OasisExploreSimilar'
 import { OasisFooter } from '../components/oasis/OasisFooter'
+import { OasisHighlights } from '../components/oasis/OasisHighlights'
 import { OasisMobileSection } from '../components/oasis/OasisMobileSection'
 import { OasisMobileStickyBar } from '../components/oasis/OasisMobileStickyBar'
+import { OasisThingsToKnow } from '../components/oasis/OasisThingsToKnow'
 import { AVAILABILITY_SHORTCUT_DEFAULT_DATE_LABEL } from '../data/availabilityShortcutDates'
 import { formatAvailabilitySearchTotal, getTourGradeOption } from '../data/availabilityShortcutOptions'
 import {
@@ -150,6 +152,7 @@ export function OasisPage() {
           <main className="pdp-figma w-full min-w-0 max-w-[864px] lg:order-1">
             <ViatorPdpBlock
               booking={booking}
+              extraHighlights={<OasisHighlights />}
               showUpcomingAvailability
               availabilityOptionsOpen={availabilityOptionsOpen}
               availabilityOptionsLoading={availabilityOptionsLoading}
@@ -176,7 +179,7 @@ export function OasisPage() {
                 </OasisMobileSection>
 
                 <OasisMobileSection title="Things to know">
-                  <AdditionalInfo />
+                  <OasisThingsToKnow />
                 </OasisMobileSection>
               </>
             ) : (
@@ -193,7 +196,7 @@ export function OasisPage() {
                 </CollapsibleSection>
 
                 <CollapsibleSection title="Things to know" defaultOpen>
-                  <AdditionalInfo />
+                  <OasisThingsToKnow />
                 </CollapsibleSection>
               </>
             )}
@@ -225,6 +228,7 @@ export function OasisPage() {
 
         <PdpCompareSimilarExperiences />
         <PdpCustomersAlsoBought />
+        <OasisExploreSimilar />
       </div>
 
       <OasisFooter />
