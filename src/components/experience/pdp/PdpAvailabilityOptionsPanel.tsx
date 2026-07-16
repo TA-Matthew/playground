@@ -26,7 +26,7 @@ export function PdpAvailabilityOptionsPanel({
   const collapsedOptions = TOUR_GRADE_OPTIONS.filter((option) => option.id !== selected.id)
 
   return (
-    <div className="relative flex flex-col gap-4 pb-6">
+    <div className="relative flex flex-col gap-4 px-4 pb-4 lg:px-0 lg:pb-6">
       {selected.scarcityLabel ? (
         <span className="absolute -top-3 left-6 z-10 inline-flex rounded-md bg-[#feece9] px-1 py-1 text-xs font-medium leading-4 text-[#ae3e38]">
           {selected.scarcityLabel}

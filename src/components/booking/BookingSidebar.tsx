@@ -1,12 +1,17 @@
 import { useId, type SVGProps } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { BenefitCheckIcon } from '../icons/BenefitCheckIcon'
 import { Tag } from '../common/Tag'
 import { AvailabilityDateControl } from '../experience/pdp/AvailabilityDateControl'
 import { AvailabilityTravelersControl } from '../experience/pdp/AvailabilityTravelersControl'
+import { AvailabilityShortcutCard } from '../experience/pdp/AvailabilityShortcutCard'
+import { PdpAvailabilityOptionsPanel } from '../experience/pdp/PdpAvailabilityOptionsPanel'
+import { PdpAvailabilityOptionsSkeleton } from '../experience/pdp/PdpAvailabilityOptionsSkeleton'
 import { BookingSidebarCommerceOptions } from './BookingSidebarCommerceOptions'
 import bookAheadFlame from '../../assets/book-ahead-flame.png'
 import type { AvailabilityCommerceModeId } from '../../data/availabilityShortcutCommerce'
-import { usesStickyCommerceSidebar } from '../../data/availabilityShortcutCommerce'
+import { usesMergedMobileCommerce, usesStickyCommerceSidebar } from '../../data/availabilityShortcutCommerce'
+import { AVAILABILITY_SHORTCUTS } from '../../data/availabilityShortcuts'
 import type { AvailabilityTravelerCounts } from '../../data/availabilityShortcutTravelers'
 import type { BookingContent } from '../../data/variants'
 
@@ -41,6 +46,8 @@ type Props = {
   onTravelerCountsChange?: (counts: AvailabilityTravelerCounts) => void
   onSelectAvailabilityOption?: (optionId: string) => void
   availabilityOptionsLoading?: boolean
+  /** Merged MW mode — selected option once the shortcut shelf swaps to the full options panel. */
+  selectedAvailabilityOptionId?: string
 }
 
 export function BookingSidebar({
@@ -60,8 +67,10 @@ export function BookingSidebar({
   onTravelerCountsChange,
   onSelectAvailabilityOption,
   availabilityOptionsLoading = false,
+  selectedAvailabilityOptionId = 'english',
 }: Props) {
   const sidebarCommerce = usesStickyCommerceSidebar(availabilityCommerceMode)
+  const mergedMobileCommerce = embedded && usesMergedMobileCommerce(availabilityCommerceMode)
   const useMetaChips =
     sidebarCommerce && Boolean(onDateLabelChange && onTravelerCountsChange && travelerCounts)
   const shellCard = embedded
@@ -70,6 +79,27 @@ export function BookingSidebar({
 
   const travelerCount = travelers ?? booking.travellers
   const dateLabel = dateLabelOverride ?? booking.dateLabel
+
+  const bookAheadBanner = (
+    <div
+      className={`flex items-start gap-4 self-stretch rounded-[12px] border ${CARD_BORDER} bg-white px-4 py-2`}
+    >
+      <img
+        src={bookAheadFlame}
+        alt=""
+        width={40}
+        height={40}
+        className="h-10 w-10 shrink-0 object-contain"
+        aria-hidden
+      />
+      <div className="min-w-0 font-sans text-[#333] [font-feature-settings:'liga'_0,'clig'_0]">
+        <p className="text-[14px] font-medium not-italic leading-[150%]">{booking.bookAheadTitle}</p>
+        <p className="text-[13px] font-normal not-italic leading-[150%]">
+          {booking.bookAheadSubtitle}
+        </p>
+      </div>
+    </div>
+  )
 
   const bookingBadges = (
     <div className="flex flex-wrap gap-2">
@@ -197,20 +227,39 @@ export function BookingSidebar({
           </div>
         ) : null}
 
+        {embedded && availabilitySearchActive && !hideBookAheadMobile ? (
+          <div className="mt-6">{bookAheadBanner}</div>
+        ) : null}
+
+        {mergedMobileCommerce ? (
+          <div className="mt-6">
+            <MergedMobileAvailability
+              availabilitySearchActive={availabilitySearchActive}
+              optionsLoading={availabilityOptionsLoading}
+              selectedOptionId={selectedAvailabilityOptionId}
+              travelerCounts={travelerCounts}
+              dateLabel={dateLabel}
+              onSelectOption={onSelectAvailabilityOption}
+            />
+          </div>
+        ) : null}
+
         {/* Primary CTA */}
-        <button
-          type="button"
-          className={
-            availabilitySearchActive
-              ? 'mt-5 w-full rounded-[10px] border-[1.5px] border-black bg-white py-3.5 text-center text-[15px] font-bold leading-tight tracking-tight text-black shadow-none transition hover:bg-neutral-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black active:scale-[0.99]'
-              : `mt-5 w-full rounded-[10px] ${CTA_TEAL} py-3.5 text-center text-[15px] font-bold leading-tight tracking-tight text-white shadow-none transition hover:bg-[#256b51] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#256b51] active:scale-[0.99]`
-          }
-          onClick={
-            availabilitySearchActive ? onUpdateSearch ?? onCheckAvailability : onCheckAvailability
-          }
-        >
-          {availabilitySearchActive ? 'Update Search' : 'Check Availability'}
-        </button>
+        {!mergedMobileCommerce ? (
+          <button
+            type="button"
+            className={
+              availabilitySearchActive
+                ? 'mt-5 w-full rounded-[10px] border-[1.5px] border-black bg-white py-3.5 text-center text-[15px] font-bold leading-tight tracking-tight text-black shadow-none transition hover:bg-neutral-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black active:scale-[0.99]'
+                : `mt-5 w-full rounded-[10px] ${CTA_TEAL} py-3.5 text-center text-[15px] font-bold leading-tight tracking-tight text-white shadow-none transition hover:bg-[#256b51] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#256b51] active:scale-[0.99]`
+            }
+            onClick={
+              availabilitySearchActive ? onUpdateSearch ?? onCheckAvailability : onCheckAvailability
+            }
+          >
+            {availabilitySearchActive ? 'Update Search' : 'Check Availability'}
+          </button>
+        ) : null}
 
         {/* Policies — main column only; commerce benefits sit under From price */}
         {availabilitySearchActive || sidebarCommerce ? null : (
@@ -240,29 +289,90 @@ export function BookingSidebar({
         )}
       </div>
 
-      {embedded && hideBookAheadMobile ? null : (
-      <div
-        className={`flex items-start gap-4 self-stretch rounded-[12px] border ${CARD_BORDER} bg-white px-4 py-2`}
-      >
-        <img
-          src={bookAheadFlame}
-          alt=""
-          width={40}
-          height={40}
-          className="h-10 w-10 shrink-0 object-contain"
-          aria-hidden
-        />
-        <div className="min-w-0 font-sans text-[#333] [font-feature-settings:'liga'_0,'clig'_0]">
-          <p className="text-[14px] font-medium not-italic leading-[150%]">
-            {booking.bookAheadTitle}
-          </p>
-          <p className="text-[13px] font-normal not-italic leading-[150%]">
-            {booking.bookAheadSubtitle}
-          </p>
-        </div>
-      </div>
-      )}
+      {!embedded ? (
+        bookAheadBanner
+      ) : !availabilitySearchActive && !hideBookAheadMobile ? (
+        bookAheadBanner
+      ) : null}
     </div>
+  )
+}
+
+/** Merged MW mode — shortcut shelf swaps for the full options panel once one is selected. */
+function MergedMobileAvailability({
+  availabilitySearchActive,
+  optionsLoading,
+  selectedOptionId,
+  travelerCounts,
+  dateLabel,
+  onSelectOption,
+}: {
+  readonly availabilitySearchActive: boolean
+  readonly optionsLoading: boolean
+  readonly selectedOptionId: string
+  readonly travelerCounts?: AvailabilityTravelerCounts
+  readonly dateLabel: string
+  readonly onSelectOption?: (optionId: string) => void
+}) {
+  const reduceMotion = useReducedMotion()
+  const viewKey = availabilitySearchActive
+    ? optionsLoading
+      ? 'skeleton-panel'
+      : 'panel'
+    : optionsLoading
+      ? 'skeleton-shortcuts'
+      : 'shortcuts'
+
+  // Entering the loading skeleton right after Select is clicked — hold briefly so it
+  // settles in just as the book-ahead banner finishes sliding up above it.
+  const delay = viewKey === 'skeleton-panel' && !reduceMotion ? 0.3 : 0
+  const duration = reduceMotion ? 0 : 0.25
+
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={viewKey}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, transition: { duration, delay } }}
+        exit={{ opacity: 0, transition: { duration } }}
+      >
+        {viewKey === 'panel' ? (
+          <PdpAvailabilityOptionsPanel
+            selectedOptionId={selectedOptionId}
+            travelerCounts={travelerCounts!}
+            dateLabel={dateLabel}
+            onSelectedOptionChange={onSelectOption ?? (() => {})}
+          />
+        ) : null}
+
+        {viewKey === 'skeleton-panel' ? <PdpAvailabilityOptionsSkeleton /> : null}
+
+        {viewKey === 'skeleton-shortcuts' ? (
+          <div className="-mx-4 flex gap-3 overflow-x-auto px-4" data-availability-shortcuts>
+            {[0, 1, 2].map((index) => (
+              <div
+                key={index}
+                aria-hidden
+                className="h-[152px] w-[280px] shrink-0 animate-pulse rounded-2xl border border-[#e8e8e8] bg-[#f5f5f5]"
+              />
+            ))}
+          </div>
+        ) : null}
+
+        {viewKey === 'shortcuts' ? (
+          <div className="-mx-4 flex gap-3 overflow-x-auto px-4" data-availability-shortcuts>
+            {AVAILABILITY_SHORTCUTS.map((shortcut) => (
+              <div key={shortcut.id} className="w-[280px] shrink-0">
+                <AvailabilityShortcutCard
+                  shortcut={shortcut}
+                  onSelect={() => onSelectOption?.(shortcut.id)}
+                />
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </motion.div>
+    </AnimatePresence>
   )
 }
 

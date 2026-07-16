@@ -137,6 +137,7 @@ export function FigmaViatorPdpBlock({
               onDateLabelChange={onDateLabelChange}
               onTravelerCountsChange={onTravelerCountsChange}
               onSelectAvailabilityOption={onOpenAvailabilityOptions}
+              selectedAvailabilityOptionId={selectedAvailabilityOptionId}
               availabilityOptionsLoading={showUpcomingAvailability && availabilityOptionsLoading}
               onCheckAvailability={
                 showUpcomingAvailability

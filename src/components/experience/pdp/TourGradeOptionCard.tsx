@@ -81,76 +81,78 @@ function ExpandedTourGradeOptionCard({
     <article
       data-tour-grade-option-card
       data-variant="expanded"
-      className="relative flex w-full overflow-hidden rounded-2xl border border-[#008768] bg-white"
+      className="relative flex w-full flex-col overflow-hidden rounded-lg border-2 border-[#008768] bg-white lg:flex-row lg:rounded-2xl lg:border"
     >
-      <div className="flex min-w-0 flex-1 gap-4 p-6">
-        <RadioButton selected aria-hidden />
-        <div className="flex min-w-0 flex-1 flex-col gap-4">
-          <h3 className="text-lg font-bold leading-[1.2] text-black">{option.expandedTitle}</h3>
+      <div className="flex min-w-0 flex-1 flex-col gap-4 px-4 py-6 lg:p-6">
+        <div className="flex min-w-0 gap-4">
+          <RadioButton selected aria-hidden />
+          <h3 className="min-w-0 flex-1 text-lg font-bold leading-[1.2] text-black">
+            {option.expandedTitle}
+          </h3>
+        </div>
 
-          {option.description ? (
-            <div className="flex flex-col gap-1">
-              <p
-                className={`text-base leading-normal text-black ${readMoreOpen ? '' : 'line-clamp-2'}`}
-              >
-                {option.description}
-              </p>
-              <button
-                type="button"
-                className="inline-flex w-fit items-center gap-2 text-base leading-normal text-black"
-                onClick={() => setReadMoreOpen((open) => !open)}
-              >
-                {readMoreOpen ? 'Read less' : 'Read more'}
-                <ChevronDown className={readMoreOpen ? 'rotate-180' : ''} />
-              </button>
-            </div>
-          ) : null}
-
-          {option.timeSlots && option.timeSlots.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {option.timeSlots.map((slot) => (
-                <TimeSlotChip
-                  key={slot.id}
-                  slot={slot.id === selectedTimeId ? { ...slot, status: 'selected' } : slot}
-                  onSelect={() => {
-                    if (slot.status !== 'sold-out') setSelectedTimeId(slot.id)
-                  }}
-                />
-              ))}
-            </div>
-          ) : null}
-
-          <div className="rounded-lg bg-[#eafbf7] px-4 py-3">
-            <ul className="flex flex-col gap-4 text-sm leading-normal text-black">
-              <li className="flex gap-3">
-                <BenefitCheckIcon className="mt-0.5 h-5 w-5 shrink-0" />
-                <span>
-                  <span className="font-bold underline decoration-solid underline-offset-2">
-                    Free cancellation
-                  </span>{' '}
-                  before 3:00 PM (local time) on {dateLabel}
-                </span>
-              </li>
-              <li className="flex gap-3">
-                <BenefitCheckIcon className="mt-0.5 h-5 w-5 shrink-0" />
-                <span>
-                  <span className="font-bold underline decoration-solid underline-offset-2">
-                    Reserve now, pay nothing
-                  </span>{' '}
-                  until Feb 19
-                </span>
-              </li>
-            </ul>
+        {option.description ? (
+          <div className="flex flex-col gap-1">
+            <p
+              className={`text-base leading-normal text-black ${readMoreOpen ? '' : 'line-clamp-2'}`}
+            >
+              {option.description}
+            </p>
+            <button
+              type="button"
+              className="inline-flex w-fit items-center gap-2 text-base leading-normal text-black"
+              onClick={() => setReadMoreOpen((open) => !open)}
+            >
+              {readMoreOpen ? 'Read less' : 'Read more'}
+              <ChevronDown className={readMoreOpen ? 'rotate-180' : ''} />
+            </button>
           </div>
+        ) : null}
+
+        {option.timeSlots && option.timeSlots.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {option.timeSlots.map((slot) => (
+              <TimeSlotChip
+                key={slot.id}
+                slot={slot.id === selectedTimeId ? { ...slot, status: 'selected' } : slot}
+                onSelect={() => {
+                  if (slot.status !== 'sold-out') setSelectedTimeId(slot.id)
+                }}
+              />
+            ))}
+          </div>
+        ) : null}
+
+        <div className="rounded-lg bg-[#eafbf7] px-4 py-3">
+          <ul className="flex flex-col gap-4 text-sm leading-normal text-black">
+            <li className="flex gap-3">
+              <BenefitCheckIcon className="mt-0.5 h-5 w-5 shrink-0" />
+              <span>
+                <span className="font-bold underline decoration-solid underline-offset-2">
+                  Free cancellation
+                </span>{' '}
+                before 3:00 PM (local time) on {dateLabel}
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <BenefitCheckIcon className="mt-0.5 h-5 w-5 shrink-0" />
+              <span>
+                <span className="font-bold underline decoration-solid underline-offset-2">
+                  Reserve now, pay nothing
+                </span>{' '}
+                until Feb 19
+              </span>
+            </li>
+          </ul>
         </div>
       </div>
 
-      <div className="flex w-[min(100%,280px)] shrink-0 flex-col justify-between border-l border-[#d9d9d9] p-6">
-        <div className="text-right">
+      <div className="flex w-full flex-col gap-4 border-t border-[#d9d9d9] px-4 py-6 lg:w-[min(100%,280px)] lg:shrink-0 lg:justify-between lg:border-l lg:border-t-0 lg:p-6">
+        <div className="text-left lg:text-right">
           <p className="text-base font-bold leading-normal text-black">{totalPrice}</p>
           <p className="text-sm leading-normal text-black">{priceDetailLine}</p>
         </div>
-        <div className="mt-6 flex flex-col gap-4">
+        <div className="flex flex-col gap-4 lg:mt-6">
           <button
             type="button"
             className="w-full rounded-lg border-[1.5px] border-[#0d0d0d] bg-white px-6 py-2.5 text-base font-medium leading-6 text-[#0d0d0d] transition hover:bg-neutral-50"
@@ -195,14 +197,14 @@ function CollapsedTourGradeOptionCard({
       type="button"
       data-tour-grade-option-card
       data-variant="collapsed"
-      className="flex w-full overflow-hidden rounded-lg border border-[#d9d9d9] bg-white text-left transition hover:bg-neutral-50/80"
+      className="flex w-full flex-col overflow-hidden rounded-lg border border-[#d9d9d9] bg-white text-left transition hover:bg-neutral-50/80 lg:flex-row"
       onClick={onSelect}
     >
-      <div className="flex min-w-0 flex-1 items-center gap-4 p-6">
+      <div className="flex min-w-0 items-center gap-4 px-4 py-6 lg:flex-1 lg:p-6">
         <RadioButton selected={false} />
         <p className="text-lg font-bold leading-[1.2] text-black">{option.title}</p>
       </div>
-      <div className="flex w-[min(100%,220px)] shrink-0 flex-col justify-center border-l border-[#d9d9d9] p-6 text-right">
+      <div className="flex flex-col justify-center gap-1 border-t border-[#d9d9d9] px-4 py-6 text-left lg:w-[min(100%,220px)] lg:shrink-0 lg:border-l lg:border-t-0 lg:p-6 lg:text-right">
         <p className="text-base font-bold leading-normal text-black">{total}</p>
         <p className="text-sm leading-normal text-black">{priceDetailLine}</p>
       </div>
