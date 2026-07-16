@@ -82,7 +82,7 @@ export function OasisBookingSidebar({
 
   return (
     <div className="flex w-[419px] flex-col items-start gap-4">
-      <div className="flex w-full items-center gap-2 rounded-2xl bg-white p-4 shadow-[0px_4px_12px_rgba(2,44,69,0.15)]">
+      <div className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white p-4 shadow-[0px_4px_12px_rgba(2,44,69,0.15)]">
         <FlameIcon />
         <p className="text-[14px] font-medium leading-5 text-[#333]">{booking.bookAheadSubtitle}</p>
       </div>
