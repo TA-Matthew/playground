@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 
-function SearchIcon() {
+function SearchIcon({ width = 16, height = 16 }: { width?: number; height?: number }) {
   return (
-    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" aria-hidden>
       <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
       <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
@@ -76,21 +76,14 @@ function ChatIcon() {
 const BREADCRUMBS = ['Home', 'Italy', 'Rome', 'Things to do in Rome']
 
 /**
- * Oasis PDP top chrome — Figma [PDP ideas](https://www.figma.com/design/8TMWFcCFxTled8jPX2ZbwH/PDP-ideas?node-id=10033-18938):
- * desktop nav + breadcrumb/contacts row; mobile collapses to hamburger + icon rail + search pill.
+ * Desktop-only nav + breadcrumb/contacts row — Figma
+ * [node 10033:18938](https://www.figma.com/design/8TMWFcCFxTled8jPX2ZbwH/PDP-ideas?node-id=10033-18938).
+ * Mobile uses its own {@link OasisMobileTopBar}, not a collapsed version of this.
  */
 export function OasisHeader() {
   return (
-    <header className="border-b border-stone-200 bg-white">
-      <div className="mx-auto flex w-full max-w-[1308px] items-center gap-4 px-4 py-3 sm:px-6 lg:px-8 xl:px-0">
-        <button
-          type="button"
-          className="inline-flex shrink-0 items-center justify-center text-stone-700 md:hidden"
-          aria-label="Open menu"
-        >
-          <HamburgerIcon />
-        </button>
-
+    <header className="hidden border-b border-stone-200 bg-white md:block">
+      <div className="mx-auto flex w-full max-w-[1308px] items-center gap-4 px-6 py-3 lg:px-8 xl:px-0">
         <Link
           to="/"
           className="shrink-0 font-serif text-[22px] font-semibold tracking-tight text-[#008768]"
@@ -98,7 +91,7 @@ export function OasisHeader() {
           viator
         </Link>
 
-        <div className="hidden min-w-0 flex-1 md:block">
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 rounded-full border border-stone-300 px-4 py-2 text-stone-500 transition hover:border-stone-400">
             <SearchIcon />
             <span className="truncate text-sm">Search for things to do</span>
@@ -106,7 +99,7 @@ export function OasisHeader() {
         </div>
 
         <div className="ml-auto flex shrink-0 items-center gap-4 text-stone-700">
-          <button type="button" className="hidden md:inline-flex" aria-label="Wishlist">
+          <button type="button" className="inline-flex" aria-label="Wishlist">
             <HeartIcon />
           </button>
           <button type="button" className="inline-flex" aria-label="Account">
@@ -115,17 +108,8 @@ export function OasisHeader() {
         </div>
       </div>
 
-      <div className="md:hidden">
-        <div className="mx-auto w-full max-w-[1308px] px-4 pb-3 sm:px-6">
-          <div className="flex items-center gap-2 rounded-full border border-stone-300 px-4 py-2 text-stone-500">
-            <SearchIcon />
-            <span className="truncate text-sm">Search for things to do</span>
-          </div>
-        </div>
-      </div>
-
       <div className="border-t border-stone-100">
-        <div className="mx-auto flex w-full max-w-[1308px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8 xl:px-0">
+        <div className="mx-auto flex w-full max-w-[1308px] items-center justify-between gap-4 px-6 py-3 lg:px-8 xl:px-0">
           <nav
             aria-label="Breadcrumb"
             className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto text-sm text-stone-500"
@@ -149,6 +133,31 @@ export function OasisHeader() {
             </span>
           </div>
         </div>
+      </div>
+    </header>
+  )
+}
+
+/**
+ * Mobile-web top bar — Figma [node 9937:8620](https://www.figma.com/design/8TMWFcCFxTled8jPX2ZbwH/PDP-ideas?node-id=9937-8620):
+ * just the logo plus a search icon and hamburger menu — no breadcrumb, no search pill, no contacts row.
+ */
+export function OasisMobileTopBar() {
+  return (
+    <header className="sticky top-0 z-30 flex items-center justify-between border-b border-stone-200 bg-white px-4 py-[13px] md:hidden">
+      <Link
+        to="/"
+        className="shrink-0 font-serif text-[20px] font-semibold tracking-tight text-[#008768]"
+      >
+        viator
+      </Link>
+      <div className="flex shrink-0 items-center gap-4 text-stone-800">
+        <button type="button" className="inline-flex" aria-label="Search">
+          <SearchIcon width={24} height={24} />
+        </button>
+        <button type="button" className="inline-flex" aria-label="Open menu">
+          <HamburgerIcon />
+        </button>
       </div>
     </header>
   )

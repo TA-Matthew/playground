@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { usePreloadMapPinImages } from '../hooks/usePreloadMapPinImages'
+import { useIsMobileViewport } from '../hooks/useIsMobileViewport'
 import { BookingSidebar } from '../components/booking/BookingSidebar'
 import { CollapsibleSection } from '../components/common/CollapsibleSection'
 import { AdditionalInfo } from '../components/additional/AdditionalInfo'
@@ -13,8 +14,10 @@ import { PdpViatorTitleMeta } from '../components/experience/pdp/PdpViatorTitleM
 import { ViatorPdpBlock } from '../components/experience/pdp/ViatorPdpBlock'
 import { UPCOMING_AVAILABILITY_SECTION_ID } from '../components/experience/pdp/PdpUpcomingAvailabilitySection'
 import { LogisticsBlock } from '../components/logistics/LogisticsBlock'
-import { OasisHeader } from '../components/oasis/OasisHeader'
+import { OasisHeader, OasisMobileTopBar } from '../components/oasis/OasisHeader'
 import { OasisFooter } from '../components/oasis/OasisFooter'
+import { OasisMobileSection } from '../components/oasis/OasisMobileSection'
+import { OasisMobileStickyBar } from '../components/oasis/OasisMobileStickyBar'
 import { AVAILABILITY_SHORTCUT_DEFAULT_DATE_LABEL } from '../data/availabilityShortcutDates'
 import { formatAvailabilitySearchTotal, getTourGradeOption } from '../data/availabilityShortcutOptions'
 import {
@@ -34,6 +37,7 @@ const AVAILABILITY_OPTIONS_LOAD_MS = 900
  * (desktop) and [node 9937:8620](https://www.figma.com/design/8TMWFcCFxTled8jPX2ZbwH/PDP-ideas?node-id=9937-8620) (mobile web).
  */
 export function OasisPage() {
+  const isMobile = useIsMobileViewport()
   const booking = useMemo(() => variants.a.booking, [])
   const [dateLabel, setDateLabel] = useState(() => AVAILABILITY_SHORTCUT_DEFAULT_DATE_LABEL)
   const [travelerCounts, setTravelerCounts] = useState<AvailabilityTravelerCounts>(() =>
@@ -118,8 +122,9 @@ export function OasisPage() {
   return (
     <div className="min-h-screen bg-white text-stone-900">
       <OasisHeader />
+      <OasisMobileTopBar />
 
-      <div className="mx-auto w-full max-w-[1308px] px-4 pb-14 pt-6 sm:px-6 md:pb-20 md:pt-8 lg:px-8 xl:px-0">
+      <div className="mx-auto w-full max-w-[1308px] px-4 pb-32 pt-6 sm:px-6 md:pb-20 md:pt-8 lg:px-8 xl:px-0">
         <div className="mb-4">
           <Link
             to="/"
@@ -157,20 +162,41 @@ export function OasisPage() {
               onOpenAvailabilityOptions={handleOpenAvailabilityOptions}
             />
 
-            <CollapsibleSection title="Itinerary" defaultOpen>
-              <LogisticsBlock
-                variantId="a"
-                stops={variants.a.stops}
-                routeLngLat={variants.a.routeLngLat}
-                mapKey="oasis-logistics"
-                poiPopupContent="image-only"
-                meetingAddress={variants.a.meetingAndPickup?.meeting.placeName}
-              />
-            </CollapsibleSection>
+            {isMobile ? (
+              <>
+                <OasisMobileSection title="Itinerary">
+                  <LogisticsBlock
+                    variantId="a"
+                    stops={variants.a.stops}
+                    routeLngLat={variants.a.routeLngLat}
+                    mapKey="oasis-logistics"
+                    poiPopupContent="image-only"
+                    meetingAddress={variants.a.meetingAndPickup?.meeting.placeName}
+                  />
+                </OasisMobileSection>
 
-            <CollapsibleSection title="Things to know" defaultOpen>
-              <AdditionalInfo />
-            </CollapsibleSection>
+                <OasisMobileSection title="Things to know">
+                  <AdditionalInfo />
+                </OasisMobileSection>
+              </>
+            ) : (
+              <>
+                <CollapsibleSection title="Itinerary" defaultOpen>
+                  <LogisticsBlock
+                    variantId="a"
+                    stops={variants.a.stops}
+                    routeLngLat={variants.a.routeLngLat}
+                    mapKey="oasis-logistics"
+                    poiPopupContent="image-only"
+                    meetingAddress={variants.a.meetingAndPickup?.meeting.placeName}
+                  />
+                </CollapsibleSection>
+
+                <CollapsibleSection title="Things to know" defaultOpen>
+                  <AdditionalInfo />
+                </CollapsibleSection>
+              </>
+            )}
 
             <div className="w-full">
               <PdpCancellationQuestionsSection />
@@ -202,6 +228,13 @@ export function OasisPage() {
       </div>
 
       <OasisFooter />
+
+      <OasisMobileStickyBar
+        priceAmount={booking.priceAmount}
+        durationLabel={viatorListing.iconRail.find((item) => item.id === 'duration')?.value ?? ''}
+        averageRating={viatorListing.averageRating}
+        onCheckAvailability={openAvailabilityFromSidebar}
+      />
     </div>
   )
 }

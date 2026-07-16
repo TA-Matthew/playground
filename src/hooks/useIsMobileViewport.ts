@@ -1,0 +1,19 @@
+import { useEffect, useState } from 'react'
+
+const MOBILE_QUERY = '(max-width: 767px)'
+
+/** Tracks the Tailwind `md` breakpoint so a component can mount only one of two heavy subtrees (e.g. a map). */
+export function useIsMobileViewport() {
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(MOBILE_QUERY).matches,
+  )
+
+  useEffect(() => {
+    const mql = window.matchMedia(MOBILE_QUERY)
+    const onChange = () => setIsMobile(mql.matches)
+    mql.addEventListener('change', onChange)
+    return () => mql.removeEventListener('change', onChange)
+  }, [])
+
+  return isMobile
+}
