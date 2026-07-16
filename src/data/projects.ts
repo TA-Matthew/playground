@@ -36,6 +36,7 @@ export const PDP_TEMPLATE_PROJECT_PATH = '/projects/pdp-template'
 export const AVAILABILITY_SHORTCUT_PROJECT_PATH = '/projects/availability-shortcut'
 export const AI_REVIEW_PROJECT_PATH = '/projects/ai-review-prototype'
 export const LOYALTY_LOGIN_BUTTON_PATH = '/projects/loyalty-login-button-animation'
+export const OASIS_PROJECT_PATH = '/projects/oasis'
 
 /** Order is oldest → newest; the home list shows the last item first. */
 export const projects: Project[] = [
@@ -78,5 +79,12 @@ export const projects: Project[] = [
     description:
       'Prototype faster paths to Check Availability and booking on the PDP — Q2 Decide Availability study shell.',
     path: AVAILABILITY_SHORTCUT_PROJECT_PATH,
+  },
+  {
+    id: 'oasis',
+    title: 'Oasis',
+    description:
+      'Full desktop + mobile-web booking PDP with site header/footer, itinerary map, and upcoming availability — from the PDP ideas Figma file.',
+    path: OASIS_PROJECT_PATH,
   },
 ]
