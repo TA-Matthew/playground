@@ -2,7 +2,10 @@ import { useEffect, useState, type RefObject } from 'react'
 import type { ProductHighlightIconStyleId } from '../../data/productHighlightIconStyles'
 import type { ProductHighlightBase, ProductHighlightIconRail } from '../../data/productHighlightLayouts'
 import type { AvailabilityCommerceModeId } from '../../data/availabilityShortcutCommerce'
-import { AVAILABILITY_COMMERCE_MODE_OPTIONS } from '../../data/availabilityShortcutCommerce'
+import {
+  AVAILABILITY_COMMERCE_MODE_OPTIONS_DESKTOP,
+  AVAILABILITY_COMMERCE_MODE_OPTIONS_MOBILE,
+} from '../../data/availabilityShortcutCommerce'
 import type { VariantId } from '../../data/variants'
 
 const FACILITATOR_VARIANT_UI: Record<
@@ -268,8 +271,30 @@ export function FacilitatorBar({
               <span className="text-[11px] font-medium uppercase tracking-widest text-amber-900/90">
                 Options
               </span>
-              <div className={PILL_GROUP_CLASS}>
-                {AVAILABILITY_COMMERCE_MODE_OPTIONS.map((opt) => (
+
+              {/* DW only — reinstated pre-merged desktop layout variants. */}
+              <div className="hidden w-fit flex-wrap gap-1 rounded-xl border border-amber-200/90 bg-white/90 p-1 shadow-sm lg:inline-flex">
+                {AVAILABILITY_COMMERCE_MODE_OPTIONS_DESKTOP.map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    title={opt.title}
+                    className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                      availabilityCommerceControls.commerceMode === opt.id ||
+                      (availabilityCommerceControls.commerceMode === 'merged' && opt.id === 'main-column')
+                        ? 'bg-amber-600 text-white shadow-sm'
+                        : 'text-amber-950 hover:bg-amber-50'
+                    }`}
+                    onClick={() => availabilityCommerceControls.onCommerceModeChange(opt.id)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* MW only — always the merged shelf-in-card behavior. */}
+              <div className="inline-flex w-fit flex-wrap gap-1 rounded-xl border border-amber-200/90 bg-white/90 p-1 shadow-sm lg:hidden">
+                {AVAILABILITY_COMMERCE_MODE_OPTIONS_MOBILE.map((opt) => (
                   <button
                     key={opt.id}
                     type="button"

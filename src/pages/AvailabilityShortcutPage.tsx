@@ -114,19 +114,16 @@ export function AvailabilityShortcutPage() {
       openAvailabilityOptions(optionId)
       if (optionsInModal) {
         setAvailabilityModalOpen(true)
-      } else if (sidebarCommerce) {
+      } else {
         requestAnimationFrame(() => scrollToUpcomingAvailability())
       }
     },
-    [openAvailabilityOptions, optionsInModal, scrollToUpcomingAvailability, sidebarCommerce],
+    [openAvailabilityOptions, optionsInModal, scrollToUpcomingAvailability],
   )
 
   const openAvailabilityFromSidebar = useCallback(() => {
     handleOpenAvailabilityOptions('english')
-    if (!sidebarCommerce) {
-      requestAnimationFrame(() => scrollToUpcomingAvailability())
-    }
-  }, [handleOpenAvailabilityOptions, scrollToUpcomingAvailability, sidebarCommerce])
+  }, [handleOpenAvailabilityOptions])
 
   const handleCloseAvailabilityModal = useCallback(() => {
     setAvailabilityModalOpen(false)

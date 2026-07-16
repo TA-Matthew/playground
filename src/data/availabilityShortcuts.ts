@@ -10,6 +10,7 @@ export type AvailabilityShortcut = {
   readonly timesAvailableLabel: string
   readonly priceAmount: string
   readonly scarcityLabel?: string
+  readonly isBestSeller?: boolean
 }
 
 function shortcutFromOption(
@@ -26,7 +27,7 @@ function shortcutFromOption(
 }
 
 export const AVAILABILITY_SHORTCUTS: readonly AvailabilityShortcut[] = [
-  shortcutFromOption(TOUR_GRADE_OPTIONS[0], '3 times available'),
+  { ...shortcutFromOption(TOUR_GRADE_OPTIONS[0], '3 times available'), isBestSeller: true },
   {
     ...shortcutFromOption(TOUR_GRADE_OPTIONS[1], '3 times available'),
     scarcityLabel: undefined,

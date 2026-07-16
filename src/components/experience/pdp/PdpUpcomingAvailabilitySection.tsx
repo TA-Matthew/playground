@@ -5,15 +5,11 @@ import {
   usesStickyCommerceSidebar,
 } from '../../../data/availabilityShortcutCommerce'
 import type { AvailabilityTravelerCounts } from '../../../data/availabilityShortcutTravelers'
-import { totalTravelers } from '../../../data/availabilityShortcutTravelers'
 import { AVAILABILITY_SHORTCUTS } from '../../../data/availabilityShortcuts'
 import { AvailabilityShortcutCard } from './AvailabilityShortcutCard'
 import { AvailabilityShortcutsSkeleton } from './AvailabilityShortcutsSkeleton'
 import { PdpAvailabilityOptionsPanel } from './PdpAvailabilityOptionsPanel'
 import { PdpAvailabilityOptionsSkeleton } from './PdpAvailabilityOptionsSkeleton'
-import { AvailabilityTravelersControl } from './AvailabilityTravelersControl'
-import { AvailabilityDateControl } from './AvailabilityDateControl'
-import { AvailabilityInlineMetaTrigger } from './AvailabilityInlineMetaTrigger'
 
 export const AVAILABILITY_OPTIONS_LOAD_MS = 900
 export const UPCOMING_AVAILABILITY_SECTION_ID = 'pdp-upcoming-availability'
@@ -22,9 +18,7 @@ const AVAILABILITY_FADE_MS = 0.25
 type Props = {
   /** Same label as {@link BookingSidebar} date field (`booking.dateLabel`). */
   readonly dateLabel: string
-  readonly onDateLabelChange?: (dateLabel: string) => void
   readonly travelerCounts?: AvailabilityTravelerCounts
-  readonly onTravelerCountsChange?: (counts: AvailabilityTravelerCounts) => void
   readonly showOptionsPanel?: boolean
   readonly selectedOptionId?: string
   readonly onSelectOption?: (optionId: string) => void
@@ -42,9 +36,7 @@ type Props = {
  */
 export function PdpUpcomingAvailabilitySection({
   dateLabel,
-  onDateLabelChange,
   travelerCounts = { adults: 2, children: 0, infants: 0 },
-  onTravelerCountsChange,
   showOptionsPanel = false,
   selectedOptionId = 'english',
   onSelectOption,
@@ -53,10 +45,8 @@ export function PdpUpcomingAvailabilitySection({
   showTopDivider = false,
   availabilityCommerceMode = 'main-column',
 }: Props) {
-  const travelerTotal = totalTravelers(travelerCounts)
   const sidebarCommerce = usesStickyCommerceSidebar(availabilityCommerceMode)
   const optionsInModal = loadsAvailabilityOptionsInModal(availabilityCommerceMode)
-
   if (optionsInModal) {
     return null
   }
@@ -71,44 +61,23 @@ export function PdpUpcomingAvailabilitySection({
       className={`hidden scroll-mt-8 py-8 lg:block ${
         showTopDivider ? 'border-t border-[#d9d9d9]' : ''
       }`}
-      aria-labelledby="pdp-upcoming-availability-h"
+      aria-labelledby={!sidebarCommerce && !showOptionsPanel ? 'pdp-upcoming-availability-h' : undefined}
     >
       <div className="flex flex-col gap-4">
-        {!sidebarCommerce ? (
-          <div className="flex flex-col gap-2">
+        {!sidebarCommerce && !showOptionsPanel ? (
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <h2
               id="pdp-upcoming-availability-h"
               className="text-[28px] font-medium leading-8 tracking-[0.2px] text-black"
             >
               Upcoming availability
             </h2>
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-2 text-[#737373]">
-              {onDateLabelChange ? (
-                <AvailabilityDateControl
-                  dateLabel={dateLabel}
-                  onDateLabelChange={onDateLabelChange}
-                  variant="inline"
-                />
-              ) : (
-                <AvailabilityInlineMetaTrigger icon={<CalendarIcon />}>
-                  {dateLabel}
-                </AvailabilityInlineMetaTrigger>
-              )}
-              <span aria-hidden className="select-none text-[#bdbdbd]">
-                ·
-              </span>
-              {onTravelerCountsChange ? (
-                <AvailabilityTravelersControl
-                  travelerCounts={travelerCounts}
-                  onTravelerCountsChange={onTravelerCountsChange}
-                  variant="inline"
-                />
-              ) : (
-                <AvailabilityInlineMetaTrigger icon={<PersonIcon />}>
-                  {travelerTotal}
-                </AvailabilityInlineMetaTrigger>
-              )}
-            </div>
+            <span aria-hidden className="select-none text-[#bdbdbd]">
+              •
+            </span>
+            <span className="text-base font-medium leading-6 tracking-[0.05px] text-[#4d4d4d]">
+              {dateLabel}
+            </span>
           </div>
         ) : null}
 
@@ -178,7 +147,7 @@ function AvailabilityContentStage({
         exit={{ opacity: 0, transition: { duration: fadeDuration } }}
       >
         {viewKey === 'shortcuts' ? (
-          <ul className="grid grid-cols-3 gap-4" data-availability-shortcuts>
+          <ul className="grid grid-cols-3 gap-4 pt-3" data-availability-shortcuts>
             {AVAILABILITY_SHORTCUTS.map((shortcut) => (
               <li key={shortcut.id}>
                 <AvailabilityShortcutCard
@@ -204,31 +173,5 @@ function AvailabilityContentStage({
         ) : null}
       </motion.div>
     </AnimatePresence>
-  )
-}
-
-function CalendarIcon() {
-  return (
-    <svg className="size-4 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden>
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M5.333 1.333a.667.667 0 0 1 .667.667V3h4V2a.667.667 0 1 1 1.333 0V3h.667A1.333 1.333 0 0 1 13.333 4.333v9.334A1.333 1.333 0 0 1 12 15H4a1.333 1.333 0 0 1-1.333-1.333V4.333A1.333 1.333 0 0 1 4 3h.667V2a.667.667 0 0 1 .666-.667ZM4 4.667v8.666h8V4.667H4Zm2 2.666a.667.667 0 0 0 0 1.334h4a.667.667 0 0 0 0-1.334H6Z"
-        fill="#4D4D4D"
-      />
-    </svg>
-  )
-}
-
-function PersonIcon() {
-  return (
-    <svg className="size-4 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden>
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M8 8a2.667 2.667 0 1 0 0-5.333A2.667 2.667 0 0 0 8 8ZM3.333 13.333c0-2.577 2.09-4.666 4.667-4.666s4.667 2.09 4.667 4.666H3.333Z"
-        fill="#4D4D4D"
-      />
-    </svg>
   )
 }

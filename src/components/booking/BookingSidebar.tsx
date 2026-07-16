@@ -1,9 +1,11 @@
-import { useId, type SVGProps } from 'react'
+import { useId, useState, type SVGProps } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { BenefitCheckIcon } from '../icons/BenefitCheckIcon'
 import { Tag } from '../common/Tag'
 import { AvailabilityDateControl } from '../experience/pdp/AvailabilityDateControl'
+import { AvailabilityDateSheet } from '../experience/pdp/AvailabilityDateSheet'
 import { AvailabilityTravelersControl } from '../experience/pdp/AvailabilityTravelersControl'
+import { AvailabilityTravelersSheet } from '../experience/pdp/AvailabilityTravelersSheet'
 import { AvailabilityShortcutCard } from '../experience/pdp/AvailabilityShortcutCard'
 import { PdpAvailabilityOptionsPanel } from '../experience/pdp/PdpAvailabilityOptionsPanel'
 import { PdpAvailabilityOptionsSkeleton } from '../experience/pdp/PdpAvailabilityOptionsSkeleton'
@@ -73,6 +75,28 @@ export function BookingSidebar({
   const mergedMobileCommerce = embedded && usesMergedMobileCommerce(availabilityCommerceMode)
   const useMetaChips =
     sidebarCommerce && Boolean(onDateLabelChange && onTravelerCountsChange && travelerCounts)
+
+  // MW only — the plain Date/Travelers row (shown when !useMetaChips) opens a bottom sheet.
+  const [dateSheetOpen, setDateSheetOpen] = useState(false)
+  const [travelersSheetOpen, setTravelersSheetOpen] = useState(false)
+  // Guided first run — picking a date auto-opens travelers next, and applying travelers
+  // opens the options panel. Once that's happened once, date/travelers changes are independent.
+  const [initialAvailabilityFlowDone, setInitialAvailabilityFlowDone] = useState(false)
+
+  const handleDateSheetSelect = (label: string) => {
+    onDateLabelChange?.(label)
+    if (!initialAvailabilityFlowDone) {
+      setTravelersSheetOpen(true)
+    }
+  }
+
+  const handleTravelersSheetApply = (counts: AvailabilityTravelerCounts) => {
+    onTravelerCountsChange?.(counts)
+    if (!initialAvailabilityFlowDone) {
+      setInitialAvailabilityFlowDone(true)
+      onSelectAvailabilityOption?.(selectedAvailabilityOptionId)
+    }
+  }
   const shellCard = embedded
     ? 'bg-transparent p-0'
     : `rounded-[12px] border ${CARD_BORDER} bg-white p-6`
@@ -193,6 +217,7 @@ export function BookingSidebar({
             <button
               type="button"
               className="flex flex-col items-stretch gap-0.5 bg-white px-3 py-2.5 text-left outline-none ring-inset transition hover:bg-neutral-50/80 focus-visible:ring-2 focus-visible:ring-[#2d8564]"
+              onClick={embedded ? () => setDateSheetOpen(true) : undefined}
             >
               <span className="text-[12px] font-normal leading-tight text-[#737373]">Date</span>
               <span className="flex w-full items-center justify-between gap-2 text-[15px] font-medium leading-tight text-black">
@@ -203,6 +228,7 @@ export function BookingSidebar({
             <button
               type="button"
               className="flex flex-col items-stretch gap-0.5 bg-white px-3 py-2.5 text-left outline-none ring-inset transition hover:bg-neutral-50/80 focus-visible:ring-2 focus-visible:ring-[#2d8564]"
+              onClick={embedded ? () => setTravelersSheetOpen(true) : undefined}
             >
               <span className="text-[12px] font-normal leading-tight text-[#737373]">Travelers</span>
               <span className="flex w-full items-center justify-between gap-2 text-[15px] font-medium leading-tight text-black">
@@ -216,6 +242,22 @@ export function BookingSidebar({
           </div>
         </div>
         )}
+
+        {embedded && dateSheetOpen && onDateLabelChange ? (
+          <AvailabilityDateSheet
+            dateLabel={dateLabel}
+            onSelect={handleDateSheetSelect}
+            onClose={() => setDateSheetOpen(false)}
+          />
+        ) : null}
+
+        {embedded && travelersSheetOpen && onTravelerCountsChange ? (
+          <AvailabilityTravelersSheet
+            value={travelerCounts ?? { adults: travelerCount, children: 0, infants: 0 }}
+            onApply={handleTravelersSheetApply}
+            onClose={() => setTravelersSheetOpen(false)}
+          />
+        ) : null}
 
         {sidebarCommerce && !availabilitySearchActive ? (
           <div className="mt-6">
@@ -360,7 +402,7 @@ function MergedMobileAvailability({
         ) : null}
 
         {viewKey === 'shortcuts' ? (
-          <div className="-mx-4 flex gap-3 overflow-x-auto px-4" data-availability-shortcuts>
+          <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pt-3" data-availability-shortcuts>
             {AVAILABILITY_SHORTCUTS.map((shortcut) => (
               <div key={shortcut.id} className="w-[280px] shrink-0">
                 <AvailabilityShortcutCard

@@ -10,12 +10,24 @@ export function AvailabilityShortcutCard({ shortcut, onSelect }: Props) {
   return (
     <article
       data-availability-shortcut-card
-      className="flex h-full min-h-[152px] flex-col justify-between rounded-2xl border border-[#d9d9d9] bg-white px-4 py-4"
+      className="relative flex h-full min-h-[152px] flex-col justify-between rounded-2xl border border-[#d9d9d9] bg-white px-4 py-4"
     >
+      {shortcut.isBestSeller || shortcut.scarcityLabel ? (
+        <div className="absolute -top-3 left-4 z-10 flex items-center gap-2">
+          {shortcut.isBestSeller ? (
+            <span className="inline-flex rounded-md bg-[#eafbf7] px-1 py-1 text-xs font-medium leading-4 text-[#008768]">
+              Best seller
+            </span>
+          ) : null}
+          {shortcut.scarcityLabel ? (
+            <span className="inline-flex rounded-md bg-[#feece9] px-1 py-1 text-xs font-medium leading-4 text-[#ae3e38]">
+              {shortcut.scarcityLabel}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
       <div className="flex flex-col gap-2">
-        {shortcut.scarcityLabel ? (
-          <p className="text-xs font-medium leading-4 text-[#c81e3a]">{shortcut.scarcityLabel}</p>
-        ) : null}
         <p className="text-base font-medium leading-6 tracking-[0.05px] text-[#333]">{shortcut.title}</p>
         <p className="text-sm font-normal leading-5 tracking-[0.05px] text-[#4d4d4d]">
           {shortcut.timesAvailableLabel}
