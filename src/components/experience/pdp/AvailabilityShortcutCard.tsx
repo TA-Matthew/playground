@@ -41,6 +41,7 @@ export function AvailabilityShortcutCard({ shortcut, onSelect }: Props) {
         </p>
         <button
           type="button"
+          data-availability-shortcut-select
           className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg border-[1.5px] border-transparent bg-[#008768] px-6 pt-[7px] pb-2 text-sm font-medium leading-5 tracking-[0.05px] text-white transition hover:bg-[#007058] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#008768] lg:border-black lg:bg-white lg:text-[#0d0d0d] lg:hover:bg-neutral-50 lg:focus-visible:outline-black"
           onClick={onSelect}
         >

@@ -1,11 +1,25 @@
-import { useId, useState, type SVGProps } from 'react'
+import {
+  forwardRef,
+  useEffect,
+  useId,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+  type SVGProps,
+} from 'react'
+import { createPortal } from 'react-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { BenefitCheckIcon } from '../icons/BenefitCheckIcon'
 import { Tag } from '../common/Tag'
 import { AvailabilityDateControl } from '../experience/pdp/AvailabilityDateControl'
 import { AvailabilityDateSheet } from '../experience/pdp/AvailabilityDateSheet'
+import { AvailabilityDatePickerOverlay } from '../experience/pdp/AvailabilityDatePickerOverlay'
 import { AvailabilityTravelersControl } from '../experience/pdp/AvailabilityTravelersControl'
 import { AvailabilityTravelersSheet } from '../experience/pdp/AvailabilityTravelersSheet'
+import { AvailabilityTravelersOverlay } from '../experience/pdp/AvailabilityTravelersOverlay'
 import { AvailabilityShortcutCard } from '../experience/pdp/AvailabilityShortcutCard'
 import { PdpAvailabilityOptionsPanel } from '../experience/pdp/PdpAvailabilityOptionsPanel'
 import { PdpAvailabilityOptionsSkeleton } from '../experience/pdp/PdpAvailabilityOptionsSkeleton'
@@ -20,6 +34,15 @@ import type { BookingContent } from '../../data/variants'
 const CARD_BORDER = 'border-[#e0e0e0]'
 const CTA_TEAL = 'bg-[#2d8564]'
 const MINT_PANEL = 'bg-[#f0faf7]'
+
+/** MW — the book-ahead banner just below Date/Travelers; scroll target once the tour grade
+ * option cards finish loading, so the banner (not the cards) sits at the top of the screen. */
+export const MOBILE_AVAILABILITY_SCROLL_TARGET_ID = 'mobile-availability-scroll-target'
+
+export type BookingSidebarHandle = {
+  /** Opens the guided Date → Travelers flow (used by the sticky footer's Check Availability). */
+  openDateFlow: () => void
+}
 
 type Props = {
   booking: BookingContent
@@ -52,36 +75,47 @@ type Props = {
   selectedAvailabilityOptionId?: string
 }
 
-export function BookingSidebar({
-  booking,
-  embedded,
-  hideBookAheadMobile,
-  onCheckAvailability,
-  onUpdateSearch,
-  availabilitySearchActive = false,
-  searchTotalAmount,
-  searchTotalLoading = false,
-  travelers,
-  dateLabel: dateLabelOverride,
-  availabilityCommerceMode = 'main-column',
-  travelerCounts,
-  onDateLabelChange,
-  onTravelerCountsChange,
-  onSelectAvailabilityOption,
-  availabilityOptionsLoading = false,
-  selectedAvailabilityOptionId = 'english',
-}: Props) {
+export const BookingSidebar = forwardRef<BookingSidebarHandle, Props>(function BookingSidebar(
+  {
+    booking,
+    embedded,
+    hideBookAheadMobile,
+    onCheckAvailability,
+    onUpdateSearch,
+    availabilitySearchActive = false,
+    searchTotalAmount,
+    searchTotalLoading = false,
+    travelers,
+    dateLabel: dateLabelOverride,
+    availabilityCommerceMode = 'main-column',
+    travelerCounts,
+    onDateLabelChange,
+    onTravelerCountsChange,
+    onSelectAvailabilityOption,
+    availabilityOptionsLoading = false,
+    selectedAvailabilityOptionId = 'english',
+  }: Props,
+  ref,
+) {
   const sidebarCommerce = usesStickyCommerceSidebar(availabilityCommerceMode)
   const mergedMobileCommerce = embedded && usesMergedMobileCommerce(availabilityCommerceMode)
   const useMetaChips =
     sidebarCommerce && Boolean(onDateLabelChange && onTravelerCountsChange && travelerCounts)
 
-  // MW only — the plain Date/Travelers row (shown when !useMetaChips) opens a bottom sheet.
+  // The plain Date/Travelers row (shown when !useMetaChips) opens a bottom sheet on MW,
+  // or an inline dropdown overlay on DW.
   const [dateSheetOpen, setDateSheetOpen] = useState(false)
   const [travelersSheetOpen, setTravelersSheetOpen] = useState(false)
-  // Guided first run — picking a date auto-opens travelers next, and applying travelers
-  // opens the options panel. Once that's happened once, date/travelers changes are independent.
+  const dateFieldRef = useRef<HTMLDivElement>(null)
+  const travelersFieldRef = useRef<HTMLDivElement>(null)
+  // Guided first run (both MW and DW) — picking a date auto-opens travelers next, and
+  // applying travelers opens the options panel (kicking off the loading skeleton). Once
+  // that's happened once, date/travelers changes are independent.
   const [initialAvailabilityFlowDone, setInitialAvailabilityFlowDone] = useState(false)
+
+  useImperativeHandle(ref, () => ({
+    openDateFlow: () => setDateSheetOpen(true),
+  }))
 
   const handleDateSheetSelect = (label: string) => {
     onDateLabelChange?.(label)
@@ -159,7 +193,9 @@ export function BookingSidebar({
     </div>
   )
 
-  const priceBlock = availabilitySearchActive ? (
+  // MW keeps showing the static "From X per person" price even after options load —
+  // only DW switches to the computed search total.
+  const priceBlock = availabilitySearchActive && !embedded ? (
     searchTotalLoading ? (
       <BookingSearchTotalSkeleton />
     ) : (
@@ -214,31 +250,63 @@ export function BookingSidebar({
         ) : (
         <div className={`mt-5 overflow-hidden rounded-[10px] border ${CARD_BORDER} bg-white`}>
           <div className="grid grid-cols-2 divide-x divide-[#e0e0e0]">
-            <button
-              type="button"
-              className="flex flex-col items-stretch gap-0.5 bg-white px-3 py-2.5 text-left outline-none ring-inset transition hover:bg-neutral-50/80 focus-visible:ring-2 focus-visible:ring-[#2d8564]"
-              onClick={embedded ? () => setDateSheetOpen(true) : undefined}
-            >
-              <span className="text-[12px] font-normal leading-tight text-[#737373]">Date</span>
-              <span className="flex w-full items-center justify-between gap-2 text-[15px] font-medium leading-tight text-black">
-                <span className="min-w-0 truncate">{dateLabel}</span>
-                <ChevronDown className="shrink-0" />
-              </span>
-            </button>
-            <button
-              type="button"
-              className="flex flex-col items-stretch gap-0.5 bg-white px-3 py-2.5 text-left outline-none ring-inset transition hover:bg-neutral-50/80 focus-visible:ring-2 focus-visible:ring-[#2d8564]"
-              onClick={embedded ? () => setTravelersSheetOpen(true) : undefined}
-            >
-              <span className="text-[12px] font-normal leading-tight text-[#737373]">Travelers</span>
-              <span className="flex w-full items-center justify-between gap-2 text-[15px] font-medium leading-tight text-black">
-                <span className="inline-flex min-w-0 items-center gap-1.5 truncate">
-                  <PersonIcon />
-                  <span>{travelerCount}</span>
+            <div className="relative" ref={dateFieldRef}>
+              <button
+                type="button"
+                className="flex w-full flex-col items-stretch gap-0.5 bg-white px-3 py-2.5 text-left outline-none ring-inset transition hover:bg-neutral-50/80 focus-visible:ring-2 focus-visible:ring-[#2d8564]"
+                onClick={() => setDateSheetOpen(true)}
+              >
+                <span className="text-[12px] font-normal leading-tight text-[#737373]">Date</span>
+                <span className="flex w-full items-center justify-between gap-2 text-[15px] font-medium leading-tight text-black">
+                  <span className="min-w-0 truncate">{dateLabel}</span>
+                  <ChevronDown className="shrink-0" />
                 </span>
-                <ChevronDown className="shrink-0" />
-              </span>
-            </button>
+              </button>
+              {!embedded && dateSheetOpen && onDateLabelChange ? (
+                <DesktopFieldOverlay
+                  anchorRef={dateFieldRef}
+                  align="right"
+                  onRequestClose={() => setDateSheetOpen(false)}
+                >
+                  <AvailabilityDatePickerOverlay
+                    dateLabel={dateLabel}
+                    onSelect={handleDateSheetSelect}
+                    onClose={() => setDateSheetOpen(false)}
+                  />
+                </DesktopFieldOverlay>
+              ) : null}
+            </div>
+            <div className="relative" ref={travelersFieldRef}>
+              <button
+                type="button"
+                className="flex w-full flex-col items-stretch gap-0.5 bg-white px-3 py-2.5 text-left outline-none ring-inset transition hover:bg-neutral-50/80 focus-visible:ring-2 focus-visible:ring-[#2d8564]"
+                onClick={() => setTravelersSheetOpen(true)}
+              >
+                <span className="text-[12px] font-normal leading-tight text-[#737373]">Travelers</span>
+                <span className="flex w-full items-center justify-between gap-2 text-[15px] font-medium leading-tight text-black">
+                  <span className="inline-flex min-w-0 items-center gap-1.5 truncate">
+                    <PersonIcon />
+                    <span>{travelerCount}</span>
+                  </span>
+                  <ChevronDown className="shrink-0" />
+                </span>
+              </button>
+              {!embedded && travelersSheetOpen && onTravelerCountsChange ? (
+                <DesktopFieldOverlay
+                  anchorRef={travelersFieldRef}
+                  align="right"
+                  onRequestClose={() => setTravelersSheetOpen(false)}
+                >
+                  <AvailabilityTravelersOverlay
+                    value={travelerCounts ?? { adults: travelerCount, children: 0, infants: 0 }}
+                    onApply={(counts) => {
+                      handleTravelersSheetApply(counts)
+                      setTravelersSheetOpen(false)
+                    }}
+                  />
+                </DesktopFieldOverlay>
+              ) : null}
+            </div>
           </div>
         </div>
         )}
@@ -270,7 +338,9 @@ export function BookingSidebar({
         ) : null}
 
         {embedded && availabilitySearchActive && !hideBookAheadMobile ? (
-          <div className="mt-6">{bookAheadBanner}</div>
+          <div className="mt-6" id={MOBILE_AVAILABILITY_SCROLL_TARGET_ID}>
+            {bookAheadBanner}
+          </div>
         ) : null}
 
         {mergedMobileCommerce ? (
@@ -338,6 +408,73 @@ export function BookingSidebar({
       ) : null}
     </div>
   )
+})
+
+/**
+ * DW — portals a dropdown to `document.body`, positioned below `anchorRef`'s field.
+ * Avoids clipping from the field row's `overflow-hidden` container.
+ */
+function DesktopFieldOverlay({
+  anchorRef,
+  align,
+  onRequestClose,
+  children,
+}: {
+  readonly anchorRef: RefObject<HTMLDivElement | null>
+  readonly align: 'left' | 'right'
+  readonly onRequestClose: () => void
+  readonly children: ReactNode
+}) {
+  const [rect, setRect] = useState<DOMRect | null>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    const update = () => setRect(anchorRef.current?.getBoundingClientRect() ?? null)
+    update()
+    window.addEventListener('scroll', update, true)
+    window.addEventListener('resize', update)
+    return () => {
+      window.removeEventListener('scroll', update, true)
+      window.removeEventListener('resize', update)
+    }
+  }, [anchorRef])
+
+  useEffect(() => {
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node
+      if (anchorRef.current?.contains(target)) return
+      if (contentRef.current?.contains(target)) return
+      onRequestClose()
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onRequestClose()
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [anchorRef, onRequestClose])
+
+  if (!rect) return null
+
+  const style =
+    align === 'left'
+      ? { position: 'fixed' as const, top: rect.bottom + 8, left: rect.left, zIndex: 200 }
+      : {
+          position: 'fixed' as const,
+          top: rect.bottom + 8,
+          right: window.innerWidth - rect.right,
+          zIndex: 200,
+        }
+
+  return createPortal(
+    <div ref={contentRef} style={style}>
+      {children}
+    </div>,
+    document.body,
+  )
 }
 
 /** Merged MW mode — shortcut shelf swaps for the full options panel once one is selected. */
@@ -369,6 +506,22 @@ function MergedMobileAvailability({
   // settles in just as the book-ahead banner finishes sliding up above it.
   const delay = viewKey === 'skeleton-panel' && !reduceMotion ? 0.3 : 0
   const duration = reduceMotion ? 0 : 0.25
+
+  // As soon as a date/pax selection activates (or re-activates) the search — whether from
+  // Select on a shortcut card, the guided date/pax flow, or a later independent date/pax
+  // change — the book-ahead banner mounts/updates immediately (well before the cards finish
+  // loading), so start scrolling right then rather than waiting for the loaded panel.
+  const travelerKey = travelerCounts
+    ? `${travelerCounts.adults}-${travelerCounts.children}-${travelerCounts.infants}`
+    : ''
+
+  useEffect(() => {
+    if (!availabilitySearchActive) return
+    document.getElementById(MOBILE_AVAILABILITY_SCROLL_TARGET_ID)?.scrollIntoView({
+      behavior: reduceMotion ? 'auto' : 'smooth',
+      block: 'start',
+    })
+  }, [availabilitySearchActive, dateLabel, travelerKey, reduceMotion])
 
   return (
     <AnimatePresence mode="wait" initial={false}>

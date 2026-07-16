@@ -204,7 +204,7 @@ function CollapsedTourGradeOptionCard({
         <RadioButton selected={false} />
         <p className="text-lg font-bold leading-[1.2] text-black">{option.title}</p>
       </div>
-      <div className="flex flex-col justify-center gap-1 border-t border-[#d9d9d9] px-4 py-6 text-left lg:w-[min(100%,220px)] lg:shrink-0 lg:border-l lg:border-t-0 lg:p-6 lg:text-right">
+      <div className="flex flex-col justify-center gap-1 border-t border-[#d9d9d9] px-4 py-6 text-left lg:w-[min(100%,280px)] lg:shrink-0 lg:border-l lg:border-t-0 lg:p-6 lg:text-right">
         <p className="text-base font-bold leading-normal text-black">{total}</p>
         <p className="text-sm leading-normal text-black">{priceDetailLine}</p>
       </div>

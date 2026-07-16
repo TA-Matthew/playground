@@ -1,4 +1,6 @@
-import { BookingSidebar } from '../../booking/BookingSidebar'
+import { useEffect, useRef, useState } from 'react'
+import { BookingSidebar, type BookingSidebarHandle } from '../../booking/BookingSidebar'
+import { MobileStickyAvailabilityBar } from './MobileStickyAvailabilityBar'
 import {
   parseProductHighlightLayoutOptions,
   type ProductHighlightLayoutId,
@@ -78,6 +80,32 @@ export function FigmaViatorPdpBlock({
   const resolvedTravelerCounts =
     travelerCounts ?? { adults: booking.travellers, children: 0, infants: 0 }
   const travelerTotal = totalTravelers(resolvedTravelerCounts)
+
+  const mobileBookingRef = useRef<HTMLDivElement>(null)
+  const bookingSidebarRef = useRef<BookingSidebarHandle>(null)
+  const [stickyBarVisible, setStickyBarVisible] = useState(false)
+
+  useEffect(() => {
+    if (availabilityOptionsOpen || !showUpcomingAvailability) {
+      setStickyBarVisible(false)
+      return
+    }
+
+    const target = mobileBookingRef.current?.querySelector('[data-availability-shortcut-select]')
+    if (!target) {
+      setStickyBarVisible(false)
+      return
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      // Only "scrolled past" (target above the viewport) should show the bar — not
+      // "hasn't scrolled down far enough yet" (target still below the viewport).
+      setStickyBarVisible(!entry.isIntersecting && entry.boundingClientRect.bottom < 0)
+    })
+    observer.observe(target)
+    return () => observer.disconnect()
+  }, [availabilityOptionsOpen, showUpcomingAvailability])
+
   const l = viatorListing
   const layoutOpts =
     productHighlightLayoutId != null
@@ -125,8 +153,9 @@ export function FigmaViatorPdpBlock({
       <div className="flex w-full flex-col">
         <div className="flex flex-col gap-6">
           <PdpViatorHeroGallery />
-          <div className="lg:hidden">
+          <div className="lg:hidden" ref={mobileBookingRef}>
             <BookingSidebar
+              ref={bookingSidebarRef}
               booking={booking}
               embedded
               travelers={travelerTotal}
@@ -184,6 +213,11 @@ export function FigmaViatorPdpBlock({
           </div>
         </div>
       </div>
+
+      <MobileStickyAvailabilityBar
+        visible={stickyBarVisible}
+        onCheckAvailability={() => bookingSidebarRef.current?.openDateFlow()}
+      />
     </div>
   )
 }

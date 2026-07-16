@@ -179,11 +179,20 @@ export function AvailabilityShortcutPage() {
   useEffect(() => {
     if (prevDateLabelRef.current === dateLabel) return
     prevDateLabelRef.current = dateLabel
+    // Don't start loading on date alone during the guided flow — wait until pax is applied.
+    // Once options are already open, an independent date change reloads immediately.
+    if (!availabilityOptionsOpen) return
     triggerOptionsLoading()
     if (!sidebarCommerce) {
       requestAnimationFrame(() => scrollToUpcomingAvailability())
     }
-  }, [dateLabel, triggerOptionsLoading, sidebarCommerce, scrollToUpcomingAvailability])
+  }, [
+    dateLabel,
+    availabilityOptionsOpen,
+    triggerOptionsLoading,
+    sidebarCommerce,
+    scrollToUpcomingAvailability,
+  ])
 
   const availabilitySearchTotal = useMemo(() => {
     const option = getTourGradeOption(selectedAvailabilityOptionId)
