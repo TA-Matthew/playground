@@ -72,7 +72,7 @@ export function OasisMobileTitleInfo({
         </span>
       </div>
 
-      <p className="w-full text-center text-[14px] leading-5 tracking-[0.05px] text-[#4d4d4d]">
+      <p className="line-clamp-3 w-full text-center text-[14px] leading-5 tracking-[0.05px] text-[#4d4d4d]">
         {descriptionBody} <span className="cursor-pointer underline decoration-solid">More</span>
       </p>
     </div>
