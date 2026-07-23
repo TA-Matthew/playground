@@ -32,14 +32,9 @@ export function OasisMobileStickyBar({
   showBookedBanner = false,
 }: Props) {
   const reduceMotion = useReducedMotion()
-  const transition = reduceMotion ? { duration: 0 } : BOOKED_BANNER_MORPH_TRANSITION
 
   return (
-    <motion.div
-      layout
-      transition={transition}
-      className="fixed inset-x-0 bottom-0 z-30 drop-shadow-[0px_0px_6px_rgba(0,0,0,0.25)] md:hidden"
-    >
+    <div className="fixed inset-x-0 bottom-0 z-30 drop-shadow-[0px_0px_6px_rgba(0,0,0,0.25)] md:hidden">
       <div className="bg-[#f5f5f5]">
         <AnimatePresence>
           {showBookedBanner && (
@@ -48,7 +43,7 @@ export function OasisMobileStickyBar({
               layout
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={transition}
+              transition={reduceMotion ? { duration: 0 } : BOOKED_BANNER_MORPH_TRANSITION}
               className="flex items-center justify-center gap-2 bg-[#f5f5f5] px-4 py-2.5"
             >
               <span aria-hidden className="text-[16px] leading-none">
@@ -81,6 +76,6 @@ export function OasisMobileStickyBar({
           Check availability
         </button>
       </div>
-    </motion.div>
+    </div>
   )
 }
