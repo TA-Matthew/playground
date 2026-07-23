@@ -34,7 +34,7 @@ export function OasisMobileStickyBar({
   const reduceMotion = useReducedMotion()
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 bg-white drop-shadow-[0px_0px_6px_rgba(0,0,0,0.25)] md:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-30 drop-shadow-[0px_0px_6px_rgba(0,0,0,0.25)] md:hidden">
       <div className="bg-[#f5f5f5]">
         <AnimatePresence>
           {showBookedBanner && (
@@ -56,7 +56,7 @@ export function OasisMobileStickyBar({
           )}
         </AnimatePresence>
       </div>
-      <div className="flex items-start justify-between gap-4 px-6 pb-6 pt-4">
+      <div className="flex items-start justify-between gap-4 bg-white px-6 pb-6 pt-4">
         <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
           <p className="flex items-center gap-1 whitespace-nowrap">
             <span className="text-[12px] leading-5 tracking-[0.05px] text-[#4d4d4d]">From</span>
