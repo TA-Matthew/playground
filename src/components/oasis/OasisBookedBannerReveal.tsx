@@ -62,7 +62,7 @@ export function BookedBannerEmberText({
             ease: 'easeInOut',
           }}
         >
-          {char === ' ' ? ' ' : char}
+          {char === ' ' ? ' ' : char}
         </motion.span>
       ))}
     </p>
