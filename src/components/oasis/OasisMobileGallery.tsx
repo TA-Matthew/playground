@@ -1,4 +1,5 @@
 import { viatorListing } from '../../data/viatorListing'
+import './oasis-mobile-gallery-animations.css'
 
 function ChevronLeftIcon() {
   return (
@@ -133,14 +134,16 @@ export function OasisMobileGallery({ bookedBannerDocked = false }: Props) {
 
       <div
         aria-hidden={bookedBannerDocked}
-        className={`absolute bottom-10 left-1/2 flex w-[342px] -translate-x-1/2 items-center justify-center gap-2 rounded-2xl bg-white p-4 drop-shadow-[0px_4px_12px_rgba(2,44,69,0.15)] transition-all duration-500 ease-out ${
+        className={`absolute bottom-10 left-1/2 w-[342px] -translate-x-1/2 transition-all duration-500 ease-out ${
           bookedBannerDocked ? 'pointer-events-none translate-y-3 opacity-0' : 'opacity-100'
         }`}
       >
-        <FlameIcon />
-        <p className="whitespace-nowrap text-[14px] font-medium leading-[1.5] text-[#333]">
-          Typically booked 8 days in advance
-        </p>
+        <div className="oasis-booked-banner-fly-in flex items-center justify-center gap-2 rounded-2xl bg-white p-4 drop-shadow-[0px_4px_12px_rgba(2,44,69,0.15)]">
+          <FlameIcon />
+          <p className="whitespace-nowrap text-[14px] font-medium leading-[1.5] text-[#333]">
+            Typically booked 8 days in advance
+          </p>
+        </div>
       </div>
     </div>
   )
