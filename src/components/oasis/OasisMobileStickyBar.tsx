@@ -35,25 +35,27 @@ export function OasisMobileStickyBar({
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 bg-white drop-shadow-[0px_0px_6px_rgba(0,0,0,0.25)] md:hidden">
-      <AnimatePresence>
-        {showBookedBanner && (
-          <motion.div
-            layoutId={BOOKED_BANNER_LAYOUT_ID}
-            layout
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={reduceMotion ? { duration: 0 } : BOOKED_BANNER_MORPH_TRANSITION}
-            className="flex items-center justify-center gap-2 bg-[#f5f5f5] px-4 py-2.5"
-          >
-            <span aria-hidden className="text-[16px] leading-none">
-              🔥
-            </span>
-            <p className="whitespace-nowrap text-[13px] font-medium leading-[1.3] text-[#333]">
-              Typically booked 8 days in advance
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div className="bg-[#f5f5f5]">
+        <AnimatePresence>
+          {showBookedBanner && (
+            <motion.div
+              layoutId={BOOKED_BANNER_LAYOUT_ID}
+              layout
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={reduceMotion ? { duration: 0 } : BOOKED_BANNER_MORPH_TRANSITION}
+              className="flex items-center justify-center gap-2 bg-[#f5f5f5] px-4 py-2.5"
+            >
+              <span aria-hidden className="text-[16px] leading-none">
+                🔥
+              </span>
+              <p className="whitespace-nowrap text-[13px] font-medium leading-[1.3] text-[#333]">
+                Typically booked 8 days in advance
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
       <div className="flex items-start justify-between gap-4 px-6 pb-6 pt-4">
         <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
           <p className="flex items-center gap-1 whitespace-nowrap">
