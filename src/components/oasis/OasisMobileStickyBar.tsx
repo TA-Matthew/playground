@@ -1,11 +1,3 @@
-function CheckCircleIcon() {
-  return (
-    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" aria-hidden className="shrink-0 text-[#00654e]">
-      <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
 function DialIcon() {
   return (
     <svg width={20} height={10} viewBox="0 0 20 10" fill="none" aria-hidden className="shrink-0">
@@ -31,12 +23,6 @@ type Props = {
 export function OasisMobileStickyBar({ priceAmount, exceptionalDealLabel, onCheckAvailability }: Props) {
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 bg-white drop-shadow-[0px_0px_6px_rgba(0,0,0,0.25)] md:hidden">
-      <div className="flex items-center justify-center gap-2 bg-[#ebfaf7] px-2.5 py-2">
-        <CheckCircleIcon />
-        <p className="text-[13px] font-medium leading-[17px] tracking-[0.05px] text-[#00654e]">
-          Free cancellation up to 24 hours
-        </p>
-      </div>
       <div className="flex items-start justify-between gap-4 px-6 pb-6 pt-4">
         <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
           <p className="flex items-center gap-1 whitespace-nowrap">
