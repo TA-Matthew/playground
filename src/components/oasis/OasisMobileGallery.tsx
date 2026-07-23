@@ -1,6 +1,4 @@
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { viatorListing } from '../../data/viatorListing'
-import { BOOKED_BANNER_LAYOUT_ID, BOOKED_BANNER_MORPH_TRANSITION } from './oasisBookedBannerMorph'
 
 function ChevronLeftIcon() {
   return (
@@ -46,31 +44,17 @@ function GalleryStackIcon() {
   )
 }
 
-function FlameIcon() {
-  return (
-    <span aria-hidden className="text-[24px] leading-none">
-      🔥
-    </span>
-  )
-}
-
 /**
  * Mobile-web hero gallery + overlay chrome — Figma
  * [node 10144:18514](https://www.figma.com/design/8TMWFcCFxTled8jPX2ZbwH/PDP-ideas?node-id=10144-18514):
- * a horizontal image shelf (edge-to-edge, 439px tall) with a back-chevron/share/heart icon row and a
- * "View all N images" heart-badge panel overlaid on top, plus a "Typically booked" alert card near the
- * bottom. The sticky logo/search/hamburger header above this is {@link OasisMobileTopBar} — Figma treats
- * it as a separate layer, not part of the gallery shelf.
+ * a horizontal image shelf (edge-to-edge, 439px tall) with a back-chevron/share/heart icon row overlaid
+ * on top. The sticky logo/search/hamburger header above this is {@link OasisMobileTopBar} — Figma treats
+ * it as a separate layer, not part of the gallery shelf. The "Typically booked" alert now floats above
+ * the sticky footer instead of living in this gallery — see {@link OasisMobileStickyBar}.
  */
-type Props = {
-  /** Once true, the "Typically booked" card has docked into the sticky footer strip and fades out here. */
-  bookedBannerDocked?: boolean
-}
-
-export function OasisMobileGallery({ bookedBannerDocked = false }: Props) {
+export function OasisMobileGallery() {
   const { hero, thumbnails } = viatorListing.media
   const imageCount = thumbnails.length + 1
-  const reduceMotion = useReducedMotion()
 
   return (
     <div className="relative h-[439px] w-full overflow-hidden">
@@ -133,24 +117,6 @@ export function OasisMobileGallery({ bookedBannerDocked = false }: Props) {
           </button>
         </div>
       </div>
-
-      <AnimatePresence>
-        {!bookedBannerDocked && (
-          <motion.div
-            layoutId={BOOKED_BANNER_LAYOUT_ID}
-            layout
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={reduceMotion ? { duration: 0 } : BOOKED_BANNER_MORPH_TRANSITION}
-            className="absolute inset-x-0 bottom-10 mx-auto flex w-[342px] items-center justify-center gap-2 rounded-2xl bg-white p-4 drop-shadow-[0px_4px_12px_rgba(2,44,69,0.15)]"
-          >
-            <FlameIcon />
-            <p className="whitespace-nowrap text-[14px] font-medium leading-[1.5] text-[#333]">
-              Typically booked 8 days in advance
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }

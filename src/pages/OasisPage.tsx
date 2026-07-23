@@ -141,7 +141,7 @@ export function OasisPage() {
         <OasisMobileTopBar />
 
         <main className="pdp-figma w-full min-w-0 pb-40">
-          <OasisMobileGallery bookedBannerDocked={bookedBannerDocked} />
+          <OasisMobileGallery />
 
           <div className="flex w-full flex-col items-start gap-6 px-6 py-6">
             <Link
