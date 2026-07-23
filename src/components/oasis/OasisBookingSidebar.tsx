@@ -1,8 +1,10 @@
+import { motion, useReducedMotion } from 'framer-motion'
 import { AvailabilityDateControl } from '../experience/pdp/AvailabilityDateControl'
 import { AvailabilityTravelersControl } from '../experience/pdp/AvailabilityTravelersControl'
 import type { AvailabilityTravelerCounts } from '../../data/availabilityShortcutTravelers'
 import type { BookingContent } from '../../data/variants'
 import { BookedBannerEmberText, BookedBannerFlameIcon } from './OasisBookedBannerReveal'
+import { BOOKED_BANNER_MORPH_TRANSITION } from './oasisBookedBannerMorph'
 
 function InfoIcon() {
   return (
@@ -72,13 +74,19 @@ export function OasisBookingSidebar({
   searchTotalLoading,
 }: Props) {
   const priceLabel = availabilitySearchActive ? searchTotalAmount ?? booking.priceAmount : booking.priceAmount
+  const reduceMotion = useReducedMotion()
 
   return (
     <div className="flex w-[419px] flex-col items-start gap-4">
-      <div className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white p-4 shadow-[0px_4px_12px_rgba(2,44,69,0.15)]">
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={reduceMotion ? { duration: 0 } : BOOKED_BANNER_MORPH_TRANSITION}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white p-4 shadow-[0px_4px_12px_rgba(2,44,69,0.15)]"
+      >
         <BookedBannerFlameIcon />
         <BookedBannerEmberText text={booking.bookAheadSubtitle} className="text-[14px] font-medium leading-5" />
-      </div>
+      </motion.div>
 
       <div className="flex w-full flex-col items-start gap-4 rounded-2xl bg-white p-6 shadow-[0px_4px_12px_rgba(2,44,69,0.15)]">
         <div className="flex w-full items-start justify-between">
