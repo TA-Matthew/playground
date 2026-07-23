@@ -1,5 +1,6 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { BOOKED_BANNER_LAYOUT_ID, BOOKED_BANNER_MORPH_TRANSITION } from './oasisBookedBannerMorph'
+import { BookedBannerEmberText, BookedBannerFlameIcon } from './OasisBookedBannerReveal'
 
 function DialIcon() {
   return (
@@ -12,59 +13,6 @@ function DialIcon() {
 }
 
 const BOOKED_BANNER_TEXT = 'Typically booked 8 days in advance'
-const EMBER_LETTER_STAGGER_S = 0.018
-const EMBER_LETTER_DURATION_S = 0.4
-
-/** Fades up in step with the ember-reveal text beside it — same drift, no separate flourish. */
-function FlameIcon() {
-  const reduceMotion = useReducedMotion()
-
-  if (reduceMotion) {
-    return (
-      <span aria-hidden className="text-[24px] leading-none">
-        🔥
-      </span>
-    )
-  }
-
-  return (
-    <motion.span
-      aria-hidden
-      className="inline-block text-[24px] leading-none"
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: EMBER_LETTER_DURATION_S, ease: 'easeOut' }}
-    >
-      🔥
-    </motion.span>
-  )
-}
-
-/** Each letter drifts up and cools from ember-orange to grey, staggered — like embers settling into place. */
-function EmberRevealText() {
-  const reduceMotion = useReducedMotion()
-
-  if (reduceMotion) {
-    return <p className="whitespace-nowrap text-[14px] font-medium leading-[1.5] text-[#333]">{BOOKED_BANNER_TEXT}</p>
-  }
-
-  return (
-    <p className="whitespace-nowrap text-[14px] font-medium leading-[1.5]" aria-label={BOOKED_BANNER_TEXT}>
-      {BOOKED_BANNER_TEXT.split('').map((char, index) => (
-        <motion.span
-          key={index}
-          aria-hidden
-          className="inline-block"
-          initial={{ opacity: 0, y: 8, color: '#f97316' }}
-          animate={{ opacity: 1, y: 0, color: '#333333' }}
-          transition={{ duration: EMBER_LETTER_DURATION_S, delay: index * EMBER_LETTER_STAGGER_S, ease: 'easeOut' }}
-        >
-          {char === ' ' ? ' ' : char}
-        </motion.span>
-      ))}
-    </p>
-  )
-}
 
 type Props = {
   priceAmount: string
@@ -105,8 +53,8 @@ export function OasisMobileStickyBar({
             transition={transition}
             className="mx-auto mb-6 flex w-[342px] items-center justify-center gap-2 rounded-2xl bg-white p-4 drop-shadow-[0px_4px_12px_rgba(2,44,69,0.15)]"
           >
-            <FlameIcon />
-            <EmberRevealText />
+            <BookedBannerFlameIcon />
+            <BookedBannerEmberText text={BOOKED_BANNER_TEXT} />
           </motion.div>
         )}
       </AnimatePresence>
