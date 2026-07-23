@@ -73,7 +73,13 @@ export function OasisMobileTitleInfo({
       </div>
 
       <p className="line-clamp-3 w-full text-center text-[14px] leading-5 tracking-[0.05px] text-[#4d4d4d]">
-        {descriptionBody} <span className="cursor-pointer underline decoration-solid">More</span>
+        <span
+          className="float-right ml-1 cursor-pointer whitespace-nowrap underline decoration-solid"
+          style={{ shapeOutside: 'inset(calc(100% - 20px) 0 0 0)' }}
+        >
+          More
+        </span>
+        {descriptionBody}
       </p>
     </div>
   )
