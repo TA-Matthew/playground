@@ -141,7 +141,6 @@ export function OasisMobileGallery({ bookedBannerDocked = false }: Props) {
             layout
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
             transition={reduceMotion ? { duration: 0 } : BOOKED_BANNER_MORPH_TRANSITION}
             className="absolute inset-x-0 bottom-10 mx-auto flex w-[342px] items-center justify-center gap-2 rounded-2xl bg-white p-4 drop-shadow-[0px_4px_12px_rgba(2,44,69,0.15)]"
           >

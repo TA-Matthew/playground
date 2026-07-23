@@ -42,9 +42,8 @@ export function OasisMobileStickyBar({
             layout
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
             transition={reduceMotion ? { duration: 0 } : BOOKED_BANNER_MORPH_TRANSITION}
-            className="flex items-center justify-center gap-2 border-b border-[#d9d9d9] px-4 py-2.5"
+            className="flex items-center justify-center gap-2 bg-[#f5f5f5] px-4 py-2.5"
           >
             <span aria-hidden className="text-[16px] leading-none">
               🔥
