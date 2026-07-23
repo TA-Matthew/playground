@@ -212,6 +212,7 @@ export function OasisPage() {
           priceAmount={booking.priceAmount}
           exceptionalDealLabel={booking.badgeExceptionalDeal}
           onCheckAvailability={openAvailabilityFromSidebar}
+          bookedBannerText={booking.bookAheadSubtitle}
           showBookedBanner={bookedBannerDocked}
         />
       </div>

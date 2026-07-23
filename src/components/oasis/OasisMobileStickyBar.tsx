@@ -12,12 +12,12 @@ function DialIcon() {
   )
 }
 
-const BOOKED_BANNER_TEXT = 'Typically booked 8 days in advance'
-
 type Props = {
   priceAmount: string
   exceptionalDealLabel: string
   onCheckAvailability: () => void
+  /** e.g. "Typically booked 8 days ahead" — same copy source as the desktop sidebar's banner. */
+  bookedBannerText: string
   /** Once true, the floating "Typically booked" card morphs into the slim strip docked in the footer. */
   showBookedBanner?: boolean
 }
@@ -36,6 +36,7 @@ export function OasisMobileStickyBar({
   priceAmount,
   exceptionalDealLabel,
   onCheckAvailability,
+  bookedBannerText,
   showBookedBanner = false,
 }: Props) {
   const reduceMotion = useReducedMotion()
@@ -54,7 +55,7 @@ export function OasisMobileStickyBar({
             className="mx-auto mb-6 flex w-[342px] items-center justify-center gap-2 rounded-2xl bg-white p-4 drop-shadow-[0px_4px_12px_rgba(2,44,69,0.15)]"
           >
             <BookedBannerFlameIcon />
-            <BookedBannerEmberText text={BOOKED_BANNER_TEXT} />
+            <BookedBannerEmberText text={bookedBannerText} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -72,7 +73,7 @@ export function OasisMobileStickyBar({
               <span aria-hidden className="text-[16px] leading-none">
                 🔥
               </span>
-              <p className="whitespace-nowrap text-[13px] font-medium leading-[1.3] text-[#333]">{BOOKED_BANNER_TEXT}</p>
+              <p className="whitespace-nowrap text-[13px] font-medium leading-[1.3] text-[#333]">{bookedBannerText}</p>
             </motion.div>
           )}
         </AnimatePresence>

@@ -361,7 +361,7 @@ export const variants: Record<VariantId, ExperienceVariant> = {
       dateLabel: 'Wed, Apr 29',
       travellers: 2,
       bookAheadTitle: 'Book ahead!',
-      bookAheadSubtitle: 'On average, booked 8 days in advance.',
+      bookAheadSubtitle: 'Typically booked 8 days ahead',
     },
   },
   a: {
@@ -381,7 +381,7 @@ export const variants: Record<VariantId, ExperienceVariant> = {
       dateLabel: 'Wed, Apr 29',
       travellers: 2,
       bookAheadTitle: 'Book ahead!',
-      bookAheadSubtitle: 'On average, booked 8 days in advance.',
+      bookAheadSubtitle: 'Typically booked 8 days ahead',
     },
   },
   a2: {
@@ -402,7 +402,7 @@ export const variants: Record<VariantId, ExperienceVariant> = {
       dateLabel: 'Wed, Apr 29',
       travellers: 2,
       bookAheadTitle: 'Book ahead!',
-      bookAheadSubtitle: 'On average, booked 8 days in advance.',
+      bookAheadSubtitle: 'Typically booked 8 days ahead',
     },
   },
   b: {
@@ -422,7 +422,7 @@ export const variants: Record<VariantId, ExperienceVariant> = {
       dateLabel: 'Wed, Apr 29',
       travellers: 2,
       bookAheadTitle: 'Book ahead!',
-      bookAheadSubtitle: 'On average, booked 8 days in advance.',
+      bookAheadSubtitle: 'Typically booked 8 days ahead',
     },
   },
   b2: {
@@ -443,7 +443,7 @@ export const variants: Record<VariantId, ExperienceVariant> = {
       dateLabel: 'Wed, Apr 29',
       travellers: 2,
       bookAheadTitle: 'Book ahead!',
-      bookAheadSubtitle: 'On average, booked 8 days in advance.',
+      bookAheadSubtitle: 'Typically booked 8 days ahead',
     },
   },
   c: {
@@ -461,7 +461,7 @@ export const variants: Record<VariantId, ExperienceVariant> = {
       dateLabel: 'Wed, Apr 29',
       travellers: 2,
       bookAheadTitle: 'Book ahead!',
-      bookAheadSubtitle: 'On average, booked 8 days in advance.',
+      bookAheadSubtitle: 'Typically booked 8 days ahead',
     },
   },
   c2: {
@@ -483,7 +483,7 @@ export const variants: Record<VariantId, ExperienceVariant> = {
       dateLabel: 'Wed, Apr 29',
       travellers: 2,
       bookAheadTitle: 'Book ahead!',
-      bookAheadSubtitle: 'On average, booked 8 days in advance.',
+      bookAheadSubtitle: 'Typically booked 8 days ahead',
     },
   },
 }
