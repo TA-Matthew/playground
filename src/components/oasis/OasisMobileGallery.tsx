@@ -1,5 +1,6 @@
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { viatorListing } from '../../data/viatorListing'
-import './oasis-mobile-gallery-animations.css'
+import { BOOKED_BANNER_LAYOUT_ID, BOOKED_BANNER_MORPH_TRANSITION } from './oasisBookedBannerMorph'
 
 function ChevronLeftIcon() {
   return (
@@ -69,6 +70,7 @@ type Props = {
 export function OasisMobileGallery({ bookedBannerDocked = false }: Props) {
   const { hero, thumbnails } = viatorListing.media
   const imageCount = thumbnails.length + 1
+  const reduceMotion = useReducedMotion()
 
   return (
     <div className="relative h-[439px] w-full overflow-hidden">
@@ -132,19 +134,24 @@ export function OasisMobileGallery({ bookedBannerDocked = false }: Props) {
         </div>
       </div>
 
-      <div
-        aria-hidden={bookedBannerDocked}
-        className={`absolute bottom-10 left-1/2 w-[342px] -translate-x-1/2 transition-all duration-500 ease-out ${
-          bookedBannerDocked ? 'pointer-events-none translate-y-3 opacity-0' : 'opacity-100'
-        }`}
-      >
-        <div className="oasis-booked-banner-fly-in flex items-center justify-center gap-2 rounded-2xl bg-white p-4 drop-shadow-[0px_4px_12px_rgba(2,44,69,0.15)]">
-          <FlameIcon />
-          <p className="whitespace-nowrap text-[14px] font-medium leading-[1.5] text-[#333]">
-            Typically booked 8 days in advance
-          </p>
-        </div>
-      </div>
+      <AnimatePresence>
+        {!bookedBannerDocked && (
+          <motion.div
+            layoutId={BOOKED_BANNER_LAYOUT_ID}
+            layout
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={reduceMotion ? { duration: 0 } : BOOKED_BANNER_MORPH_TRANSITION}
+            className="absolute inset-x-0 bottom-10 mx-auto flex w-[342px] items-center justify-center gap-2 rounded-2xl bg-white p-4 drop-shadow-[0px_4px_12px_rgba(2,44,69,0.15)]"
+          >
+            <FlameIcon />
+            <p className="whitespace-nowrap text-[14px] font-medium leading-[1.5] text-[#333]">
+              Typically booked 8 days in advance
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
