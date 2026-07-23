@@ -72,8 +72,7 @@ export function OasisMobileStickyBar({
             <motion.div
               layoutId={BOOKED_BANNER_LAYOUT_ID}
               layout
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={false}
               transition={transition}
               className="flex items-center justify-center gap-2 bg-[#f5f5f5] px-4 py-2.5"
             >
