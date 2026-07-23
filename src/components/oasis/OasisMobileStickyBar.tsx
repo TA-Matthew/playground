@@ -48,9 +48,9 @@ export function OasisMobileStickyBar({
       <div className="flex items-start justify-between gap-4 px-6 pb-6 pt-4">
         <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
           <p className="flex items-center gap-1 whitespace-nowrap">
-            <span className="text-[14px] leading-5 tracking-[0.05px] text-[#4d4d4d]">From</span>
+            <span className="text-[12px] leading-5 tracking-[0.05px] text-[#4d4d4d]">From</span>
             <span className="text-[20px] font-bold leading-[22px] tracking-[0.2px] text-black">{priceAmount}</span>
-            <span className="text-[14px] leading-5 tracking-[0.05px] text-[#4d4d4d]">/person</span>
+            <span className="text-[12px] leading-5 tracking-[0.05px] text-[#4d4d4d]">/person</span>
           </p>
           <span className="flex items-center gap-1 rounded-md border border-[#d9d9d9] p-1 text-[12px] font-medium leading-4 tracking-[0.05px] text-[#4d4d4d]">
             <DialIcon />
