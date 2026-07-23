@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { BOOKED_BANNER_LAYOUT_ID, BOOKED_BANNER_MORPH_TRANSITION } from './oasisBookedBannerMorph'
 
@@ -11,11 +12,38 @@ function DialIcon() {
   )
 }
 
+/** Pops in like a spark catching, then settles into a gentle, endless flicker — draws the eye without nagging. */
 function FlameIcon() {
+  const reduceMotion = useReducedMotion()
+  const [ignited, setIgnited] = useState(false)
+
+  if (reduceMotion) {
+    return (
+      <span aria-hidden className="text-[24px] leading-none">
+        🔥
+      </span>
+    )
+  }
+
   return (
-    <span aria-hidden className="text-[24px] leading-none">
+    <motion.span
+      aria-hidden
+      className="inline-block text-[24px] leading-none"
+      initial={{ scale: 0, rotate: -30, opacity: 0 }}
+      animate={
+        ignited
+          ? { scale: [1, 1.1, 0.96, 1.04, 1], rotate: [0, -4, 3, -2, 0] }
+          : { scale: [0, 1.35, 0.85, 1.08, 1], rotate: [-30, 18, -10, 5, 0], opacity: 1 }
+      }
+      transition={
+        ignited
+          ? { duration: 2.2, ease: 'easeInOut', repeat: Infinity, repeatDelay: 0.4 }
+          : { duration: 0.75, ease: [0.34, 1.56, 0.64, 1] }
+      }
+      onAnimationComplete={() => setIgnited(true)}
+    >
       🔥
-    </span>
+    </motion.span>
   )
 }
 
