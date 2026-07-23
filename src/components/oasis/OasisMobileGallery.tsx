@@ -60,7 +60,12 @@ function FlameIcon() {
  * bottom. The sticky logo/search/hamburger header above this is {@link OasisMobileTopBar} — Figma treats
  * it as a separate layer, not part of the gallery shelf.
  */
-export function OasisMobileGallery() {
+type Props = {
+  /** Once true, the "Typically booked" card has docked into the sticky footer strip and fades out here. */
+  bookedBannerDocked?: boolean
+}
+
+export function OasisMobileGallery({ bookedBannerDocked = false }: Props) {
   const { hero, thumbnails } = viatorListing.media
   const imageCount = thumbnails.length + 1
 
@@ -126,7 +131,12 @@ export function OasisMobileGallery() {
         </div>
       </div>
 
-      <div className="absolute bottom-10 left-1/2 flex w-[342px] -translate-x-1/2 items-center justify-center gap-2 rounded-2xl bg-white p-4 drop-shadow-[0px_4px_12px_rgba(2,44,69,0.15)]">
+      <div
+        aria-hidden={bookedBannerDocked}
+        className={`absolute bottom-10 left-1/2 flex w-[342px] -translate-x-1/2 items-center justify-center gap-2 rounded-2xl bg-white p-4 drop-shadow-[0px_4px_12px_rgba(2,44,69,0.15)] transition-all duration-500 ease-out ${
+          bookedBannerDocked ? 'pointer-events-none translate-y-3 opacity-0' : 'opacity-100'
+        }`}
+      >
         <FlameIcon />
         <p className="whitespace-nowrap text-[14px] font-medium leading-[1.5] text-[#333]">
           Typically booked 8 days in advance

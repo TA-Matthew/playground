@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { usePreloadMapPinImages } from '../hooks/usePreloadMapPinImages'
+import { useDockedBookedBanner } from '../hooks/useDockedBookedBanner'
 import { useIsMobileViewport } from '../hooks/useIsMobileViewport'
 import { UPCOMING_AVAILABILITY_SECTION_ID } from '../components/experience/pdp/PdpUpcomingAvailabilitySection'
 import { OasisHeader, OasisMobileTopBar } from '../components/oasis/OasisHeader'
@@ -48,6 +49,7 @@ const AVAILABILITY_OPTIONS_LOAD_MS = 900
  */
 export function OasisPage() {
   const isMobile = useIsMobileViewport()
+  const bookedBannerDocked = useDockedBookedBanner()
   const booking = useMemo(() => variants.a.booking, [])
   const [dateLabel, setDateLabel] = useState(() => AVAILABILITY_SHORTCUT_DEFAULT_DATE_LABEL)
   const [travelerCounts, setTravelerCounts] = useState<AvailabilityTravelerCounts>(() =>
@@ -139,7 +141,7 @@ export function OasisPage() {
         <OasisMobileTopBar />
 
         <main className="pdp-figma w-full min-w-0 pb-40">
-          <OasisMobileGallery />
+          <OasisMobileGallery bookedBannerDocked={bookedBannerDocked} />
 
           <div className="flex w-full flex-col items-start gap-6 px-6 py-6">
             <Link
@@ -210,6 +212,7 @@ export function OasisPage() {
           priceAmount={booking.priceAmount}
           exceptionalDealLabel={booking.badgeExceptionalDeal}
           onCheckAvailability={openAvailabilityFromSidebar}
+          showBookedBanner={bookedBannerDocked}
         />
       </div>
     )
